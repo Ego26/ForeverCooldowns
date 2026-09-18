@@ -154,7 +154,7 @@ local SETTINGS = {
     { key = "VisibleSetting", label = L["Sichtbarkeit"], kind = "dropdown",
         enums = { "CooldownViewerVisibleSetting" },
         names = { Always = "Immer sichtbar", InCombat = "Nur im Kampf",
-            OutOfCombat = "Außerhalb des Kampfes", Hidden = "Nie" } },
+            OutOfCombat = L["Außerhalb des Kampfes"], Hidden = "Nie" } },
     { key = "HideWhenInactive", label = L["Bei Inaktivität verbergen"], kind = "check" },
     { key = "ShowTimer", label = L["Timer anzeigen"], kind = "check" },
     { key = "ShowTooltips", label = L["Tooltips anzeigen"], kind = "check" },

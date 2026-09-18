@@ -1,4 +1,5 @@
 local FCD = ForeverCooldowns
+local L = FCD.L
 
 -- Während ein Chatbefehl läuft, werden alle Ausgaben gesammelt und am Ende
 -- im kopierbaren Fenster gezeigt. Einzelne Zeilen bleiben im Chat, damit
@@ -60,51 +61,51 @@ local function trim(text)
 end
 
 local function printHelp()
-    printMessage("/fcd - Blizzards Abklingzeit-Einstellungen mit unserem Panel öffnen")
-    printMessage("/fcd dock - Panel neben Blizzards Fenster ein-/ausblenden")
-    printMessage("/fcd wide - zwischen schmaler und breiter Ansicht wechseln")
-    printMessage("/fcd instant on|off - sofort wirksam (Standard) oder erst nach /reload")
-    printMessage("/fcd log - alle bisherigen Ausgaben zum Kopieren")
-    printMessage("/fcd store - Bestand sofort in Blizzards Layout sichern")
-    printMessage("/fcd blizz - Blizzards Fenster holen (Layout wechseln)")
-    printMessage("/fcd replace on|off - ob FCD an die Stelle ihres Fensters tritt")
-    printMessage("/fcd editui on|off - eigenes Fenster im Bearbeitungsmodus")
-    printMessage("/fcd lang de|en|auto - Sprache der Oberfläche")
-    printMessage("/fcd round on|off - abgerundete Symbolecken (wirkt nach /reload)")
-    printMessage("/fcd check - Funktionsprüfung dieses Clients im Chat")
-    printMessage("/fcd probe - vollständigen API-Bericht als Text öffnen")
-    printMessage("/fcd report - Abgleich mit dem Blizzard-Manager")
-    printMessage("/fcd layout - Layout-Daten des Blizzard-Managers anzeigen")
-    printMessage("/fcd layouttest - prüfen, ob sie beschreibbar sind (ändert nichts)")
-    printMessage("/fcd roundtrip - prüfen, ob ein Blob bitgleich neu erzeugt werden kann")
-    printMessage("/fcd snapshot - Layout-Stand sichern, /fcd diff - Änderungen anzeigen")
-    printMessage("/fcd hide|show <AbklingzeitID> - im Blizzard-Manager aus-/einblenden")
-    printMessage("/fcd state <AbklingzeitID> - Blob- und API-Zustand nebeneinander")
-    printMessage("/fcd trace [Filter] | off - Ereignisse mitschneiden")
-    printMessage("/fcd find <Text> - Globals, C_*-Namespaces und Enums durchsuchen")
-    printMessage("/fcd dump <Name> - Mitglieder eines Objekts auflisten")
-    printMessage("/fcd shown - welche benannten Rahmen gerade offen sind")
-    printMessage("/fcd layouts - Blizzards Layout-Liste")
-    printMessage("/fcd editmode - Rahmen und Schreibwege ihres Bearbeitungsmodus")
-    printMessage("/fcd editsettings - Einstellungen der angeklickten Leiste")
-    printMessage("/fcd editset <Name> <Wert> - eine davon probeweise setzen")
-    printMessage("/fcd instances - laufende Objekte des Managers suchen")
-    printMessage("/fcd compare - unsere Kategorien gegen Blizzards halten (taintet)")
-    printMessage("/fcd fields - Felderverteilung der Cache-Eintraege je Kategorie")
-    printMessage("/fcd art on - Blizzards Grafik abschauen (aus, kosmetisch)")
-    printMessage("/fcd backups - Sicherungen auflisten, /fcd restore - letzte zurücknehmen")
-    printMessage("/fcd unlock | lock - Leisten bewegen oder festsetzen")
-    printMessage("/fcd profiles - Profile auflisten")
-    printMessage("/fcd profile <Name> - Profil aktivieren")
-    printMessage("/fcd export | import - Profil teilen")
-    printMessage("/fcd rule form <FormID> <Profil> - Profilwechsel bei Haltung/Form")
-    printMessage("/fcd rule combat <on|off> <Profil> - Profilwechsel im Kampf")
-    printMessage("/fcd rules - Regeln auflisten, /fcd rule remove <Nummer>")
-    printMessage("/fcd spell <ZauberID> - beliebigen Zauber aufnehmen")
-    printMessage("/fcd item <ItemID> - Item dauerhaft in den Katalog aufnehmen")
-    printMessage("/fcd form - aktuelle Form-/Haltungs-ID anzeigen")
-    printMessage("/fcd rescan - Zauberbuch und Katalog neu einlesen")
-    printMessage("/fcd undo - letzte Änderung zurücknehmen")
+    printMessage(L["/fcd - Blizzards Abklingzeit-Einstellungen mit unserem Panel öffnen"])
+    printMessage(L["/fcd dock - Panel neben Blizzards Fenster ein-/ausblenden"])
+    printMessage(L["/fcd wide - zwischen schmaler und breiter Ansicht wechseln"])
+    printMessage(L["/fcd instant on|off - sofort wirksam (Standard) oder erst nach /reload"])
+    printMessage(L["/fcd log - alle bisherigen Ausgaben zum Kopieren"])
+    printMessage(L["/fcd store - Bestand sofort in Blizzards Layout sichern"])
+    printMessage(L["/fcd blizz - Blizzards Fenster holen (Layout wechseln)"])
+    printMessage(L["/fcd replace on|off - ob FCD an die Stelle ihres Fensters tritt"])
+    printMessage(L["/fcd editui on|off - eigenes Fenster im Bearbeitungsmodus"])
+    printMessage(L["/fcd lang de|en|auto - Sprache der Oberfläche"])
+    printMessage(L["/fcd round on|off - abgerundete Symbolecken (wirkt nach /reload)"])
+    printMessage(L["/fcd check - Funktionsprüfung dieses Clients im Chat"])
+    printMessage(L["/fcd probe - vollständigen API-Bericht als Text öffnen"])
+    printMessage(L["/fcd report - Abgleich mit dem Blizzard-Manager"])
+    printMessage(L["/fcd layout - Layout-Daten des Blizzard-Managers anzeigen"])
+    printMessage(L["/fcd layouttest - prüfen, ob sie beschreibbar sind (ändert nichts)"])
+    printMessage(L["/fcd roundtrip - prüfen, ob ein Blob bitgleich neu erzeugt werden kann"])
+    printMessage(L["/fcd snapshot - Layout-Stand sichern, /fcd diff - Änderungen anzeigen"])
+    printMessage(L["/fcd hide|show <AbklingzeitID> - im Blizzard-Manager aus-/einblenden"])
+    printMessage(L["/fcd state <AbklingzeitID> - Blob- und API-Zustand nebeneinander"])
+    printMessage(L["/fcd trace [Filter] | off - Ereignisse mitschneiden"])
+    printMessage(L["/fcd find <Text> - Globals, C_*-Namespaces und Enums durchsuchen"])
+    printMessage(L["/fcd dump <Name> - Mitglieder eines Objekts auflisten"])
+    printMessage(L["/fcd shown - welche benannten Rahmen gerade offen sind"])
+    printMessage(L["/fcd layouts - Blizzards Layout-Liste"])
+    printMessage(L["/fcd editmode - Rahmen und Schreibwege ihres Bearbeitungsmodus"])
+    printMessage(L["/fcd editsettings - Einstellungen der angeklickten Leiste"])
+    printMessage(L["/fcd editset <Name> <Wert> - eine davon probeweise setzen"])
+    printMessage(L["/fcd instances - laufende Objekte des Managers suchen"])
+    printMessage(L["/fcd compare - unsere Kategorien gegen Blizzards halten (taintet)"])
+    printMessage(L["/fcd fields - Felderverteilung der Cache-Einträge je Kategorie"])
+    printMessage(L["/fcd art on - Blizzards Grafik abschauen (aus, kosmetisch)"])
+    printMessage(L["/fcd backups - Sicherungen auflisten, /fcd restore - letzte zurücknehmen"])
+    printMessage(L["/fcd unlock | lock - Leisten bewegen oder festsetzen"])
+    printMessage(L["/fcd profiles - Profile auflisten"])
+    printMessage(L["/fcd profile <Name> - Profil aktivieren"])
+    printMessage(L["/fcd export | import - Profil teilen"])
+    printMessage(L["/fcd rule form <FormID> <Profil> - Profilwechsel bei Haltung/Form"])
+    printMessage(L["/fcd rule combat <on|off> <Profil> - Profilwechsel im Kampf"])
+    printMessage(L["/fcd rules - Regeln auflisten, /fcd rule remove <Nummer>"])
+    printMessage(L["/fcd spell <ZauberID> - beliebigen Zauber aufnehmen"])
+    printMessage(L["/fcd item <ItemID> - Item dauerhaft in den Katalog aufnehmen"])
+    printMessage(L["/fcd form - aktuelle Form-/Haltungs-ID anzeigen"])
+    printMessage(L["/fcd rescan - Zauberbuch und Katalog neu einlesen"])
+    printMessage(L["/fcd undo - letzte Änderung zurücknehmen"])
 end
 
 -- Diese Befehle öffnen oder schalten etwas um; ihre Rückmeldung ist eine
@@ -129,9 +130,9 @@ local function dispatch(command, argument)
         FCD.Probe:PrintFeatureMatrix()
     elseif command == "probe" then
         FCD.Catalog:Rebuild()
-        outputWindow("Forever Cooldowns - API-Bericht", FCD.Probe:BuildReport())
+        outputWindow(L["Forever Cooldowns - API-Bericht"], FCD.Probe:BuildReport())
     elseif command == "layout" then
-        outputWindow("Layout-Daten des Abklingzeit-Managers", FCD.Probe:BuildLayoutReport())
+        outputWindow(L["Layout-Daten des Abklingzeit-Managers"], FCD.Probe:BuildLayoutReport())
     elseif command == "layouttest" then
         FCD.Probe:TestLayoutWrite()
     elseif command == "roundtrip" then
@@ -139,7 +140,7 @@ local function dispatch(command, argument)
     elseif command == "snapshot" then
         FCD.Probe:SnapshotLayout()
     elseif command == "diff" then
-        outputWindow("Vergleich der Layout-Daten", FCD.Probe:BuildLayoutDiff())
+        outputWindow(L["Vergleich der Layout-Daten"], FCD.Probe:BuildLayoutDiff())
     elseif command == "hide" or command == "show" then
         FCD:ChangeVisibility(tonumber(argument), command == "hide")
     elseif command == "trace" then
@@ -153,46 +154,46 @@ local function dispatch(command, argument)
         local mode = string.lower(trim(argument))
         if mode == "on" or mode == "an" then
             FCD.db.settings.allowNativeWrites = true
-            printMessage("Sofortmodus AN.")
+            printMessage(L["Sofortmodus AN."])
             printMessage("")
-            printMessage("Änderungen wirken jetzt ohne Neuladen - über Blizzards eigenes")
-            printMessage("Datenmodell. Der Preis: sobald AddOn-Code es anfasst, gilt es für")
-            printMessage("die restliche Sitzung als tainted, und Blizzards Viewer kann keine")
-            printMessage("Auren mehr lesen. Betrifft nur ihre Anzeige, nicht unsere, und ein")
-            printMessage("/reload setzt es zurück.")
+            printMessage(L["Änderungen wirken jetzt ohne Neuladen - über Blizzards eigenes"])
+            printMessage(L["Datenmodell. Der Preis: sobald AddOn-Code es anfasst, gilt es für"])
+            printMessage(L["die restliche Sitzung als tainted, und Blizzards Viewer kann keine"])
+            printMessage(L["Auren mehr lesen. Betrifft nur ihre Anzeige, nicht unsere, und ein"])
+            printMessage(L["/reload setzt es zurück."])
         elseif mode == "off" or mode == "aus" then
             FCD.db.settings.allowNativeWrites = false
-            printMessage("Sofortmodus AUS. Änderungen werden sicher geschrieben und mit dem")
-            printMessage("nächsten Neuladen wirksam.")
+            printMessage(L["Sofortmodus AUS. Änderungen werden sicher geschrieben und mit dem"])
+            printMessage(L["nächsten Neuladen wirksam."])
         else
-            printMessage("Sofortmodus ist derzeit " .. (FCD.db.settings.allowNativeWrites and "AN" or "AUS") .. ".")
-            printMessage("/fcd instant on   - sofort wirksam, taintet Blizzards Viewer")
-            printMessage("/fcd instant off  - sicher, wirkt nach /reload")
+            printMessage(L["Sofortmodus ist derzeit "] .. (FCD.db.settings.allowNativeWrites and "AN" or "AUS") .. ".")
+            printMessage(L["/fcd instant on   - sofort wirksam, taintet Blizzards Viewer"])
+            printMessage(L["/fcd instant off  - sicher, wirkt nach /reload"])
         end
     elseif command == "wide" then
         FCD.Dock:Build()
         FCD.Dock:SetWide(not FCD.Dock.state.wide)
         if not FCD.Dock:IsShown() then FCD.Dock:Toggle() end
-        printMessage(FCD.Dock.state.wide and "Breite Ansicht." or "Schmale Ansicht.")
+        printMessage(FCD.Dock.state.wide and L["Breite Ansicht."] or L["Schmale Ansicht."])
     elseif command == "dock" then
         local shown = FCD.Dock:Toggle()
-        printMessage(shown and "Panel geöffnet." or "Panel geschlossen.")
-        printMessage("Es erscheint sonst automatisch neben Blizzards Abklingzeit-Einstellungen.")
+        printMessage(shown and L["Panel geöffnet."] or L["Panel geschlossen."])
+        printMessage(L["Es erscheint sonst automatisch neben Blizzards Abklingzeit-Einstellungen."])
     elseif command == "find" then
-        outputWindow("Suche in der Client-API", FCD.Probe:BuildSearchReport(argument))
+        outputWindow(L["Suche in der Client-API"], FCD.Probe:BuildSearchReport(argument))
     elseif command == "fields" then
-        outputWindow("Felderanalyse", FCD.Probe:BuildFieldAnalysis())
+        outputWindow(L["Felderanalyse"], FCD.Probe:BuildFieldAnalysis())
     elseif command == "spell" then
         local ok, err = FCD.Ranks:AddCustom(trim(argument))
         if ok then
             local id = tonumber(trim(argument):match("%d+"))
-            printMessage(string.format("'%s' aufgenommen - steht jetzt im"
-                .. " Reiter Eigene Zauber.",
-                FCD.Compat.GetSpellName(id) or ("Zauber " .. tostring(id))))
+            printMessage(string.format(L["'%s' aufgenommen - steht jetzt im"]
+                .. L[" Reiter Eigene Zauber."],
+                FCD.Compat.GetSpellName(id) or (L["Zauber "] .. tostring(id))))
             FCD.Catalog:Rebuild()
             FCD.Dock:Refresh()
         else
-            printMessage("Nicht aufgenommen: " .. tostring(err))
+            printMessage(L["Nicht aufgenommen: "] .. tostring(err))
         end
     elseif command == "lang" then
         local mode = string.lower(trim(argument))
@@ -203,45 +204,45 @@ local function dispatch(command, argument)
         elseif mode == "auto" then
             FCD.db.settings.language = nil
         else
-            printMessage("Sprache: " .. FCD.GetLanguage()
-                .. " - umschalten mit  /fcd lang de|en|auto")
+            printMessage(L["Sprache: "] .. FCD.GetLanguage()
+                .. L[" - umschalten mit  /fcd lang de|en|auto"])
             return
         end
         FCD.SetLanguage(FCD.db.settings.language)
         FCD.Store:Save()
         -- Einige Beschriftungen stehen schon beim Laden in Tabellen; die
-        -- wechseln erst beim naechsten Durchlauf.
-        printMessage("Sprache: " .. FCD.GetLanguage() .. " - wirkt nach /reload.")
+        -- wechseln erst beim nächsten Durchlauf.
+        printMessage(L["Sprache: "] .. FCD.GetLanguage() .. L[" - wirkt nach /reload."])
     elseif command == "editui" then
         local mode = string.lower(trim(argument))
         if mode == "off" or mode == "aus" then
             FCD.db.settings.replaceEditModeDialog = false
             FCD.Store:Save()
             FCD.BlizzOptions:Close("abgeschaltet")
-            printMessage("Im Bearbeitungsmodus erscheint wieder ihr Fenster.")
+            printMessage(L["Im Bearbeitungsmodus erscheint wieder ihr Fenster."])
         elseif mode == "on" or mode == "an" then
             FCD.db.settings.replaceEditModeDialog = true
             FCD.Store:Save()
-            printMessage("Im Bearbeitungsmodus erscheint unser Fenster.")
+            printMessage(L["Im Bearbeitungsmodus erscheint unser Fenster."])
         else
-            printMessage("Eigenes Fenster im Bearbeitungsmodus ist derzeit "
+            printMessage(L["Eigenes Fenster im Bearbeitungsmodus ist derzeit "]
                 .. ((FCD.db.settings.replaceEditModeDialog ~= false) and "AN" or "AUS")
-                .. ". Umschalten mit  /fcd editui on  bzw.  off")
+                .. L[". Umschalten mit  /fcd editui on  bzw.  off"])
         end
     elseif command == "round" then
         local mode = string.lower(trim(argument))
         if mode == "off" or mode == "aus" then
             FCD.db.settings.roundIcons = false
             FCD.Store:Save()
-            printMessage("Abgerundete Ecken aus - wirkt nach /reload.")
+            printMessage(L["Abgerundete Ecken aus - wirkt nach /reload."])
         elseif mode == "on" or mode == "an" then
             FCD.db.settings.roundIcons = true
             FCD.Store:Save()
-            printMessage("Abgerundete Ecken an - wirkt nach /reload.")
+            printMessage(L["Abgerundete Ecken an - wirkt nach /reload."])
         else
-            printMessage("Abgerundete Symbolecken sind derzeit "
+            printMessage(L["Abgerundete Symbolecken sind derzeit "]
                 .. ((FCD.db.settings.roundIcons ~= false) and "AN" or "AUS")
-                .. ". Umschalten mit  /fcd round on  bzw.  off")
+                .. L[". Umschalten mit  /fcd round on  bzw.  off"])
         end
     elseif command == "blizz" then
         FCD.Dock:OpenBlizzardWindow()
@@ -250,22 +251,22 @@ local function dispatch(command, argument)
         if mode == "off" or mode == "aus" then
             FCD.db.settings.replaceBlizzardWindow = false
             FCD.Store:Save()
-            printMessage("Blizzards Fenster geht wieder normal auf.")
+            printMessage(L["Blizzards Fenster geht wieder normal auf."])
         elseif mode == "on" or mode == "an" then
             FCD.db.settings.replaceBlizzardWindow = true
             FCD.Store:Save()
-            printMessage("FCD tritt an die Stelle ihres Fensters.")
+            printMessage(L["FCD tritt an die Stelle ihres Fensters."])
         else
-            printMessage("Verdrängung ist derzeit "
+            printMessage(L["Verdrängung ist derzeit "]
                 .. ((FCD.db.settings.replaceBlizzardWindow ~= false) and "AN" or "AUS")
-                .. ". Umschalten mit  /fcd replace on  bzw.  off")
+                .. L[". Umschalten mit  /fcd replace on  bzw.  off"])
         end
     elseif command == "shown" then
-        outputWindow("Offene Rahmen", FCD.Probe:BuildShownFrameReport())
+        outputWindow(L["Offene Rahmen"], FCD.Probe:BuildShownFrameReport())
     elseif command == "editmode" then
-        outputWindow("Bearbeitungsmodus", FCD.Probe:BuildEditModeReport())
+        outputWindow(L["Bearbeitungsmodus"], FCD.Probe:BuildEditModeReport())
     elseif command == "editsettings" then
-        outputWindow("Einstellungen der Leiste",
+        outputWindow(L["Einstellungen der Leiste"],
             FCD.Probe:BuildEditModeSettingsReport())
     elseif command == "editset" then
         -- Probeschreiben auf Blizzards Bearbeitungsmodus. Ein Befehl und
@@ -273,18 +274,18 @@ local function dispatch(command, argument)
         -- ob es ihren Code taintet.
         local settingName, value = string.match(trim(argument), "^(%S+)%s+(%S+)$")
         if not settingName then
-            printMessage("So: /fcd editset <Name> <Wert>  -  Namen zeigt /fcd editsettings")
+            printMessage(L["So: /fcd editset <Name> <Wert>  -  Namen zeigt /fcd editsettings"])
         else
             local result, setErr = FCD.Probe:TryEditModeSetting(settingName, value)
-            printMessage(result and ("Geschrieben: " .. result)
-                or ("Nicht geschrieben: " .. tostring(setErr)))
+            printMessage(result and (L["Geschrieben: "] .. result)
+                or (L["Nicht geschrieben: "] .. tostring(setErr)))
         end
     elseif command == "layouts" then
-        outputWindow("Blizzards Layout-Liste", FCD.Probe:BuildBlizzardLayoutReport())
+        outputWindow(L["Blizzards Layout-Liste"], FCD.Probe:BuildBlizzardLayoutReport())
     elseif command == "store" then
         local ok, err = FCD.Store:Save(true)
-        printMessage(ok and "Bestand ins Layout geschrieben."
-            or ("Nicht geschrieben: " .. tostring(err)))
+        printMessage(ok and L["Bestand ins Layout geschrieben."]
+            or (L["Nicht geschrieben: "] .. tostring(err)))
         printMessage(tostring(FCD.Store.status))
         -- Sofort gegenlesen: bleibt unser Schlüssel nicht einmal in derselben
         -- Sitzung stehen, verwirft der Client ihn beim Schreiben - dann ist
@@ -292,106 +293,106 @@ local function dispatch(command, argument)
         if ok then
             local present = FCD.Store:IsPresent()
             printMessage(present
-                and "Gegengelesen: der Eintrag steht im Layout."
-                or "|cffff6060Gegengelesen: der Eintrag ist sofort wieder weg|r"
-                    .. " - der Client verwirft ihn beim Schreiben.")
+                and L["Gegengelesen: der Eintrag steht im Layout."]
+                or L["|cffff6060Gegengelesen: der Eintrag ist sofort wieder weg|r"]
+                    .. L[" - der Client verwirft ihn beim Schreiben."])
         end
     elseif command == "log" then
         -- Abschrift vor dieser Ausgabe nehmen, sonst steht der Aufruf selbst
         -- mit darin.
         local snapshot = table.concat(logLines, "\n")
-        outputWindow("Bisherige Ausgaben", snapshot ~= "" and snapshot
-            or "Noch nichts ausgegeben.")
+        outputWindow(L["Bisherige Ausgaben"], snapshot ~= "" and snapshot
+            or L["Noch nichts ausgegeben."])
     elseif command == "art" then
         local mode = string.lower(trim(argument))
         if mode == "off" or mode == "aus" then
             FCD.db.settings.useBlizzardArt = false
-            printMessage("Blizzards Grafik wird nicht mehr übernommen.")
-            printMessage("Nach einem /reload zeichnet das Panel wieder selbst.")
+            printMessage(L["Blizzards Grafik wird nicht mehr übernommen."])
+            printMessage(L["Nach einem /reload zeichnet das Panel wieder selbst."])
         elseif mode == "on" or mode == "an" then
             FCD.db.settings.useBlizzardArt = true
-            printMessage("Blizzards Grafik wird wieder übernommen, sobald ihr Fenster offen ist.")
+            printMessage(L["Blizzards Grafik wird wieder übernommen, sobald ihr Fenster offen ist."])
         else
-            outputWindow("Blizzards Grafik als Vorlage", FCD.Art:Describe())
+            outputWindow(L["Blizzards Grafik als Vorlage"], FCD.Art:Describe())
         end
     elseif command == "compare" then
-        outputWindow("Abgleich der Kategorien", FCD.Probe:BuildCategoryComparison())
+        outputWindow(L["Abgleich der Kategorien"], FCD.Probe:BuildCategoryComparison())
     elseif command == "instances" then
-        outputWindow("Laufende Objekte", FCD.Probe:BuildInstanceReport())
+        outputWindow(L["Laufende Objekte"], FCD.Probe:BuildInstanceReport())
     elseif command == "dump" then
-        outputWindow("Inhalt eines Objekts", FCD.Probe:BuildDumpReport(argument))
+        outputWindow(L["Inhalt eines Objekts"], FCD.Probe:BuildDumpReport(argument))
     elseif command == "state" then
-        outputWindow("Zustand einer Abklingzeit", FCD.Probe:BuildCooldownStateReport(tonumber(argument)))
+        outputWindow(L["Zustand einer Abklingzeit"], FCD.Probe:BuildCooldownStateReport(tonumber(argument)))
     elseif command == "restore" then
         local ok, info = FCD.Layout:Restore()
-        printMessage(ok and ("Sicherung von " .. tostring(info) .. " wiederhergestellt.")
-            or ("Wiederherstellen fehlgeschlagen: " .. tostring(info)))
+        printMessage(ok and (L["Sicherung von "] .. tostring(info) .. L[" wiederhergestellt."])
+            or (L["Wiederherstellen fehlgeschlagen: "] .. tostring(info)))
     elseif command == "backups" then
         local backups = FCD.Layout:GetBackups()
         if #backups == 0 then
-            printMessage("Keine Sicherungen vorhanden.")
+            printMessage(L["Keine Sicherungen vorhanden."])
         end
         for index, backup in ipairs(backups) do
-            printMessage(string.format("%d. %s - %s (%d Zeichen)", index, backup.taken, backup.label, #backup.raw))
+            printMessage(string.format(L["%d. %s - %s (%d Zeichen)"], index, backup.taken, backup.label, #backup.raw))
         end
     elseif command == "report" then
         FCD.Catalog:Rebuild()
-        outputWindow("Forever Cooldowns - Katalogbericht", FCD.Catalog:BuildReport())
+        outputWindow(L["Forever Cooldowns - Katalogbericht"], FCD.Catalog:BuildReport())
     elseif command == "unlock" then
         FCD.Viewer:SetUnlocked(true)
-        printMessage("Leisten können jetzt mit der Maus verschoben werden.")
+        printMessage(L["Leisten können jetzt mit der Maus verschoben werden."])
     elseif command == "lock" then
         FCD.Viewer:SetUnlocked(false)
-        printMessage("Leisten festgesetzt.")
+        printMessage(L["Leisten festgesetzt."])
     elseif command == "profiles" then
-        printMessage("== Leisten-Profile (eigene Leisten) ==")
+        printMessage(L["== Leisten-Profile (eigene Leisten) =="])
         for _, name in ipairs(FCD.Profiles:List()) do
             printMessage((name == FCD.Profiles:GetActiveName() and "* " or "  ") .. name)
         end
 
         -- Getrennt ausweisen, ob die Tabelle leer ist oder nur die Anzeige
         printMessage("")
-        printMessage("== Layout-Profile (Blizzards Kategorien) ==")
+        printMessage(L["== Layout-Profile (Blizzards Kategorien) =="])
         local raw = FCD.db.layoutProfiles
         if raw == nil then
-            printMessage("  ForeverCooldownsDB.layoutProfiles existiert nicht.")
+            printMessage(L["  ForeverCooldownsDB.layoutProfiles existiert nicht."])
         else
             local count = 0
             for _ in pairs(raw) do
                 count = count + 1
             end
-            printMessage("  Tabelle vorhanden, " .. count .. " Eintrag/Einträge.")
+            printMessage(L["  Tabelle vorhanden, "] .. count .. L[" Eintrag/Einträge."])
             for _, name in ipairs(FCD.Layout:ListProfiles()) do
                 local profile = raw[name]
                 local assignments = 0
                 for _ in pairs(profile and profile.assignments or {}) do
                     assignments = assignments + 1
                 end
-                printMessage(string.format("  %s%s  (%d Zuweisungen, gesichert %s)",
+                printMessage(string.format(L["  %s%s  (%d Zuweisungen, gesichert %s)"],
                     name == FCD.db.settings.activeLayoutProfile and "* " or "  ",
                     name, assignments, tostring(profile and profile.saved or "?")))
             end
         end
         printMessage("")
-        printMessage("Aktiv laut Einstellungen: "
+        printMessage(L["Aktiv laut Einstellungen: "]
             .. tostring(FCD.db.settings.activeLayoutProfile or "keines"))
     elseif command == "profile" then
         if FCD.Profiles:SetActive(argument) then
-            printMessage("Profil '" .. argument .. "' aktiv.")
+            printMessage(L["Profil '"] .. argument .. L["' aktiv."])
         else
-            printMessage("Unbekanntes Profil: " .. argument)
+            printMessage(L["Unbekanntes Profil: "] .. argument)
         end
     elseif command == "export" then
-        outputWindow("Profil exportieren", FCD.Profiles:Export() or "")
+        outputWindow(L["Profil exportieren"], FCD.Profiles:Export() or "")
     elseif command == "import" then
         FCD:ShowImport()
     elseif command == "rules" then
         local rules = FCD.Profiles:GetRules()
         if #rules == 0 then
-            printMessage("Keine Regeln hinterlegt.")
+            printMessage(L["Keine Regeln hinterlegt."])
         end
         for index, rule in ipairs(rules) do
-            printMessage(string.format("%d. %s = %s -> %s", index, rule.kind, tostring(rule.value), rule.profile))
+            printMessage(string.format(L["%d. %s = %s -> %s"], index, rule.kind, tostring(rule.value), rule.profile))
         end
     elseif command == "rule" then
         local kind, rest = argument:match("^(%S+)%s*(.-)$")
@@ -399,50 +400,50 @@ local function dispatch(command, argument)
         if kind == "remove" then
             local index = tonumber(rest)
             if index and FCD.Profiles:RemoveRule(index) then
-                printMessage("Regel " .. index .. " entfernt.")
+                printMessage(L["Regel "] .. index .. L[" entfernt."])
             else
-                printMessage("Regel nicht gefunden.")
+                printMessage(L["Regel nicht gefunden."])
             end
         elseif kind == "form" or kind == "spec" then
             local value, profileName = rest:match("^(%S+)%s+(.+)$")
             local number = tonumber(value)
             if not number or not profileName then
-                printMessage("Format: /fcd rule " .. kind .. " <Nummer> <Profil>")
+                printMessage(L["Format: /fcd rule "] .. kind .. L[" <Nummer> <Profil>"])
                 return
             end
             local ok, err = FCD.Profiles:AddRule(kind, number, trim(profileName))
-            printMessage(ok and "Regel hinzugefügt." or ("Fehler: " .. tostring(err)))
+            printMessage(ok and L["Regel hinzugefügt."] or (L["Fehler: "] .. tostring(err)))
         elseif kind == "combat" then
             local value, profileName = rest:match("^(%S+)%s+(.+)$")
             if not value or not profileName then
-                printMessage("Format: /fcd rule combat <on|off> <Profil>")
+                printMessage(L["Format: /fcd rule combat <on|off> <Profil>"])
                 return
             end
             local ok, err = FCD.Profiles:AddRule("combat", string.lower(value) == "on", trim(profileName))
-            printMessage(ok and "Regel hinzugefügt." or ("Fehler: " .. tostring(err)))
+            printMessage(ok and L["Regel hinzugefügt."] or (L["Fehler: "] .. tostring(err)))
         else
-            printMessage("Unbekannte Regelart. /fcd help")
+            printMessage(L["Unbekannte Regelart. /fcd help"])
         end
     elseif command == "item" then
         local itemID = tonumber(argument)
         if itemID and FCD.Items:AddCustom(itemID) then
             FCD:RefreshData()
-            printMessage("Item " .. itemID .. " aufgenommen.")
+            printMessage(L["Item "] .. itemID .. L[" aufgenommen."])
         else
-            printMessage("Format: /fcd item <ItemID>")
+            printMessage(L["Format: /fcd item <ItemID>"])
         end
     elseif command == "form" then
-        printMessage(string.format("FormID: %s, Index: %s, Formen: %s",
+        printMessage(string.format(L["FormID: %s, Index: %s, Formen: %s"],
             tostring(FCD.Compat.GetFormID()), tostring(FCD.Compat.GetFormIndex()), tostring(FCD.Compat.GetNumForms())))
     elseif command == "rescan" then
         FCD:RefreshData()
-        printMessage(string.format("Neu eingelesen: %d Fähigkeiten, %d mit mehreren Rängen, %d Katalogeinträge.",
+        printMessage(string.format(L["Neu eingelesen: %d Fähigkeiten, %d mit mehreren Rängen, %d Katalogeinträge."],
             FCD.Ranks.familyCount or 0, FCD.Ranks.rankedFamilyCount or 0, #FCD.Catalog.entries))
     elseif command == "undo" then
         local label = FCD.Profiles:Undo()
-        printMessage(label and ("Rückgängig: " .. label) or "Nichts rückgängig zu machen.")
+        printMessage(label and (L["Rückgängig: "] .. label) or L["Nichts rückgängig zu machen."])
     else
-        printMessage("Unbekannter Befehl.")
+        printMessage(L["Unbekannter Befehl."])
         printHelp()
     end
 end
@@ -457,7 +458,7 @@ SlashCmdList.FOREVERCOOLDOWNS = function(message)
     if UI_COMMANDS[command] then
         local ok, err = pcall(dispatch, command, argument)
         if not ok then
-            printMessage("Fehler im Befehl /fcd " .. command .. ": " .. tostring(err))
+            printMessage(L["Fehler im Befehl /fcd "] .. command .. ": " .. tostring(err))
         end
         return
     end
@@ -471,8 +472,8 @@ SlashCmdList.FOREVERCOOLDOWNS = function(message)
         -- Schlug die Initialisierung fehl, würde jeder Befehl nur einen
         -- Folgefehler werfen. Lieber klar sagen, woran es liegt.
         ok = true
-        printMessage("Nicht vollständig geladen (keine Datenbank). Meist ein Lua-Fehler beim Start:")
-        printMessage("Fehlermeldungen einschalten mit  /console scriptErrors 1  und neu laden.")
+        printMessage(L["Nicht vollständig geladen (keine Datenbank). Meist ein Lua-Fehler beim Start:"])
+        printMessage(L["Fehlermeldungen einschalten mit  /console scriptErrors 1  und neu laden."])
     else
         ok, err = pcall(dispatch, command, argument)
     end
@@ -536,11 +537,11 @@ function FCD:ShowText(title, text)
 
         local hint = window:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
         hint:SetPoint("BOTTOMLEFT", 18, 18)
-        hint:SetText("Strg+A markiert alles, Strg+C kopiert.")
+        hint:SetText(L["Strg+A markiert alles, Strg+C kopiert."])
 
         textWindow = window
     end
-    textWindow.title:SetText(title or "Forever Cooldowns")
+    textWindow.title:SetText(title or L["Forever Cooldowns"])
     textWindow.edit:SetText(text or "")
     textWindow.edit:SetCursorPosition(0)
     textWindow:Show()
@@ -554,14 +555,14 @@ function FCD:ShowImport()
         local button = CreateFrame("Button", nil, window, "UIPanelButtonTemplate")
         button:SetSize(120, 22)
         button:SetPoint("BOTTOMRIGHT", -18, 14)
-        button:SetText("Importieren")
+        button:SetText(L["Importieren"])
         button:SetScript("OnClick", function()
             local name, err = FCD.Profiles:Import(window.edit:GetText())
             if not name then
-                printMessage("Import fehlgeschlagen: " .. tostring(err))
+                printMessage(L["Import fehlgeschlagen: "] .. tostring(err))
                 return
             end
-            printMessage("Profil '" .. name .. "' importiert.")
+            printMessage(L["Profil '"] .. name .. L["' importiert."])
             window:Hide()
             FCD.Profiles:SetActive(name)
             FCD:RefreshData()
@@ -603,7 +604,7 @@ end
 
 function FCD:ShowBarOptions(bar)
     if not bar then
-        printMessage("Keine Leiste ausgewählt.")
+        printMessage(L["Keine Leiste ausgewählt."])
         return
     end
 
@@ -619,7 +620,7 @@ function FCD:ShowBarOptions(bar)
         window:SetFrameStrata("DIALOG")
         window.title = window:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
         window.title:SetPoint("TOP", 0, -6)
-        window.title:SetText("Leisten-Optionen")
+        window.title:SetText(L["Leisten-Optionen"])
         window.fields = {}
 
         local function current()
@@ -637,11 +638,11 @@ function FCD:ShowBarOptions(bar)
         window.fields.name:SetWidth(130)
 
         local numeric = {
-            { key = "columns", label = "Symbole pro Zeile", minimum = 1, maximum = 40 },
-            { key = "iconSize", label = "Symbolgröße", minimum = 12, maximum = 90 },
-            { key = "spacing", label = "Abstand", minimum = 0, maximum = 30 },
-            { key = "scale", label = "Skalierung", minimum = 0.4, maximum = 2 },
-            { key = "alpha", label = "Deckkraft", minimum = 0.1, maximum = 1 },
+            { key = "columns", label = L["Symbole pro Zeile"], minimum = 1, maximum = 40 },
+            { key = "iconSize", label = L["Symbolgröße"], minimum = 12, maximum = 90 },
+            { key = "spacing", label = L["Abstand"], minimum = 0, maximum = 30 },
+            { key = "scale", label = L["Skalierung"], minimum = 0.4, maximum = 2 },
+            { key = "alpha", label = L["Deckkraft"], minimum = 0.1, maximum = 1 },
         }
         local offset = -70
         for _, definition in ipairs(numeric) do
@@ -659,7 +660,7 @@ function FCD:ShowBarOptions(bar)
 
         local growthLabel = window:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         growthLabel:SetPoint("TOPLEFT", 20, offset)
-        growthLabel:SetText("Wachstum")
+        growthLabel:SetText(L["Wachstum"])
         local directions = { "RIGHT", "LEFT", "DOWN", "UP" }
         local directionLabels = { RIGHT = "rechts", LEFT = "links", DOWN = "runter", UP = "hoch" }
         window.growthButtons = {}
@@ -679,11 +680,11 @@ function FCD:ShowBarOptions(bar)
         offset = offset - 34
 
         local visibility = {
-            { key = "always", label = "immer sichtbar" },
-            { key = "inCombat", label = "nur im Kampf" },
-            { key = "hasTarget", label = "nur mit Ziel" },
-            { key = "onlyOnCooldown", label = "nur laufende Abklingzeiten" },
-            { key = "hideUnknown", label = "Ungelerntes ausblenden" },
+            { key = "always", label = L["immer sichtbar"] },
+            { key = "inCombat", label = L["nur im Kampf"] },
+            { key = "hasTarget", label = L["nur mit Ziel"] },
+            { key = "onlyOnCooldown", label = L["nur laufende Abklingzeiten"] },
+            { key = "hideUnknown", label = L["Ungelerntes ausblenden"] },
         }
         window.visibilityChecks = {}
         for index, definition in ipairs(visibility) do
@@ -720,7 +721,7 @@ end
 -- ------------------------------------------------------------------ Dialoge
 
 StaticPopupDialogs["FCD_NEW_PROFILE"] = {
-    text = "Name des neuen Profils:",
+    text = L["Name des neuen Profils:"],
     button1 = ACCEPT,
     button2 = CANCEL,
     hasEditBox = true,
@@ -734,15 +735,15 @@ StaticPopupDialogs["FCD_NEW_PROFILE"] = {
         if FCD.Profiles:Create(name) then
             FCD.Profiles:SetActive(name)
             FCD:RefreshData()
-            printMessage("Profil '" .. name .. "' angelegt.")
+            printMessage(L["Profil '"] .. name .. L["' angelegt."])
         else
-            printMessage("Profil konnte nicht angelegt werden (Name leer oder vergeben).")
+            printMessage(L["Profil konnte nicht angelegt werden (Name leer oder vergeben)."])
         end
     end,
 }
 
 StaticPopupDialogs["FCD_COPY_PROFILE"] = {
-    text = "Name der Kopie:",
+    text = L["Name der Kopie:"],
     button1 = ACCEPT,
     button2 = CANCEL,
     hasEditBox = true,
@@ -756,9 +757,9 @@ StaticPopupDialogs["FCD_COPY_PROFILE"] = {
         if FCD.Profiles:Create(name, FCD.Profiles:GetActiveName()) then
             FCD.Profiles:SetActive(name)
             FCD:RefreshData()
-            printMessage("Profil '" .. name .. "' angelegt.")
+            printMessage(L["Profil '"] .. name .. L["' angelegt."])
         else
-            printMessage("Profil konnte nicht angelegt werden (Name leer oder vergeben).")
+            printMessage(L["Profil konnte nicht angelegt werden (Name leer oder vergeben)."])
         end
     end,
 }
@@ -770,8 +771,8 @@ StaticPopupDialogs["FCD_COPY_PROFILE"] = {
 -- durch unsere Kette, wird gar nicht erst geschrieben.
 function FCD:ChangeVisibility(cooldownID, hidden)
     if not cooldownID then
-        printMessage("Format: /fcd hide <AbklingzeitID>  bzw.  /fcd show <AbklingzeitID>")
-        printMessage("Die IDs stehen in /fcd layout.")
+        printMessage(L["Format: /fcd hide <AbklingzeitID>  bzw.  /fcd show <AbklingzeitID>"])
+        printMessage(L["Die IDs stehen in /fcd layout."])
         return
     end
 
@@ -788,9 +789,9 @@ function FCD:ChangeVisibility(cooldownID, hidden)
     -- /reload. Deshalb ist er aus, solange er nicht ausdrücklich freigegeben
     -- wurde.
     if not self.Layout:NativeWritesAllowed() then
-        printMessage("Weg über Blizzards Lua-Objekte ist aus (beschädigt ihren Viewer).")
-        printMessage("Stattdessen wird der Layout-Blob über die C-Funktion SetLayoutData")
-        printMessage("geschrieben - das taintet nichts.")
+        printMessage(L["Weg über Blizzards Lua-Objekte ist aus (beschädigt ihren Viewer)."])
+        printMessage(L["Stattdessen wird der Layout-Blob über die C-Funktion SetLayoutData"])
+        printMessage(L["geschrieben - das taintet nichts."])
         printMessage("")
     end
 
@@ -801,7 +802,7 @@ function FCD:ChangeVisibility(cooldownID, hidden)
         else
             target = self.Layout:GetDefaultCategory(cooldownID)
             if not target then
-                printMessage(displayName .. ": keine Standardkategorie bekannt, kann nicht eingeblendet werden.")
+                printMessage(displayName .. L[": keine Standardkategorie bekannt, kann nicht eingeblendet werden."])
                 return
             end
         end
@@ -814,30 +815,30 @@ function FCD:ChangeVisibility(cooldownID, hidden)
         self.Layout:CreateNativeRestorePoint()
         local ok, err, applied = self.Layout:SetCategoryNative(cooldownID, target)
         if not ok then
-            printMessage("Abgelehnt: " .. tostring(err))
+            printMessage(L["Abgelehnt: "] .. tostring(err))
             return
         end
 
         local liveAfter, liveLines = self.Probe:GetLiveState(cooldownID)
         local staticAfter = self.Probe:GetEffectiveState(cooldownID)
 
-        printMessage(displayName .. " -> Kategorie " .. tostring(target) .. " (über Blizzards Datenschicht)")
-        printMessage("  ausgeführt: SetCooldownToCategory, " .. tostring(applied))
+        printMessage(displayName .. L[" -> Kategorie "] .. tostring(target) .. L[" (über Blizzards Datenschicht)"])
+        printMessage(L["  ausgeführt: SetCooldownToCategory, "] .. tostring(applied))
         printMessage("")
-        printMessage("  Datenmodell vorher: " .. tostring(liveBefore))
-        printMessage("  Datenmodell jetzt:  " .. tostring(liveAfter))
+        printMessage(L["  Datenmodell vorher: "] .. tostring(liveBefore))
+        printMessage(L["  Datenmodell jetzt:  "] .. tostring(liveAfter))
         for _, line in ipairs(liveLines or {}) do
             printMessage(line)
         end
         printMessage("")
-        printMessage("  Statische Abfrage vorher: " .. tostring(staticBefore))
-        printMessage("  Statische Abfrage jetzt:  " .. tostring(staticAfter))
+        printMessage(L["  Statische Abfrage vorher: "] .. tostring(staticBefore))
+        printMessage(L["  Statische Abfrage jetzt:  "] .. tostring(staticAfter))
 
         if liveBefore == liveAfter then
             printMessage("")
-            printMessage("Das Datenmodell hat sich nicht bewegt - SetCooldownToCategory erwartet")
-            printMessage("vermutlich andere Argumente. /fcd dump CooldownViewerSettings.dataProvider")
-            printMessage("zeigt, welchen Zustand es führt.")
+            printMessage(L["Das Datenmodell hat sich nicht bewegt - SetCooldownToCategory erwartet"])
+            printMessage(L["vermutlich andere Argumente. /fcd dump CooldownViewerSettings.dataProvider"])
+            printMessage(L["zeigt, welchen Zustand es führt."])
         end
         return
     end
@@ -845,20 +846,20 @@ function FCD:ChangeVisibility(cooldownID, hidden)
 
     local state, readErr = self.Layout:Read()
     if not state then
-        printMessage("Lesen fehlgeschlagen: " .. tostring(readErr))
+        printMessage(L["Lesen fehlgeschlagen: "] .. tostring(readErr))
         return
     end
 
     local ok, err, note = self.Layout:VerifyRoundTrip(state)
     if not ok then
-        printMessage("|cffff4040Abgebrochen:|r " .. tostring(err))
-        printMessage("Solange der Rundlauf den Inhalt nicht erhält, wird nichts geschrieben.")
+        printMessage(L["|cffff4040Abgebrochen:|r "] .. tostring(err))
+        printMessage(L["Solange der Rundlauf den Inhalt nicht erhält, wird nichts geschrieben."])
         return
     end
-    printMessage("Rundlauf geprüft: " .. tostring(note))
+    printMessage(L["Rundlauf geprüft: "] .. tostring(note))
 
     if not self.Layout:SetHidden(state, cooldownID, hidden) then
-        printMessage(displayName .. " ist bereits " .. (hidden and "ausgeblendet" or "eingeblendet") .. ".")
+        printMessage(displayName .. L[" ist bereits "] .. (hidden and "ausgeblendet" or "eingeblendet") .. ".")
         return
     end
 
@@ -869,28 +870,28 @@ function FCD:ChangeVisibility(cooldownID, hidden)
 
     local written, writeErr = self.Layout:Commit(state, (hidden and "Ausgeblendet: " or "Eingeblendet: ") .. displayName)
     if not written then
-        printMessage("|cffff4040Schreiben fehlgeschlagen:|r " .. tostring(writeErr))
+        printMessage(L["|cffff4040Schreiben fehlgeschlagen:|r "] .. tostring(writeErr))
         return
     end
 
     local after = self.Probe:GetEffectiveState(cooldownID)
-    printMessage(displayName .. ": Blob geschrieben. Mit  /fcd restore  zurücknehmen.")
-    printMessage("Ob es wirkt, zeigt Blizzards Fenster nach einem /reload - nicht die")
-    printMessage("Abfrage unten, die nur die statische Einordnung meldet.")
-    printMessage("  vorher: " .. tostring(before))
-    printMessage("  jetzt:  " .. tostring(after))
+    printMessage(displayName .. L[": Blob geschrieben. Mit  /fcd restore  zurücknehmen."])
+    printMessage(L["Ob es wirkt, zeigt Blizzards Fenster nach einem /reload - nicht die"])
+    printMessage(L["Abfrage unten, die nur die statische Einordnung meldet."])
+    printMessage(L["  vorher: "] .. tostring(before))
+    printMessage(L["  jetzt:  "] .. tostring(after))
     if before == after then
         -- Erwartet: diese Abfrage meldet nur die statische Einordnung und
         -- bewegt sich auch dann nicht, wenn das Schreiben gewirkt hat.
-        printMessage("Die statische Abfrage bewegt sich erwartungsgemäß nicht.")
-        printMessage("Wirkung prüfen: /reload, dann im Blizzard-Fenster den Abschnitt")
-        printMessage("'Nicht angezeigt' aufklappen - dort muss der Eintrag stehen.")
+        printMessage(L["Die statische Abfrage bewegt sich erwartungsgemäß nicht."])
+        printMessage(L["Wirkung prüfen: /reload, dann im Blizzard-Fenster den Abschnitt"])
+        printMessage(L["'Nicht angezeigt' aufklappen - dort muss der Eintrag stehen."])
     end
 end
 
 -- Ereignis-Mitschnitt. Der Client muss beim Anwenden eines Layouts
 -- irgendetwas auslösen; welches Ereignis das ist, steht in keiner
--- Dokumentation, also wird mitgehoert.
+-- Dokumentation, also wird mitgehört.
 local tracer = CreateFrame("Frame")
 local traceLog = {}
 local traceHighlight = "COOLDOWN"
@@ -910,9 +911,9 @@ function FCD:SetTrace(enabled, filterText)
         wipe(traceLog)
         traceHighlight = (filterText and filterText ~= "") and string.upper(filterText) or "COOLDOWN"
         tracer:RegisterAllEvents()
-        printMessage("Mitschnitt an - es wird alles aufgezeichnet, hervorgehoben wird '"
+        printMessage(L["Mitschnitt an - es wird alles aufgezeichnet, hervorgehoben wird '"]
             .. traceHighlight .. "'.")
-        printMessage("Jetzt im Blizzard-Fenster etwas ändern, dann  /fcd trace off.")
+        printMessage(L["Jetzt im Blizzard-Fenster etwas ändern, dann  /fcd trace off."])
         return
     end
 
@@ -923,7 +924,7 @@ function FCD:SetTrace(enabled, filterText)
         names[#names + 1] = name
     end
     if #names == 0 then
-        printMessage("Mitschnitt aus - kein einziges Ereignis aufgezeichnet.")
+        printMessage(L["Mitschnitt aus - kein einziges Ereignis aufgezeichnet."])
         return
     end
 
@@ -960,9 +961,9 @@ function FCD:SetTrace(enabled, filterText)
     lines[#lines + 1] = ""
     lines[#lines + 1] = highlighted > 0
         and (highlighted .. " Ereignis(se) enthalten '" .. traceHighlight .. "' - mit >> markiert.")
-        or ("Kein Ereignis enthält '" .. traceHighlight .. "'.")
+        or (L["Kein Ereignis enthält '"] .. traceHighlight .. "'.")
 
-    outputWindow("Ereignis-Mitschnitt", table.concat(lines, "\n"))
+    outputWindow(L["Ereignis-Mitschnitt"], table.concat(lines, "\n"))
 end
 
 -- /fcd öffnet jetzt das, womit man tatsächlich arbeitet: Blizzards
@@ -972,7 +973,7 @@ function FCD:OpenMainUI()
     -- geschützten Frame aus getaintetem Code wird blockiert und erzeugt die
     -- Meldung "Interface-Aktion fehlgeschlagen".
     if InCombatLockdown() then
-        printMessage("Im Kampf wird Blizzards Fenster nicht angefasst - zeige nur das Panel.")
+        printMessage(L["Im Kampf wird Blizzards Fenster nicht angefasst - zeige nur das Panel."])
         self.Dock:Toggle()
         return
     end
@@ -988,18 +989,18 @@ function FCD:OpenMainUI()
     if type(window) == "table" and type(window.Show) == "function" then
         if window:IsShown() then
             pcall(window.Hide, window)
-            printMessage("Geschlossen.")
+            printMessage(L["Geschlossen."])
             return
         end
         local ok = pcall(window.Show, window)
         if ok then
             -- Das Panel folgt über die Sichtbarkeitsprüfung automatisch
-            printMessage("Abklingzeit-Einstellungen geöffnet, Panel dockt rechts an.")
+            printMessage(L["Abklingzeit-Einstellungen geöffnet, Panel dockt rechts an."])
             return
         end
     end
 
-    printMessage("Blizzards Fenster lässt sich nicht öffnen - zeige nur das Panel.")
+    printMessage(L["Blizzards Fenster lässt sich nicht öffnen - zeige nur das Panel."])
     self.Dock:Toggle()
 end
 
@@ -1010,14 +1011,14 @@ function FCD:ShowLayoutImport()
         local button = CreateFrame("Button", nil, window, "UIPanelButtonTemplate")
         button:SetSize(140, 22)
         button:SetPoint("BOTTOMRIGHT", -18, 14)
-        button:SetText("Profil importieren")
+        button:SetText(L["Profil importieren"])
         button:SetScript("OnClick", function()
             local name, err = FCD.Layout:ImportProfile(window.edit:GetText())
             if not name then
-                printMessage("Import fehlgeschlagen: " .. tostring(err))
+                printMessage(L["Import fehlgeschlagen: "] .. tostring(err))
                 return
             end
-            printMessage("Layout-Profil '" .. name .. "' importiert.")
+            printMessage(L["Layout-Profil '"] .. name .. L["' importiert."])
             FCD.db.settings.activeLayoutProfile = name
             window:Hide()
             FCD.Dock:Refresh()
@@ -1028,7 +1029,7 @@ function FCD:ShowLayoutImport()
 end
 
 StaticPopupDialogs["FCD_ADD_SPELL"] = {
-    text = "Zauber aufnehmen - ID oder Link einfügen\n(Umschalt-Klick auf einen Zauber fügt den Link ein):",
+    text = L["Zauber aufnehmen - ID oder Link einfügen\n(Umschalt-Klick auf einen Zauber fügt den Link ein):"],
     button1 = ACCEPT,
     button2 = CANCEL,
     hasEditBox = true,
@@ -1042,24 +1043,24 @@ StaticPopupDialogs["FCD_ADD_SPELL"] = {
         -- Ein eingefügter Link enthält die ID; eine reine Zahl ist sie selbst.
         local spellID = tonumber(text:match("spell:(%d+)")) or tonumber(text:match("%d+"))
         if not spellID then
-            printMessage("Keine Zauber-ID erkannt.")
+            printMessage(L["Keine Zauber-ID erkannt."])
             return
         end
         local ok, err = FCD.Ranks:AddCustom(spellID)
         if not ok then
-            printMessage("Nicht aufgenommen: " .. tostring(err))
+            printMessage(L["Nicht aufgenommen: "] .. tostring(err))
             return
         end
-        printMessage(string.format("'%s' aufgenommen - im Reiter Eigene Zauber"
-            .. " anklicken, um ihn auf die Leiste zu legen.",
-            FCD.Compat.GetSpellName(spellID) or ("Zauber " .. spellID)))
+        printMessage(string.format(L["'%s' aufgenommen - im Reiter Eigene Zauber"]
+            .. L[" anklicken, um ihn auf die Leiste zu legen."],
+            FCD.Compat.GetSpellName(spellID) or (L["Zauber "] .. spellID)))
         FCD.Catalog:Rebuild()
         FCD.Dock:Refresh()
     end,
 }
 
 StaticPopupDialogs["FCD_ADD_ITEM"] = {
-    text = "Gegenstand aufnehmen - ID oder Link einfügen\n(Shift-Klick auf einen Gegenstand fügt den Link ein):",
+    text = L["Gegenstand aufnehmen - ID oder Link einfügen\n(Shift-Klick auf einen Gegenstand fügt den Link ein):"],
     button1 = ACCEPT,
     button2 = CANCEL,
     hasEditBox = true,
@@ -1073,18 +1074,18 @@ StaticPopupDialogs["FCD_ADD_ITEM"] = {
         -- Ein eingefügter Link enthält die ID; eine reine Zahl ist sie selbst.
         local itemID = tonumber(text:match("item:(%d+)")) or tonumber(text:match("%d+"))
         if not itemID then
-            printMessage("Keine Gegenstands-ID erkannt.")
+            printMessage(L["Keine Gegenstands-ID erkannt."])
             return
         end
         FCD.Items:AddCustom(itemID)
         local name = FCD.Compat.GetItemInfo(itemID)
-        printMessage(string.format("'%s' aufgenommen.", name or ("Item " .. itemID)))
+        printMessage(string.format(L["'%s' aufgenommen."], name or (L["Item "] .. itemID)))
         FCD.Dock:Refresh()
     end,
 }
 
 StaticPopupDialogs["FCD_DELETE_LAYOUT_PROFILE"] = {
-    text = "Layout '%s' wirklich verwerfen?",
+    text = L["Layout '%s' wirklich verwerfen?"],
     button1 = "Verwerfen",
     button2 = "Abbrechen",
     timeout = 0,
@@ -1099,21 +1100,21 @@ StaticPopupDialogs["FCD_DELETE_LAYOUT_PROFILE"] = {
         FCD.Dock.profileToDelete = nil
         local ok, err = FCD.Layout:DeleteProfile(name)
         if not ok then
-            printMessage("Nicht verworfen: " .. tostring(err))
+            printMessage(L["Nicht verworfen: "] .. tostring(err))
             return
         end
         if FCD.db.settings.activeLayoutProfile == name then
             FCD.db.settings.activeLayoutProfile = nil
         end
-        printMessage("Layout '" .. name .. "' verworfen. Die Zuweisungen bleiben,"
-            .. " bis ein anderes Layout gewählt wird.")
+        printMessage(L["Layout '"] .. name .. L["' verworfen. Die Zuweisungen bleiben,"]
+            .. L[" bis ein anderes Layout gewählt wird."])
         FCD.Store:Save(true)
         FCD.Dock:Refresh()
     end,
 }
 
 StaticPopupDialogs["FCD_NEW_LAYOUT_PROFILE"] = {
-    text = "Name für das Layout-Profil:",
+    text = L["Name für das Layout-Profil:"],
     button1 = ACCEPT,
     button2 = CANCEL,
     hasEditBox = true,
@@ -1125,8 +1126,8 @@ StaticPopupDialogs["FCD_NEW_LAYOUT_PROFILE"] = {
         local editBox = self.editBox or (self.GetEditBox and self:GetEditBox())
         local name = editBox and editBox:GetText() or ""
         local ok, err = FCD.Layout:SaveProfile(name)
-        printMessage(ok and ("Layout-Profil '" .. name .. "' gespeichert und aktiv.")
-            or ("Nicht gespeichert: " .. tostring(err)))
+        printMessage(ok and (L["Layout-Profil '"] .. name .. L["' gespeichert und aktiv."])
+            or (L["Nicht gespeichert: "] .. tostring(err)))
         if ok then
             -- Wer ein Profil anlegt, will es auch benutzen
             FCD.db.settings.activeLayoutProfile = name
@@ -1178,8 +1179,8 @@ local function onEvent(_, event, ...)
         -- Zweiter Blick auf die gespeicherten Daten: kamen sie erst nach
         -- ADDON_LOADED an, werden sie hier übernommen statt überschrieben.
         if FCD.Profiles:AdoptLateData() then
-            logMessage("Gespeicherte Daten kamen verspaetet an und wurden"
-                .. " nachträglich übernommen.")
+            logMessage(L["Gespeicherte Daten kamen verspätet an und wurden"]
+                .. L[" nachträglich übernommen."])
         end
         -- Es gibt zwei Quellen: die gespeicherte Datei und Blizzards
         -- Layout-Speicher. Genommen wird die reichhaltigere - sonst
@@ -1209,45 +1210,45 @@ local function onEvent(_, event, ...)
             loaded.entries = fileEntries
             if storedEntries > fileEntries then
                 FCD.Profiles:AdoptStore(stored)
-                logMessage(string.format("Bestand aus Blizzards Layout"
-                    .. " übernommen (%d Einträge, Datei hatte %d).",
+                logMessage(string.format(L["Bestand aus Blizzards Layout"]
+                    .. L[" übernommen (%d Einträge, Datei hatte %d)."],
                     storedEntries, loaded.entries or 0))
             else
-                logMessage(string.format("Datei ist aktueller als das Layout"
-                    .. " (%d gegen %d Einträge).", loaded.entries or 0, storedEntries))
+                logMessage(string.format(L["Datei ist aktueller als das Layout"]
+                    .. L[" (%d gegen %d Einträge)."], loaded.entries or 0, storedEntries))
             end
         else
-            logMessage("Kein Bestand im Layout: " .. tostring(FCD.Store.status))
+            logMessage(L["Kein Bestand im Layout: "] .. tostring(FCD.Store.status))
         end
         FCD:RefreshData()
         FCD.Viewer:SetUnlocked(not FCD.db.settings.locked)
         FCD.Profiles:EvaluateRules()
         loginDone = true
-        logMessage(string.format("geladen. Client %s (Build %s), Interface %d.",
+        logMessage(string.format(L["geladen. Client %s (Build %s), Interface %d."],
             FCD.clientVersion, tostring(FCD.build), FCD.tocVersion))
         -- Beim Anmelden ohne Nachfragen sagen, was aus der Datenbank kam.
         -- Ob Profile eine Sitzung überleben, war sonst nur zu erraten.
         local layoutNames = FCD.Layout:ListProfiles()
         if #layoutNames > 0 then
-            logMessage(string.format("%d Layout-Profil(e): %s. Aktiv: %s.",
+            logMessage(string.format(L["%d Layout-Profil(e): %s. Aktiv: %s."],
                 #layoutNames, table.concat(layoutNames, ", "),
                 tostring(FCD.db.settings.activeLayoutProfile or "keines")))
         else
-            logMessage("Keine Layout-Profile gespeichert.")
+            logMessage(L["Keine Layout-Profile gespeichert."])
         end
         -- Was der Client an gespeicherten Daten übergeben hat, bevor das
         -- AddOn sie anfasst. Weicht das von dem ab, was die Datei enthält,
         -- liegt es am Einlesen und nicht an uns.
         local loadInfo = FCD.dbLoadInfo or {}
         if loadInfo.restoredFromMirror then
-            logMessage("Die kontoweite Datei kam leer an - Bestand aus der"
-                .. " Zweitablage des Charakters wiederhergestellt.")
+            logMessage(L["Die kontoweite Datei kam leer an - Bestand aus der"]
+                .. L[" Zweitablage des Charakters wiederhergestellt."])
         elseif not loadInfo.present and not stored then
             -- Nur beunruhigen, wenn BEIDE Quellen nichts hergaben. Liefert
             -- das Layout den Bestand, ist die leere Datei kein Problem.
-            printMessage("|cffff6060Aus der Datei kam nichts an|r - die"
-                .. " gespeicherten Daten wurden nicht geladen.")
-            printMessage(string.format("  ForeverCooldownsDB: %s, FCDStore: %s",
+            printMessage(L["|cffff6060Aus der Datei kam nichts an|r - die"]
+                .. L[" gespeicherten Daten wurden nicht geladen."])
+            printMessage(string.format(L["  ForeverCooldownsDB: %s, FCDStore: %s"],
                 loadInfo.viaLong and "da" or "leer",
                 loadInfo.viaShort and "da" or "leer"))
             -- Was der Client selbst über unser AddOn weiß. Kennt er die
@@ -1258,12 +1259,12 @@ local function onEvent(_, event, ...)
                 printMessage(line)
             end
         else
-            logMessage(string.format("Aus der Datei geladen: %d Profil(e),"
-                .. " %d Leiste(n), %d Eintrag/Einträge.",
+            logMessage(string.format(L["Aus der Datei geladen: %d Profil(e),"]
+                .. L[" %d Leiste(n), %d Eintrag/Einträge."],
                 loadInfo.profiles or 0, loadInfo.bars or 0, loadInfo.entries or 0))
         end
         -- Locale.lua setzt die Sprache beim Laden nach der Clientsprache;
-        -- eine eigene Wahl steht erst jetzt zur Verfuegung.
+        -- eine eigene Wahl steht erst jetzt zur Verfügung.
         if FCD.db.settings.language then
             FCD.SetLanguage(FCD.db.settings.language)
         end
@@ -1285,21 +1286,21 @@ local function onEvent(_, event, ...)
             if #parts > 0 then
                 summary = table.concat(parts, ", ")
             elseif #profile.bars > 0 then
-                summary = "Leisten angelegt, aber ohne Einträge"
+                summary = L["Leisten angelegt, aber ohne Einträge"]
             else
                 summary = "keine eigenen Leisten in Benutzung"
             end
-            logMessage(string.format("Profil '%s' - %s.", profile.name or "?", summary))
+            logMessage(string.format(L["Profil '%s' - %s."], profile.name or "?", summary))
         else
-            logMessage("Kein Profil aktiv - eigene Leisten bleiben leer.")
+            logMessage(L["Kein Profil aktiv - eigene Leisten bleiben leer."])
         end
         local declared = FCD.Compat.GetDeclaredInterface()
         if declared and FCD.tocVersion > 0 and declared ~= FCD.tocVersion then
-            logMessage(string.format("Hinweis: .toc meldet Interface %d,"
-                .. " der Client %d.", declared, FCD.tocVersion))
+            logMessage(string.format(L["Hinweis: .toc meldet Interface %d,"]
+                .. L[" der Client %d."], declared, FCD.tocVersion))
         end
-        logMessage("/fcd öffnet den Editor, /fcd log zeigt diese Ausgaben"
-            .. " zum Kopieren.")
+        logMessage(L["/fcd öffnet den Editor, /fcd log zeigt diese Ausgaben"]
+            .. L[" zum Kopieren."])
         return
     end
 

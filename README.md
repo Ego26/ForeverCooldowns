@@ -129,6 +129,7 @@ cd Tests
 npm install luaparse fengari
 node verify.js   # Syntax, unbekannte Globals, modulübergreifende Aufrufe
 node run.js      # Logiktests in einem echten Lua-VM
+node i18n.js     # deutscher Text ohne L[...], Schlüssel ohne Übersetzung
 ```
 
 `verify.js` fängt genau die Fehler ab, die sonst erst als roter Lua-Fehler im

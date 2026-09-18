@@ -1,8 +1,8 @@
 package-as: ForeverCooldowns
 
-# Keine externen Bibliotheken: Forever Cooldowns nutzt ausschliesslich
-# Blizzard-API. Jede API wird einzeln auf Vorhandensein geprueft, damit das
-# AddOn auf Classic-artigen und modernen Clients gleichermassen laeuft.
+# Keine externen Bibliotheken: Forever Cooldowns nutzt ausschließlich
+# Blizzard-API. Jede API wird einzeln auf Vorhandensein geprüft, damit das
+# AddOn auf Classic-artigen und modernen Clients gleichermaßen läuft.
 externals: {}
 
 # Ohne diese Angabe baut der Packager die Release-Notes aus den Commit-Texten

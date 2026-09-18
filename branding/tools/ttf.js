@@ -1,15 +1,15 @@
-// Minimaler TrueType-Leser: Umrisse eines Zeichens holen und fuellen.
+// Minimaler TrueType-Leser: Umrisse eines Zeichens holen und füllen.
 //
 // Warum ueberhaupt: die Wortmarke war bisher aus Strichen mit runden Enden
-// gebaut. Genau diese Bauweise - gleichbleibende Strichstaerke, runde Kappen -
-// laesst eine Schrift nach Comic Sans aussehen, und daran aendert kein
-// Nachjustieren von Sperrung oder Groesse etwas. Eine echte Schrift hat
+// gebaut. Genau diese Bauweise - gleichbleibende Strichstärke, runde Kappen -
+// lässt eine Schrift nach Comic Sans aussehen, und daran aendert kein
+// Nachjustieren von Sperrung oder Größe etwas. Eine echte Schrift hat
 // gerade Endungen, ausgeglichene Breiten und optische Korrekturen, die man
 // von Hand nicht nachbaut.
 //
-// Gelesen wird nur, was fuer Versalien gebraucht wird: head, maxp, loca,
+// Gelesen wird nur, was für Versalien gebraucht wird: head, maxp, loca,
 // glyf, cmap (Format 4), hhea, hmtx. Zusammengesetzte Zeichen sind
-// unterstuetzt, Hinting nicht - das braucht es bei dieser Groesse nicht.
+// unterstuetzt, Hinting nicht - das braucht es bei dieser Größe nicht.
 const fs = require('fs');
 
 function readFont(path) {
@@ -159,7 +159,7 @@ function readFont(path) {
     return { unitsPerEm, glyphFor, advance, outline };
 }
 
-// Quadratische Bezier in Strecken aufloesen. Zwischen zwei Steuerpunkten
+// Quadratische Bezier in Strecken auflösen. Zwischen zwei Steuerpunkten
 // liegt ein gedachter Kurvenpunkt in der Mitte - das ist die TrueType-Regel,
 // ohne die jede zweite Rundung als Ecke herauskaeme.
 function flatten(points, steps) {
@@ -210,14 +210,14 @@ function flatten(points, steps) {
 // mehrfach abgetasteter Deckung - das ergibt saubere Kanten ohne die
 // Treppchen, die ein reines Ja/Nein pro Pixel hinterlaesst.
 //
-// Rueckgabe: { width, height, cov, capHeight } - cov ist 0..1 je Pixel.
+// Rückgabe: { width, height, cov, capHeight } - cov ist 0..1 je Pixel.
 function renderLine(font, text, pixelSize, tracking, pad) {
     pad = pad === undefined ? 4 : pad;
     const scale = pixelSize / font.unitsPerEm;
     const trackUnits = (tracking || 0) * font.unitsPerEm;
 
-    // Erst die Umrisse einsammeln und den tatsaechlich belegten Bereich
-    // messen. Die Schriftkennwerte taugen dafuer nicht: sie beschreiben die
+    // Erst die Umrisse einsammeln und den tatsächlich belegten Bereich
+    // messen. Die Schriftkennwerte taugen dafür nicht: sie beschreiben die
     // ganze Schrift, nicht diese Zeile aus Versalien.
     const contours = [];
     let cursor = 0;

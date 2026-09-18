@@ -1,5 +1,6 @@
 local FCD = ForeverCooldowns
 local Compat = FCD.Compat
+local L = FCD.L
 
 local Dock = {}
 FCD.Dock = Dock
@@ -303,11 +304,11 @@ local CATEGORY_NAMES = {
     [-1] = "Nicht angezeigt",
     [0] = "Essenzielle Abklingzeiten",
     [1] = "Strategische Abklingzeiten",
-    [2] = "Verfolgte Stärkungseffekte",
+    [2] = L["Verfolgte Stärkungseffekte"],
     [3] = "Verfolgte Leisten",
-    [4] = "Gruppenstärkungseffekte",
-    [7] = "Gegenstände",
-    [8] = "Gegenstände (verfolgt)",
+    [4] = L["Gruppenstärkungseffekte"],
+    [7] = L["Gegenstände"],
+    [8] = L["Gegenstände (verfolgt)"],
 }
 
 -- Blizzard teilt die Kategorien auf zwei Reiter auf, jeder mit eigenem
@@ -316,13 +317,13 @@ local CATEGORY_NAMES = {
 local TABS = {
     {
         id = "spells",
-        label = "Zauber",
+        label = L["Zauber"],
         icon = "Interface\\Icons\\Spell_Nature_Lightning",
         categories = { 0, 1, -1 },
     },
     {
         id = "buffs",
-        label = "Stärkungseffekte",
+        label = L["Stärkungseffekte"],
         icon = "Interface\\Icons\\Spell_Holy_WordFortitude",
         categories = { 2, 3, 7, 8, -1 },
     },
@@ -334,7 +335,7 @@ local TABS = {
     -- Zauber aus dem Zauberbuch kann auf unsere eigene Leiste.
     {
         id = "ownspells",
-        label = "Eigene Zauber",
+        label = L["Eigene Zauber"],
         icon = "Interface\\Icons\\INV_Misc_Book_09",
         categories = {},
         ownBar = true,
@@ -342,7 +343,7 @@ local TABS = {
     },
     {
         id = "items",
-        label = "Gegenstände",
+        label = L["Gegenstände"],
         -- Kein Zaubersymbol: das Händler-Sinnbild aus dem Gesprächsfenster ist
         -- freigestellt und wirkt damit wie Blizzards Reiter, nicht wie eine
         -- Kachel. Blizzard selbst hat keinen Gegenstandsreiter, von dem wir
@@ -357,10 +358,10 @@ local TABS = {
 -- Die Leisten, auf denen unsere eigenen Einträge landen. Sie werden erst
 -- angelegt, wenn wirklich etwas daraufgelegt wird.
 local SPELL_BAR_NAME = "Zauber verfolgen"
-local ITEM_BAR_NAME = "Gegenstände verfolgen"
+local ITEM_BAR_NAME = L["Gegenstände verfolgen"]
 -- Die Leiste hieß zuerst nur "Gegenstände". Wer sie schon hat, soll keine
 -- zweite bekommen, sondern die vorhandene umbenannt.
-local ITEM_BAR_LEGACY = "Gegenstände"
+local ITEM_BAR_LEGACY = L["Gegenstände"]
 
 local function ownBar(name, create)
     local profile = FCD.Profiles:GetActive()
@@ -578,9 +579,9 @@ local function buildItemSections()
 
     local groups = {
         { id = "item:onbar", title = "Auf der Leiste" },
-        { id = "item:equipped", title = "Ausgerüstet" },
+        { id = "item:equipped", title = L["Ausgerüstet"] },
         { id = "item:bags", title = "In Taschen" },
-        { id = "item:manual", title = "Selbst hinzugefügt" },
+        { id = "item:manual", title = L["Selbst hinzugefügt"] },
     }
     local buckets = {}
     for _, group in ipairs(groups) do
@@ -639,7 +640,7 @@ local function buildItemSections()
         emptyReason = "Die Leiste ist leer - unten etwas anklicken."
     else
         emptyReason = string.format(
-            "Die Leiste hat %d Eintrag/Einträge, aber keiner ist ein Gegenstand.",
+            L["Die Leiste hat %d Eintrag/Einträge, aber keiner ist ein Gegenstand."],
             #bar.entries)
     end
 
@@ -654,7 +655,7 @@ local function buildItemSections()
             items = items,
             headerText = string.format("%s  (%d)", group.title, #items),
             emptyText = (group.id == "item:onbar") and emptyReason
-                or "Nichts gefunden. Gegenstände aus der Tasche hierher ziehen.",
+                or L["Nichts gefunden. Gegenstände aus der Tasche hierher ziehen."],
         }
     end
     return sections
@@ -905,14 +906,14 @@ function Dock:AssignItemSelection(onBar)
     local spells = chosen[1].itemEntry.kind == "spell"
     local bar = ownBar(spells and SPELL_BAR_NAME or ITEM_BAR_NAME, true)
     if not bar then
-        FCD.Print("Kein Profil aktiv - ohne Profil gibt es keine Leiste.")
+        FCD.Print(L["Kein Profil aktiv - ohne Profil gibt es keine Leiste."])
         return
     end
     if not spells then
         itemBar(true)
     end
 
-    FCD.Profiles:PushUndo("Eigene Leiste geändert")
+    FCD.Profiles:PushUndo(L["Eigene Leiste geändert"])
     local changed = 0
     for _, item in ipairs(chosen) do
         local position
@@ -958,8 +959,8 @@ function Dock:ForgetItem(item)
     end
     local itemID = tonumber(item.itemEntry.id)
     if not itemID or not (FCD.db.customItems or {})[itemID] then
-        FCD.Print("Das steht nicht in der eigenen Liste - es kommt aus Tasche"
-            .. " oder Ausrüstung.")
+        FCD.Print(L["Das steht nicht in der eigenen Liste - es kommt aus Tasche"]
+            .. L[" oder Ausrüstung."])
         return
     end
     FCD.Items:RemoveCustom(itemID)
@@ -986,15 +987,15 @@ function Dock:AcceptCursorItem()
         ClearCursor()
         local ok, err = FCD.Ranks:AddCustom(spellID)
         if not ok then
-            FCD.Print("Nicht aufgenommen: " .. tostring(err))
+            FCD.Print(L["Nicht aufgenommen: "] .. tostring(err))
             return false
         end
         FCD.Catalog:Rebuild()
         state.tab = "ownspells"
         wipe(state.selection)
         self:Refresh()
-        FCD.Print(string.format("'%s' aufgenommen.",
-            Compat.GetSpellName(spellID) or ("Zauber " .. spellID)))
+        FCD.Print(string.format(L["'%s' aufgenommen."],
+            Compat.GetSpellName(spellID) or (L["Zauber "] .. spellID)))
         return true
     end
 
@@ -1032,13 +1033,13 @@ end
 -- gleichlautende einzutragen - so bleibt das Layout so klein wie Blizzards.
 function Dock:AssignSelection(category)
     if not self.layout then
-        FCD.Print("Layout nicht lesbar: " .. tostring(self.layoutError))
+        FCD.Print(L["Layout nicht lesbar: "] .. tostring(self.layoutError))
         return
     end
 
     local ok, err = FCD.Layout:VerifyRoundTrip(self.layout)
     if not ok then
-        FCD.Print("Abgebrochen, Rundlauf fehlerhaft: " .. tostring(err))
+        FCD.Print(L["Abgebrochen, Rundlauf fehlerhaft: "] .. tostring(err))
         return
     end
 
@@ -1046,9 +1047,9 @@ function Dock:AssignSelection(category)
     -- ihre Objekte aber als tainted. Im Kampf gesperrt, weil der Taint dort
     -- ihre geschützten Aktionen blockiert.
     if FCD.Layout:NativeWritesAllowed() and not FCD.Layout:CanWriteNativeNow() then
-        FCD.Print("Im Kampf wird nicht sofort geschrieben - der Taint würde Blizzards")
-        FCD.Print("Fenster blockieren. Die Änderung wird sicher gespeichert und")
-        FCD.Print("greift nach dem nächsten Neuladen.")
+        FCD.Print(L["Im Kampf wird nicht sofort geschrieben - der Taint würde Blizzards"])
+        FCD.Print(L["Fenster blockieren. Die Änderung wird sicher gespeichert und"])
+        FCD.Print(L["greift nach dem nächsten Neuladen."])
     end
 
     if FCD.Layout:CanWriteNativeNow() then
@@ -1060,14 +1061,14 @@ function Dock:AssignSelection(category)
                 if ok then
                     changed = changed + 1
                 else
-                    FCD.Print("Abgelehnt: " .. tostring(err))
+                    FCD.Print(L["Abgelehnt: "] .. tostring(err))
                 end
             end
         end
         wipe(state.selection)
         self:LoadLayout()
         self:Refresh()
-        FCD.Print(string.format("%d Abklingzeit(en) nach '%s' - sofort wirksam.",
+        FCD.Print(string.format(L["%d Abklingzeit(en) nach '%s' - sofort wirksam."],
             changed, categoryName(category)))
         return
     end
@@ -1095,14 +1096,14 @@ function Dock:AssignSelection(category)
         table.concat(names, ", "):sub(1, 60), categoryName(category))
     local written, writeErr = FCD.Layout:Commit(self.layout, label)
     if not written then
-        FCD.Print("Schreiben fehlgeschlagen: " .. tostring(writeErr))
+        FCD.Print(L["Schreiben fehlgeschlagen: "] .. tostring(writeErr))
         return
     end
 
     self.needsReload = true
     wipe(state.selection)
     self:Refresh()
-    FCD.Print(string.format("%d Abklingzeit(en) nach '%s' - wirksam nach dem Neuladen.",
+    FCD.Print(string.format(L["%d Abklingzeit(en) nach '%s' - wirksam nach dem Neuladen."],
         moved, categoryName(category)))
 end
 
@@ -1288,7 +1289,7 @@ local function attachItemHandlers(widget)
             spellID and function(tip) tip:SetSpellByID(spellID) end or nil,
             item.label,
             (item.stackSize and item.stackSize > 1)
-                and (item.stackSize .. " Ränge - bewegen sich gemeinsam") or nil,
+                and (item.stackSize .. L[" Ränge - bewegen sich gemeinsam"]) or nil,
             "Ziehen: in einen anderen Abschnitt",
             "Doppelklick: ein-/ausblenden")
     end)
@@ -1657,7 +1658,7 @@ local function refreshProfileMenu()
             addRow({
                 radio = current,
                 text = layout.name,
-                hint = current and "(Blizzard, aktiv)" or "(Blizzard)",
+                hint = current and L["(Blizzard, aktiv)"] or L["(Blizzard)"],
             })
         end
         addRow({ separator = true })
@@ -1675,7 +1676,7 @@ local function refreshProfileMenu()
     -- nennt diesen Zustand "Startlayout", und er ist immer wählbar.
     addRow({
         radio = (active == nil),
-        text = "Startlayout",
+        text = L["Startlayout"],
         onClick = function() Dock:SelectProfile(nil) end,
     })
 
@@ -1683,14 +1684,14 @@ local function refreshProfileMenu()
 
     addRow({
         mark = "+",
-        text = "Neues Layout",
+        text = L["Neues Layout"],
         onClick = function()
             menu:Hide()
             StaticPopup_Show("FCD_NEW_LAYOUT_PROFILE")
         end,
     })
     addRow({
-        text = "Importieren",
+        text = L["Importieren"],
         onClick = function()
             menu:Hide()
             FCD:ShowLayoutImport()
@@ -1699,25 +1700,25 @@ local function refreshProfileMenu()
     -- Ein AddOn darf nicht in die Zwischenablage schreiben, anders als
     -- Blizzard. Das Fenster mit vorgewähltem Text ist der nächste Weg dorthin.
     addRow({
-        text = "Zum Kopieren anzeigen",
-        hint = "(zum Teilen)",
+        text = L["Zum Kopieren anzeigen"],
+        hint = L["(zum Teilen)"],
         onClick = function()
             -- Immer der aktuelle Stand, auch im Startlayout: was man sieht,
             -- ist was man teilt. Ein gespeichertes Profil braucht es dafür nicht.
-            local name = active or "Eigenes Layout"
+            local name = active or L["Eigenes Layout"]
             menu:Hide()
             local text, err = FCD.Layout:ExportCurrent(name)
             if not text then
-                FCD.Print("Nicht lesbar: " .. tostring(err))
+                FCD.Print(L["Nicht lesbar: "] .. tostring(err))
                 return
             end
-            FCD:ShowText("Layout teilen (" .. name .. ")", text)
+            FCD:ShowText(L["Layout teilen ("] .. name .. ")", text)
         end,
     })
     if active then
         addRow({ separator = true })
         addRow({
-            text = "Verwerfen: " .. active,
+            text = L["Verwerfen: "] .. active,
             danger = true,
             onClick = function()
                 menu:Hide()
@@ -1744,12 +1745,12 @@ function Dock:SelectProfile(name)
         ok, err, count = FCD.Layout:ApplyDefaults()
     end
     if not ok then
-        FCD.Print("Nicht angewendet: " .. tostring(err))
+        FCD.Print(L["Nicht angewendet: "] .. tostring(err))
         return
     end
     settings().activeLayoutProfile = name
-    FCD.Print(string.format("%s angewendet (%d Änderungen).",
-        name or "Startlayout", count or 0))
+    FCD.Print(string.format(L["%s angewendet (%d Änderungen)."],
+        name or L["Startlayout"], count or 0))
     Dock.needsReload = not FCD.Layout:NativeWritesAllowed() and (count or 0) > 0
     Dock:LoadLayout()
     Dock:Refresh()
@@ -1768,7 +1769,7 @@ local function buildProfileControl()
     -- sitzt sie auch dann auf einer Linie, wenn sich die Feldhöhe ändert.
     panel.profileLabel = panel:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     panel.profileLabel:SetPoint("RIGHT", button, "LEFT", -8, 0)
-    panel.profileLabel:SetText("Profil")
+    panel.profileLabel:SetText(L["Profil"])
 
     button.background = button:CreateTexture(nil, "BACKGROUND")
     button.background:SetAllPoints()
@@ -1839,7 +1840,7 @@ local function buildProfileControl()
             menu:Hide()
             return
         end
-        menu.title:SetText("Für " .. (UnitName("player") or "diesen Charakter"))
+        menu.title:SetText(L["Für "] .. (UnitName("player") or L["diesen Charakter"]))
         refreshProfileMenu()
         menu:ClearAllPoints()
         menu:SetPoint("TOPLEFT", self, "BOTTOMLEFT", 0, -2)
@@ -1920,7 +1921,7 @@ function Dock:Build()
 
     panel.title = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     panel.title:SetPoint("TOP", 0, -6)
-    panel.title:SetText("Forever Cooldowns")
+    panel.title:SetText(L["Forever Cooldowns"])
 
     -- Neben dem Schließen-Kreuz: aufs große Fenster wechseln, in dem sich
     -- mehr einstellen lässt als in der schmalen Spalte.
@@ -1935,8 +1936,8 @@ function Dock:Build()
         expand:SetPoint("TOPRIGHT", -28, -4)
     end
 
-    -- Derselbe Pfeil, den die Karte zum Vergrößern nutzt. Laedt die Textur
-    -- nicht, bleibt darunter ein Zeichen sichtbar statt einer leeren Flaeche.
+    -- Derselbe Pfeil, den die Karte zum Vergrößern nutzt. Lädt die Textur
+    -- nicht, bleibt darunter ein Zeichen sichtbar statt einer leeren Fläche.
     expand.fallback = expand:CreateFontString(nil, "BACKGROUND", "GameFontNormal")
     expand.fallback:SetAllPoints()
     expand.fallback:SetText("+")
@@ -1950,7 +1951,7 @@ function Dock:Build()
     expand:SetScript("OnEnter", function(self)
         FCD.Widgets.ShowTooltip(self, "ANCHOR_LEFT",
             state.wide and "Schmale Ansicht" or "Breite Ansicht",
-            state.wide and "Zurück an Blizzards Fenster andocken."
+            state.wide and L["Zurück an Blizzards Fenster andocken."]
                 or "Dieselben Daten, nur mit mehr Platz pro Zeile.")
     end)
     expand:SetScript("OnLeave", FCD.Widgets.HideTooltip)
@@ -2055,7 +2056,7 @@ function Dock:Build()
     -- verschwindet sobald Text da ist.
     search.placeholder = search:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
     search.placeholder:SetPoint("LEFT", 4, 0)
-    search.placeholder:SetText("Suchtext eingeben")
+    search.placeholder:SetText(L["Suchtext eingeben"])
 
     local function updatePlaceholder(self)
         search.placeholder:SetShown((self:GetText() or "") == "")
@@ -2090,8 +2091,8 @@ function Dock:Build()
         local spells = currentTab().entryKind == "spell"
         FCD.Widgets.ShowTooltip(self, "ANCHOR_BOTTOMLEFT",
             spells and "Zauber aufnehmen" or "Gegenstand aufnehmen",
-            spells and "Beliebige Zauber-ID oder eingefügten Link - auch was im Zauberbuch nicht steht."
-                or "Beliebige Gegenstands-ID oder eingefügten Link - auch was gerade nicht im Beutel liegt.",
+            spells and L["Beliebige Zauber-ID oder eingefügten Link - auch was im Zauberbuch nicht steht."]
+                or L["Beliebige Gegenstands-ID oder eingefügten Link - auch was gerade nicht im Beutel liegt."],
             "Ziehen geht auch.")
     end)
     addButton:SetScript("OnLeave", FCD.Widgets.HideTooltip)
@@ -2105,7 +2106,7 @@ function Dock:Build()
     divider(-94)
 
     -- Zeile 3: Filter
-    local stackCheck = FCD.Widgets.CreateCheck(panel, "Ränge stapeln", function()
+    local stackCheck = FCD.Widgets.CreateCheck(panel, L["Ränge stapeln"], function()
         return state.stackRanks
     end, function(value)
         state.stackRanks = value
@@ -2126,8 +2127,8 @@ function Dock:Build()
     panel.hint:SetPoint("TOPLEFT", PAD, -128)
     panel.hint:SetWidth(panelWidth() - 2 * PAD)
     panel.hint:SetJustifyH("LEFT")
-    panel.hint:SetText("Ziehen verschiebt zwischen den Abschnitten,"
-        .. " Doppelklick blendet aus.")
+    panel.hint:SetText(L["Ziehen verschiebt zwischen den Abschnitten,"]
+        .. L[" Doppelklick blendet aus."])
 
     divider(-144)
 
@@ -2147,10 +2148,10 @@ function Dock:Build()
     end, function(value)
         settings().allowNativeWrites = value
         if value then
-            FCD.Print("Sofortmodus an - Änderungen wirken ohne Neuladen.")
+            FCD.Print(L["Sofortmodus an - Änderungen wirken ohne Neuladen."])
         else
-            FCD.Print("Sofortmodus aus - Änderungen wirken beim nächsten Neuladen,")
-            FCD.Print("dafür bleibt Blizzards Aurenanzeige unberührt.")
+            FCD.Print(L["Sofortmodus aus - Änderungen wirken beim nächsten Neuladen,"])
+            FCD.Print(L["dafür bleibt Blizzards Aurenanzeige unberührt."])
         end
         Dock:Refresh()
     end)
@@ -2177,11 +2178,11 @@ function Dock:Build()
     local undoButton = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
     undoButton:SetSize(110, 22)
     undoButton:SetPoint("RIGHT", footer, "RIGHT", -6, 0)
-    undoButton:SetText("Rückgängig")
+    undoButton:SetText(L["Rückgängig"])
     undoButton:SetScript("OnClick", function()
         local ok, info = FCD.Layout:Restore()
-        FCD.Print(ok and ("Sicherung von " .. tostring(info) .. " wiederhergestellt.")
-            or ("Nichts zurückzunehmen: " .. tostring(info)))
+        FCD.Print(ok and (L["Sicherung von "] .. tostring(info) .. L[" wiederhergestellt."])
+            or (L["Nichts zurückzunehmen: "] .. tostring(info)))
         if ok then
             -- Die Sicherung ist der rohe Blob; der wirkt erst beim Neuladen
             Dock.needsReload = true
@@ -2194,7 +2195,7 @@ function Dock:Build()
     panel.reloadButton:SetHeight(22)
     panel.reloadButton:SetPoint("BOTTOMLEFT", footer, "TOPLEFT", 0, 4)
     panel.reloadButton:SetPoint("BOTTOMRIGHT", footer, "TOPRIGHT", 0, 4)
-    panel.reloadButton:SetText("Änderungen anwenden (Neuladen)")
+    panel.reloadButton:SetText(L["Änderungen anwenden (Neuladen)"])
     panel.reloadButton:SetScript("OnClick", function()
         ReloadUI()
     end)
@@ -2211,7 +2212,7 @@ function Dock:Build()
 
     local sidebarTitle = sidebar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     sidebarTitle:SetPoint("TOPLEFT", 0, 0)
-    sidebarTitle:SetText("Auswahl")
+    sidebarTitle:SetText(L["Auswahl"])
 
     sidebar.detail = sidebar:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     sidebar.detail:SetPoint("TOPLEFT", 0, -20)
@@ -2221,7 +2222,7 @@ function Dock:Build()
 
     local moveLabel = sidebar:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     moveLabel:SetPoint("TOPLEFT", 0, -78)
-    moveLabel:SetText("Verschieben nach")
+    moveLabel:SetText(L["Verschieben nach"])
 
     -- Ein Knopf je Kategorie des aktuellen Reiters; Beschriftung und Ziel
     -- werden beim Aktualisieren gesetzt, weil sie vom Reiter abhängen.
@@ -2245,7 +2246,7 @@ function Dock:Build()
 
     local filterLabel = sidebar:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     filterLabel:SetPoint("TOPLEFT", 0, offsetY - 8)
-    filterLabel:SetText("Weitere Filter")
+    filterLabel:SetText(L["Weitere Filter"])
     offsetY = offsetY - 28
 
     local cooldownCheck = FCD.Widgets.CreateCheck(sidebar, "nur mit Abklingzeit", function()
@@ -2269,7 +2270,7 @@ function Dock:Build()
     local addSpellButton = CreateFrame("Button", nil, sidebar, "UIPanelButtonTemplate")
     addSpellButton:SetSize(SIDEBAR_WIDTH - PAD, 22)
     addSpellButton:SetPoint("TOPLEFT", 0, offsetY)
-    addSpellButton:SetText("+ Zauber aufnehmen...")
+    addSpellButton:SetText(L["+ Zauber aufnehmen..."])
     addSpellButton:SetScript("OnClick", function()
         StaticPopup_Show("FCD_ADD_SPELL")
     end)
@@ -2278,7 +2279,7 @@ function Dock:Build()
     local addItemButton = CreateFrame("Button", nil, sidebar, "UIPanelButtonTemplate")
     addItemButton:SetSize(SIDEBAR_WIDTH - PAD, 22)
     addItemButton:SetPoint("TOPLEFT", 0, offsetY)
-    addItemButton:SetText("+ Gegenstand aufnehmen...")
+    addItemButton:SetText(L["+ Gegenstand aufnehmen..."])
     addItemButton:SetScript("OnClick", function()
         StaticPopup_Show("FCD_ADD_ITEM")
     end)
@@ -2291,14 +2292,14 @@ function Dock:Build()
     local blizzButton = CreateFrame("Button", nil, sidebar, "UIPanelButtonTemplate")
     blizzButton:SetSize(SIDEBAR_WIDTH - PAD, 22)
     blizzButton:SetPoint("TOPLEFT", 0, offsetY)
-    blizzButton:SetText("Blizzards Fenster...")
+    blizzButton:SetText(L["Blizzards Fenster..."])
     blizzButton:SetScript("OnClick", function()
         Dock:OpenBlizzardWindow()
     end)
     blizzButton:SetScript("OnEnter", function(self)
         FCD.Widgets.ShowTooltip(self, "ANCHOR_LEFT", "Blizzards Abklingzeit-Fenster",
             "Das Layout wechseln geht nur dort - ihr Layoutverwalter ist"
-                .. " geschützt.")
+                .. L[" geschützt."])
     end)
     blizzButton:SetScript("OnLeave", FCD.Widgets.HideTooltip)
     offsetY = offsetY - 26
@@ -2360,7 +2361,7 @@ local function updateProfileButton()
             return
         end
     end
-    panel.profileButton:SetText("Startlayout")
+    panel.profileButton:SetText(L["Startlayout"])
 end
 
 function Dock:Refresh()
@@ -2391,11 +2392,11 @@ function Dock:Refresh()
         if currentTab().ownBar then
             -- Kurz halten: der Hinweis hat nur eine Zeile Platz, bei zwei
             -- Zeilen schiebt er sich in den ersten Abschnitt.
-            panel.hint:SetText("Doppelklick legt auf die Leiste,"
-                .. " Rechtsklick entfernt Eigene.")
+            panel.hint:SetText(L["Doppelklick legt auf die Leiste,"]
+                .. L[" Rechtsklick entfernt Eigene."])
         else
-            panel.hint:SetText("Ziehen verschiebt zwischen den Abschnitten,"
-                .. " Doppelklick blendet aus.")
+            panel.hint:SetText(L["Ziehen verschiebt zwischen den Abschnitten,"]
+                .. L[" Doppelklick blendet aus."])
         end
     end
 
@@ -2430,10 +2431,10 @@ function Dock:Refresh()
         header:ClearAllPoints()
         header:SetPoint("TOPLEFT", panel.content, "TOPLEFT", 0, -offsetY)
         header:SetWidth(width)
-        -- Gesamtzahl und gelernte getrennt: erklaert Unterschiede zu
-        -- Blizzards Fenster, ohne dass man zaehlen muss.
+        -- Gesamtzahl und gelernte getrennt: erklärt Unterschiede zu
+        -- Blizzards Fenster, ohne dass man zählen muss.
         header.text:SetText(section.headerText
-            or string.format("%s  (%d, davon %d gelernt)",
+            or string.format(L["%s  (%d, davon %d gelernt)"],
                 section.title, #section.items, section.knownCount or 0))
         header.toggle:SetText(state.collapsed[section.id] and "+" or "-")
         header:Show()
@@ -2597,8 +2598,8 @@ function Dock:Refresh()
         -- Auf dem Gegenstandsreiter gibt es keine Kategorien, aber dieselbe
         -- Geste: Auswahl treffen, Ziel anklicken.
         local itemTargets = currentTab().ownBar
-            and { { label = "Auf die Leiste", value = true },
-                  { label = "Von der Leiste nehmen", value = false } }
+            and { { label = L["Auf die Leiste"], value = true },
+                  { label = L["Von der Leiste nehmen"], value = false } }
             or nil
         local targets = currentTab().categories
         for index, button in ipairs(panel.sidebar.assignButtons) do
@@ -2639,7 +2640,7 @@ function Dock:Refresh()
     if instant then
         self.needsReload = false
         if tainted then
-            panel.reloadButton:SetText("Neu laden - behebt Blizzards Fehlermeldungen")
+            panel.reloadButton:SetText(L["Neu laden - behebt Blizzards Fehlermeldungen"])
             panel.reloadButton:Show()
             parts[#parts + 1] = "Blizzards Viewer wirft Fehler"
         else
@@ -2647,9 +2648,9 @@ function Dock:Refresh()
         end
     else
         if self.needsReload then
-            panel.reloadButton:SetText("Änderungen anwenden (Neuladen)")
+            panel.reloadButton:SetText(L["Änderungen anwenden (Neuladen)"])
             panel.reloadButton:Show()
-            parts[#parts + 1] = "Änderungen stehen aus"
+            parts[#parts + 1] = L["Änderungen stehen aus"]
         else
             panel.reloadButton:Hide()
         end
@@ -2658,7 +2659,7 @@ function Dock:Refresh()
     if self.layoutError then
         parts[#parts + 1] = self.layoutError
     end
-    panel.status:SetText(table.concat(parts, "   |   "))
+    panel.status:SetText(table.concat(parts, L["   |   "]))
 
     -- Werkzeugspalte: was ist gerade ausgewählt?
     if state.wide then
@@ -2669,12 +2670,12 @@ function Dock:Refresh()
             ranks = ranks + #item.cooldownIDs
         end
         if chosen == 0 then
-            panel.sidebar.detail:SetText("Nichts ausgewählt.\nSymbole anklicken, Strg für mehrere.")
+            panel.sidebar.detail:SetText(L["Nichts ausgewählt.\nSymbole anklicken, Strg für mehrere."])
         elseif chosen == 1 then
             panel.sidebar.detail:SetText(string.format("%s\n%s\n%d Abklingzeit(en)",
                 sample.label or "?", categoryName(sample.category), ranks))
         else
-            panel.sidebar.detail:SetText(string.format("%d Fähigkeiten\n%d Abklingzeit(en)",
+            panel.sidebar.detail:SetText(string.format(L["%d Fähigkeiten\n%d Abklingzeit(en)"],
                 chosen, ranks))
         end
     end
@@ -2754,8 +2755,8 @@ driver:SetScript("OnUpdate", function(_, elapsed)
         -- Beim Schließen einmal erinnern, solange die Sitzung tainted ist
         if FCD.Layout.taintedThisSession and not Dock.reloadReminderShown then
             Dock.reloadReminderShown = true
-            FCD.Print("Blizzards Viewer wirft seit der Änderung Fehler bei Auren.")
-            FCD.Print("Ein /reload räumt das auf - die Änderungen bleiben erhalten.")
+            FCD.Print(L["Blizzards Viewer wirft seit der Änderung Fehler bei Auren."])
+            FCD.Print(L["Ein /reload räumt das auf - die Änderungen bleiben erhalten."])
         end
     end
 end)
@@ -2798,7 +2799,7 @@ local function takeOver(self, window)
     -- Ebene beide lagen.
     local manager = _G.EditModeManagerFrame
     FCD.LogOnly(string.format(
-        "Verdrängt: Bearbeitungsmodus=%s, ihres noch offen=%s, ihre Ebene=%s, unsere Ebene=%s",
+        L["Verdrängt: Bearbeitungsmodus=%s, ihres noch offen=%s, ihre Ebene=%s, unsere Ebene=%s"],
         tostring(type(manager) == "table" and windowIsShown(manager) or false),
         tostring(window and windowIsShown(window) or false),
         tostring(window and type(window.GetFrameStrata) == "function"
@@ -2830,8 +2831,8 @@ function Dock:TakeOverFrom(window)
     self.blizzardWasShown = false
 
     if not ok then
-        FCD.LogOnly("Verdrängen fehlgeschlagen: " .. tostring(err))
-        FCD.Print("Panel ließ sich nicht öffnen - Einzelheiten in /fcd log.")
+        FCD.LogOnly(L["Verdrängen fehlgeschlagen: "] .. tostring(err))
+        FCD.Print(L["Panel ließ sich nicht öffnen - Einzelheiten in /fcd log."])
     end
 end
 
@@ -2854,10 +2855,10 @@ function Dock:HookBlizzardWindow()
         -- hinterher unterscheiden, ob der Haken gar nicht feuert oder ob er
         -- feuert und die Übernahme absagt - von außen sieht beides gleich
         -- aus: ihr Fenster steht offen, unseres nicht.
-        FCD.LogOnly("Ihr Fenster geht auf.")
+        FCD.LogOnly(L["Ihr Fenster geht auf."])
         if not Dock:ShouldReplace() then
             FCD.LogOnly(string.format(
-                "Keine Übernahme: Einstellung=%s, Ausnahme=%s, Kampf=%s",
+                L["Keine Übernahme: Einstellung=%s, Ausnahme=%s, Kampf=%s"],
                 tostring(FCD.db and settings().replaceBlizzardWindow),
                 tostring(Dock.allowBlizzardWindow and true or false),
                 tostring(InCombatLockdown() and true or false)))
@@ -2876,11 +2877,11 @@ function Dock:HookBlizzardWindow()
         Dock:TakeOverFrom(self)
     end)
     if not ok then
-        FCD.LogOnly("Haken auf ihrem Fenster ließ sich nicht setzen.")
+        FCD.LogOnly(L["Haken auf ihrem Fenster ließ sich nicht setzen."])
         return false
     end
     self.windowHooked = true
-    FCD.LogOnly("Haken auf ihrem Fenster gesetzt.")
+    FCD.LogOnly(L["Haken auf ihrem Fenster gesetzt."])
     return true
 end
 
@@ -2890,11 +2891,11 @@ end
 function Dock:OpenBlizzardWindow()
     local window = blizzardWindow()
     if not window then
-        FCD.Print("Blizzards Fenster ist in diesem Client nicht vorhanden.")
+        FCD.Print(L["Blizzards Fenster ist in diesem Client nicht vorhanden."])
         return false
     end
     if InCombatLockdown() then
-        FCD.Print("Im Kampf wird ihr Fenster nicht angefasst.")
+        FCD.Print(L["Im Kampf wird ihr Fenster nicht angefasst."])
         return false
     end
     -- Die Verdrängung für diesen einen Aufruf aussetzen, sonst schließt der
@@ -2902,7 +2903,7 @@ function Dock:OpenBlizzardWindow()
     self.allowBlizzardWindow = true
     if not pcall(window.Show, window) then
         self.allowBlizzardWindow = nil
-        FCD.Print("Ihr Fenster ließ sich nicht öffnen.")
+        FCD.Print(L["Ihr Fenster ließ sich nicht öffnen."])
         return false
     end
     return true

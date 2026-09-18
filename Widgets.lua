@@ -252,8 +252,8 @@ end
 -- ------------------------------------------------------------- Tooltips
 
 -- Vorher baute jede Stelle ihren Tooltip selbst: mal ANCHOR_LEFT, mal
--- ANCHOR_RIGHT, Hinweiszeilen in drei verschiedenen Blautoenen, mal mit
--- Leerzeile und mal ohne. Ein Baustein haelt sie gleich.
+-- ANCHOR_RIGHT, Hinweiszeilen in drei verschiedenen Blautönen, mal mit
+-- Leerzeile und mal ohne. Ein Baustein hält sie gleich.
 local HINT_R, HINT_G, HINT_B = 0.62, 0.78, 1
 
 function Widgets.ShowTooltip(owner, anchor, title, ...)

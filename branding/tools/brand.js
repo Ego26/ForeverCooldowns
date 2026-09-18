@@ -1,4 +1,4 @@
-// Erzeugt Emblem, Symbol und Banner fuer Forever Cooldowns.
+// Erzeugt Emblem, Symbol und Banner für Forever Cooldowns.
 //
 // Alles gezeichnet statt gesetzt: es gibt hier keine Schriftdatei, also ist
 // die Wortmarke aus Strichen mit runden Enden aufgebaut - dieselbe Bauweise
@@ -41,7 +41,7 @@ function arcDist(px, py, cx, cy, rx, ry, a0, a1) {
 
 // ------------------------------------------------------------- Schrift
 // Jeder Buchstabe in einer Box der Hoehe 1. Striche und Boegen, runde Enden.
-const S = 0.17;                         // Strichstaerke
+const S = 0.17;                         // Strichstärke
 const G = {};
 function letter(name, width, parts) { G[name] = { width, parts }; }
 
@@ -65,8 +65,8 @@ letter('N', 0.76, [L(0.10, 1, 0.10, 0), L(0.10, 0, 0.66, 1), L(0.66, 1, 0.66, 0)
 letter('O', 0.80, [A(0.40, 0.5, 0.31, 0.5, 0, 1)]);
 letter('P', 0.68, [L(0.10, 0, 0.10, 1), A(0.34, 0.27, 0.30, 0.27, 0.75, 0.25)]);
 letter('R', 0.72, [L(0.10, 0, 0.10, 1), A(0.34, 0.27, 0.30, 0.27, 0.75, 0.25), L(0.34, 0.54, 0.66, 1)]);
-// S: obere Schale rechts oben beginnend ueber links bis zur Mitte, untere
-// Schale von der Mitte ueber rechts und unten nach links. Beide enden in der
+// S: obere Schale rechts oben beginnend über links bis zur Mitte, untere
+// Schale von der Mitte über rechts und unten nach links. Beide enden in der
 // Mitte, sonst klafft die Kurve auf.
 letter("S", 0.68, [A(0.36, 0.28, 0.26, 0.26, 0.10, 0.75), A(0.36, 0.72, 0.26, 0.26, 0.60, 0.25)]);
 letter('T', 0.66, [L(0.03, 0.02, 0.63, 0.02), L(0.33, 0.02, 0.33, 1)]);
@@ -77,7 +77,7 @@ letter('X', 0.72, [L(0.08, 0, 0.66, 1), L(0.66, 0, 0.08, 1)]);
 letter('Y', 0.72, [L(0.08, 0, 0.37, 0.52), L(0.66, 0, 0.37, 0.52), L(0.37, 0.52, 0.37, 1)]);
 letter('Z', 0.68, [L(0.08, 0.02, 0.60, 0.02), L(0.60, 0.02, 0.10, 0.98), L(0.10, 0.98, 0.62, 0.98)]);
 
-// Ein fehlender Buchstabe faellt sonst erst im fertigen Bild auf - so wie das
+// Ein fehlender Buchstabe fällt sonst erst im fertigen Bild auf - so wie das
 // fehlende J in "NOT JUST BLIZZARDS LIST".
 function requireGlyphs(text) {
   for (const ch of text) {
@@ -93,7 +93,7 @@ function textWidth(text, tracking) {
   return w - tracking;
 }
 
-// Abstand zum naechsten Strich des Textes, in Einheiten der Versalhoehe.
+// Abstand zum nächsten Strich des Textes, in Einheiten der Versalhoehe.
 function textDist(px, py, text, tracking) {
   let cursor = 0, best = 9;
   for (const ch of text) {
@@ -116,12 +116,12 @@ function textDist(px, py, text, tracking) {
 // ------------------------------------------------------------- Emblem
 //
 // Ein Ring als Abklingzeit, darin drei gestapelte Kacheln als die
-// zusammengefassten Raenge. Der Ring ist zum Teil golden: die laufende
+// zusammengefassten Ränge. Der Ring ist zum Teil golden: die laufende
 // Abklingzeit. Oben bricht ein Zeiger durch den Ring, damit die Marke nicht
 // wie ein reiner Kreis wirkt.
-// Ein Faehigkeitssymbol mit laufendem Abklingkeil, dahinter zwei versetzte
-// Kacheln als der Stapel gleicher Raenge. Der Keil ueber einem Quadrat ist
-// die eindeutigste Bildsprache fuer "Abklingzeit" und bleibt auch bei 16
+// Ein Fähigkeitssymbol mit laufendem Abklingkeil, dahinter zwei versetzte
+// Kacheln als der Stapel gleicher Ränge. Der Keil über einem Quadrat ist
+// die eindeutigste Bildsprache für "Abklingzeit" und bleibt auch bei 16
 // Pixeln lesbar - ein Ring mit Kacheln darin war beides nicht.
 function roundedBox(px, py, half, radius) {
   const qx = Math.min(Math.max(px, -half + radius), half - radius);
@@ -280,8 +280,8 @@ const BW = 1696, BH = 424;
 // Satz mit einer echten Schrift.
 //
 // Vorher war die Wortmarke aus Strichen mit runden Enden gebaut. Genau diese
-// Bauweise laesst eine Schrift nach Comic Sans aussehen, und daran aendert
-// kein Nachjustieren von Sperrung oder Groesse etwas - ich habe es dreimal
+// Bauweise lässt eine Schrift nach Comic Sans aussehen, und daran aendert
+// kein Nachjustieren von Sperrung oder Größe etwas - ich habe es dreimal
 // versucht. Century Gothic ist eine geometrische Groteske mit geraden
 // Endungen und ausgeglichenen Breiten; sie liegt auf jedem Windows.
 //
@@ -297,7 +297,7 @@ const cap3 = 30;                                 // Unterzeile
 const LINE1 = 'FOREVER', LINE2 = 'COOLDOWNS';
 const LINE3 = process.env.FCD_LANG === 'en' ? 'NOT JUST BLIZZARDS LIST' : 'NICHT NUR BLIZZARDS LISTE';
 
-// Die Versalhoehe ist kleiner als die Schriftgroesse; gemessen statt geraten,
+// Die Versalhoehe ist kleiner als die Schriftgröße; gemessen statt geraten,
 // damit beide Zeilen wirklich gleich hoch stehen.
 const SIZE = Math.round(cap / 0.72);
 const SIZE3 = Math.round(cap3 / 0.72);
@@ -308,8 +308,8 @@ const maskMain = TTF.renderLine(fontBold, LINE2, SIZE, 0.015);
 const blockW = Math.max(maskTop.width, maskMain.width);
 
 // Nur die Unterzeile wird auf die Blockbreite gezogen: weite Sperrung ist
-// dort die uebliche Form und schliesst den Satz unten ab. Die Sperrung wird
-// dafuer gesucht, weil sie sich aus den Vorschubweiten nicht direkt ergibt.
+// dort die uebliche Form und schließt den Satz unten ab. Die Sperrung wird
+// dafür gesucht, weil sie sich aus den Vorschubweiten nicht direkt ergibt.
 function fitTracking(font, text, size, targetWidth) {
     let low = 0, high = 1.2;
     for (let i = 0; i < 18; i++) {
@@ -369,8 +369,8 @@ function bannerShade(x, y) {
   }
 
   // Schleier: nimmt zur Mitte hin zu, wo Emblem und Schrift stehen. Ein
-  // flacher Ueberzug wuerde alles gleich dunkel machen - dieser laesst die
-  // Raender atmen und haelt die Wortmarke frei.
+  // flacher Ueberzug wuerde alles gleich dunkel machen - dieser lässt die
+  // Raender atmen und hält die Wortmarke frei.
   const focus = Math.min(1, Math.abs(x - BW * 0.52) / (BW * 0.5));
   const veil = 0.82 - 0.62 * focus;
   const edge = Math.min(1, Math.min(y, BH - y) / (BH * 0.28));

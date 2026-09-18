@@ -1,6 +1,7 @@
 local ADDON_NAME = ...
 ForeverCooldowns = ForeverCooldowns or {}
 local FCD = ForeverCooldowns
+local L = FCD.L
 
 FCD.name = ADDON_NAME
 FCD.version = "0.1.0-beta"
@@ -167,13 +168,13 @@ end
 local function safeToString(value)
     local ok, text = pcall(tostring, value)
     if not ok or type(text) ~= "string" then
-        return "<geschützt>"
+        return L["<geschützt>"]
     end
     local usable, plain = pcall(concatSingle, text)
     if usable and type(plain) == "string" then
         return plain
     end
-    return "<geschützt>"
+    return L["<geschützt>"]
 end
 Compat.SafeToString = safeToString
 
@@ -688,7 +689,7 @@ local function payloadCandidates(text)
     -- weil der Zeilentrenner den Lauf unterbricht.
     add("letzter Base64-Block", string.match(text, "([A-Za-z0-9+/=]+)%s*$"))
     add("ohne Versionszeile", string.match(text, "^%d+[%s%c]+(.+)$"))
-    add("vollständig", text)
+    add(L["vollständig"], text)
     add("ohne Leerraum", (string.gsub(text, "%s", "")))
     return candidates
 end
@@ -955,7 +956,7 @@ function Compat.EncodingSelfTest()
     local compress = method(C_EncodingUtil, "CompressString")
     local encodeBase64 = method(C_EncodingUtil, "EncodeBase64")
     if not (serializeCBOR and encodeBase64) then
-        lines[#lines + 1] = "SerializeCBOR oder EncodeBase64 fehlt - Selbsttest nicht möglich."
+        lines[#lines + 1] = L["SerializeCBOR oder EncodeBase64 fehlt - Selbsttest nicht möglich."]
         return lines
     end
 
@@ -1072,7 +1073,7 @@ end
 local addOnInfo = method(C_AddOns, "GetAddOnInfo") or globalFunction("GetAddOnInfo")
 local numAddOns = method(C_AddOns, "GetNumAddOns") or globalFunction("GetNumAddOns")
 
--- Rückgabe: name, titel, laedtNicht, grund
+-- Rückgabe: name, titel, lädtNicht, grund
 function Compat.GetAddOnInfo(name)
     if not addOnInfo then
         return nil, nil, nil, "GetAddOnInfo fehlt"

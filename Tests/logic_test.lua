@@ -19,6 +19,7 @@ local function check(label, condition, detail)
     end
 end
 
+dofile(ADDON .. "Locale.lua")
 dofile(ADDON .. "Compat.lua")
 dofile(ADDON .. "Profiles.lua")
 dofile(ADDON .. "Ranks.lua")
@@ -233,10 +234,10 @@ on = Profiles:ResolveAlert(alertBar, {})
 check("Eintrag ohne Angabe erbt an", on == true)
 
 on = Profiles:ResolveAlert(alertBar, { alertReady = false })
-check("Eintrag false schlaegt Leiste an", on == false)
+check("Eintrag false schlägt Leiste an", on == false)
 
 on = Profiles:ResolveAlert({ alertReady = false }, { alertReady = true })
-check("Eintrag true schlaegt Leiste aus", on == true)
+check("Eintrag true schlägt Leiste aus", on == true)
 
 on, mode = Profiles:ResolveAlert({ alertReady = false }, { alertReady = true, alertMode = "glow" })
 check("Eintrag bringt eigene Art mit", on == true and mode == "glow", mode)
@@ -245,7 +246,7 @@ on, mode, sound = Profiles:ResolveAlert(alertBar, { alertSoundID = 22 })
 check("Eintrag nur mit eigenem Ton", on == true and mode == "both" and sound == 22, sound)
 
 on, mode, sound = Profiles:ResolveAlert(alertBar, { alertReady = false, alertSoundID = 22 })
-check("Aus behaelt den Ton, meldet aber nicht", on == false and sound == 22)
+check("Aus behält den Ton, meldet aber nicht", on == false and sound == 22)
 
 on, mode = Profiles:ResolveAlert({}, nil)
 check("Leere Leiste meldet nichts", on == false and mode == "both")
@@ -256,25 +257,24 @@ check("Ohne Leiste meldet nichts", on == false)
 
 
 -- ------------------------------------------------------------- Sprachen
--- Der Rueckfall ist der Schluessel selbst: eine fehlende Uebersetzung darf
+-- Der Rückfall ist der Schlüssel selbst: eine fehlende Übersetzung darf
 -- nie nil oder einen Platzhalter liefern, sondern den deutschen Text.
-dofile(ADDON .. "Locale.lua")
 local L = FCD.L
 
 FCD.SetLanguage("deDE")
-check("Deutsch liefert den Schluessel", L["Ausrichtung"] == "Ausrichtung")
+check("Deutsch liefert den Schlüssel", L["Ausrichtung"] == "Ausrichtung")
 check("Deutsch auch ohne Eintrag", L["Gibt es nicht"] == "Gibt es nicht")
 
 FCD.SetLanguage("enUS")
-check("Englisch uebersetzt", L["Ausrichtung"] == "Orientation", L["Ausrichtung"])
-check("Englisch faellt auf den Schluessel zurueck",
+check("Englisch übersetzt", L["Ausrichtung"] == "Orientation", L["Ausrichtung"])
+check("Englisch fällt auf den Schlüssel zurück",
     L["Gibt es nicht"] == "Gibt es nicht", L["Gibt es nicht"])
 
 FCD.AddTranslations("enUS", { ["Nachgetragen"] = "Added later" })
 check("Nachtragen wirkt sofort", L["Nachgetragen"] == "Added later", L["Nachgetragen"])
 
 check("auto bei deutschem Client", FCD.SetLanguage("auto") == "deDE", FCD.GetLanguage())
-check("unbekannter Code faellt auf Englisch", FCD.SetLanguage("frFR") == "enUS")
+check("unbekannter Code fällt auf Englisch", FCD.SetLanguage("frFR") == "enUS")
 FCD.SetLanguage("deDE")
 
 print(string.format("\n%d Prüfungen bestanden, %d fehlgeschlagen.", passed, failed))

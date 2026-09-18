@@ -1,5 +1,6 @@
 local FCD = ForeverCooldowns
 local Compat = FCD.Compat
+local L = FCD.L
 
 local Catalog = {}
 FCD.Catalog = Catalog
@@ -259,20 +260,20 @@ function Catalog:BuildReport()
     }
 
     if not self.viewerAvailable then
-        lines[#lines + 1] = "C_CooldownViewer ist in diesem Client nicht lesbar - kein Abgleich möglich."
-        lines[#lines + 1] = "Forever Cooldowns läuft dann rein aus dem Zauberbuch."
+        lines[#lines + 1] = L["C_CooldownViewer ist in diesem Client nicht lesbar - kein Abgleich möglich."]
+        lines[#lines + 1] = L["Forever Cooldowns läuft dann rein aus dem Zauberbuch."]
         return table.concat(lines, "\n")
     end
 
-    lines[#lines + 1] = string.format("Manager-Einträge gesamt: %d", #self.viewerEntries)
+    lines[#lines + 1] = string.format(L["Manager-Einträge gesamt: %d"], #self.viewerEntries)
 
     -- Ohne Auflösungsfunktion sind die Einträge bloße Zahlen; sie als
     -- "kaputt" zu melden wäre irreführend.
     if not Compat.HasCooldownInfo() then
         lines[#lines + 1] = ""
         lines[#lines + 1] = "Dieser Client bietet keine Funktion, die eine Abklingzeit-ID zu einem"
-        lines[#lines + 1] = "Zauber auflöst. Die Kategorien sind lesbar, die Zuordnung nicht -"
-        lines[#lines + 1] = "ein inhaltlicher Abgleich ist damit nicht möglich."
+        lines[#lines + 1] = L["Zauber auflöst. Die Kategorien sind lesbar, die Zuordnung nicht -"]
+        lines[#lines + 1] = L["ein inhaltlicher Abgleich ist damit nicht möglich."]
         lines[#lines + 1] = "Vorhandene IDs je Kategorie stehen in /fcd probe."
         return table.concat(lines, "\n")
     end
@@ -281,7 +282,7 @@ function Catalog:BuildReport()
 
     for _, entry in ipairs(self.viewerEntries) do
         if not entry.spellID then
-            broken[#broken + 1] = string.format("  Abklingzeit-ID %s (%s): kein Zauber auflösbar",
+            broken[#broken + 1] = string.format(L["  Abklingzeit-ID %s (%s): kein Zauber auflösbar"],
                 tostring(entry.cooldownID), tostring(entry.categoryName))
         else
             local name = Compat.GetSpellName(entry.spellID)
@@ -300,7 +301,7 @@ function Catalog:BuildReport()
                 entry.name, tostring(entry.bestRank or "-"), tostring(entry.bestSpellID), entry.baseCooldown or 0)
         end
         if entry.kind == "spell" and entry.inViewer and entry.rankCount > 1 and entry.viewerCount < entry.rankCount then
-            partial[#partial + 1] = string.format("  %s: %d von %d Rängen im Manager",
+            partial[#partial + 1] = string.format(L["  %s: %d von %d Rängen im Manager"],
                 entry.name, entry.viewerCount, entry.rankCount)
         end
     end
@@ -320,13 +321,13 @@ function Catalog:BuildReport()
         end
     end
 
-    section("Gelernte Fähigkeiten mit Abklingzeit, die im Manager fehlen", missing)
-    section("Manager-Einträge ohne auflösbaren Zauber", broken)
-    section("Fähigkeiten mit unvollständiger Rangabdeckung", partial)
-    section("Manager-Einträge, die dieser Charakter nicht kennt", unknownToPlayer)
+    section(L["Gelernte Fähigkeiten mit Abklingzeit, die im Manager fehlen"], missing)
+    section(L["Manager-Einträge ohne auflösbaren Zauber"], broken)
+    section(L["Fähigkeiten mit unvollständiger Rangabdeckung"], partial)
+    section(L["Manager-Einträge, die dieser Charakter nicht kennt"], unknownToPlayer)
 
     lines[#lines + 1] = ""
-    lines[#lines + 1] = string.format("Zauberbuch: %d Einträge, %d Fähigkeiten, davon %d mit mehreren Rängen.",
+    lines[#lines + 1] = string.format(L["Zauberbuch: %d Einträge, %d Fähigkeiten, davon %d mit mehreren Rängen."],
         FCD.Ranks.scanned or 0, FCD.Ranks.familyCount or 0, FCD.Ranks.rankedFamilyCount or 0)
 
     return table.concat(lines, "\n")
