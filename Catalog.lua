@@ -271,10 +271,10 @@ function Catalog:BuildReport()
     -- "kaputt" zu melden wäre irreführend.
     if not Compat.HasCooldownInfo() then
         lines[#lines + 1] = ""
-        lines[#lines + 1] = "Dieser Client bietet keine Funktion, die eine Abklingzeit-ID zu einem"
+        lines[#lines + 1] = L["Dieser Client bietet keine Funktion, die eine Abklingzeit-ID zu einem"]
         lines[#lines + 1] = L["Zauber auflöst. Die Kategorien sind lesbar, die Zuordnung nicht -"]
         lines[#lines + 1] = L["ein inhaltlicher Abgleich ist damit nicht möglich."]
-        lines[#lines + 1] = "Vorhandene IDs je Kategorie stehen in /fcd probe."
+        lines[#lines + 1] = L["Vorhandene IDs je Kategorie stehen in /fcd probe."]
         return table.concat(lines, "\n")
     end
 
@@ -287,7 +287,7 @@ function Catalog:BuildReport()
         else
             local name = Compat.GetSpellName(entry.spellID)
             if not name then
-                broken[#broken + 1] = string.format("  Abklingzeit-ID %s -> Zauber %d: kein Name im Client",
+                broken[#broken + 1] = string.format(L["  Abklingzeit-ID %s -> Zauber %d: kein Name im Client"],
                     tostring(entry.cooldownID), entry.spellID)
             elseif not Compat.IsSpellKnown(entry.spellID) then
                 unknownToPlayer[#unknownToPlayer + 1] = string.format("  %s (%d, %s)", name, entry.spellID, tostring(entry.categoryName))
@@ -297,7 +297,7 @@ function Catalog:BuildReport()
 
     for _, entry in ipairs(self.entries) do
         if entry.kind == "spell" and entry.known and not entry.isPassive and entry.hasCooldown and not entry.inViewer then
-            missing[#missing + 1] = string.format("  %s (bester Rang %s, Zauber %s, CD %.0fs)",
+            missing[#missing + 1] = string.format(L["  %s (bester Rang %s, Zauber %s, CD %.0fs)"],
                 entry.name, tostring(entry.bestRank or "-"), tostring(entry.bestSpellID), entry.baseCooldown or 0)
         end
         if entry.kind == "spell" and entry.inViewer and entry.rankCount > 1 and entry.viewerCount < entry.rankCount then
@@ -310,14 +310,14 @@ function Catalog:BuildReport()
         lines[#lines + 1] = ""
         lines[#lines + 1] = string.format("%s (%d)", title, #list)
         if #list == 0 then
-            lines[#lines + 1] = "  keine"
+            lines[#lines + 1] = L["  keine"]
             return
         end
         for index = 1, math.min(#list, 200) do
             lines[#lines + 1] = list[index]
         end
         if #list > 200 then
-            lines[#lines + 1] = string.format("  ... und %d weitere", #list - 200)
+            lines[#lines + 1] = string.format(L["  ... und %d weitere"], #list - 200)
         end
     end
 

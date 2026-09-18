@@ -31,7 +31,7 @@ local STORE_KEY = "fcdStore"
 -- Blizzards Layout geht es erst bei einer echten Abweichung.
 local CHECK_INTERVAL = 2
 
-Store.status = "noch nichts gelesen"
+Store.status = L["noch nichts gelesen"]
 Store.lastWritten = nil
 
 -- ------------------------------------------------------------- Umwandlung
@@ -70,21 +70,21 @@ end
 function Store:Load()
     local state, err = FCD.Layout:Read()
     if not state then
-        self.status = "Layout nicht lesbar: " .. tostring(err)
+        self.status = L["Layout nicht lesbar: "] .. tostring(err)
         return nil, err
     end
     local text = state.data and state.data[STORE_KEY]
     if type(text) ~= "string" or text == "" then
-        self.status = "Im Layout liegt noch kein Bestand."
-        return nil, "kein Bestand"
+        self.status = L["Im Layout liegt noch kein Bestand."]
+        return nil, L["kein Bestand"]
     end
     local value = unpack(text)
     if not value then
-        self.status = "Bestand im Layout ist unlesbar."
+        self.status = L["Bestand im Layout ist unlesbar."]
         return nil, "unlesbar"
     end
     self.lastWritten = text
-    self.status = string.format("Bestand aus dem Layout gelesen (%d Zeichen).", #text)
+    self.status = string.format(L["Bestand aus dem Layout gelesen (%d Zeichen)."], #text)
     return value
 end
 
@@ -93,11 +93,11 @@ end
 -- Rückgabe: erfolg, fehlertext
 function Store:Save(force)
     if InCombatLockdown() then
-        return false, "im Kampf nicht"
+        return false, L["im Kampf nicht"]
     end
     local text = pack()
     if not text then
-        return false, "nichts zu schreiben"
+        return false, L["nichts zu schreiben"]
     end
     if not force and text == self.lastWritten then
         return true
@@ -124,7 +124,7 @@ function Store:Save(force)
     end
 
     self.lastWritten = text
-    self.status = string.format("Bestand im Layout gesichert (%d Zeichen).", #text)
+    self.status = string.format(L["Bestand im Layout gesichert (%d Zeichen)."], #text)
     return true
 end
 

@@ -18,14 +18,29 @@ for (const m of locale.matchAll(/\["((?:[^"\\]|\\.)*)"\]\s*=/g)) {
     translated.add(m[1]);
 }
 
-// Jede Zeichenkette mit Umlaut, die nicht in L[...] steht, ist verdächtig.
-// Bewusste Ausnahmen: hier ist Deutsch kein Oberflächentext, sondern ein
-// Vergleichswert. Profiles.lua prüft gespeicherte Leistennamen - übersetzt
-// man die, findet ein deutsch angelegtes Profil sich auf einem englischen
-// Client nicht wieder.
-const ERLAUBT = new Set([
-    "Gegenstände verfolgen|Profiles.lua",
-    "Gegenstände|Profiles.lua",
+// Beschriftungstabellen auf Dateiebene. Was dort steht, ist ein Schlüssel und
+// wird erst beim Anzeigen übersetzt - beim Laden stünde die Sprache noch auf
+// der des Clients, und der Text wäre eingebrannt. Für diese Prüfung zählen
+// die Werte deshalb als benutzte Schlüssel, nicht als loser Text.
+const LABEL_TABLES = {
+    'BarOptions.lua': ['ORIENTATION_OPTIONS', 'DIRECTION_OPTIONS', 'GROWTH_OPTIONS',
+        'VISIBILITY_OPTIONS', 'ALERT_MODES', 'ENTRY_ALERT_OPTIONS'],
+    'BlizzOptions.lua': ['SETTINGS'],
+    'Viewer.lua': ['SOUND_CANDIDATES'],
+    'Probe.lua': ['FEATURES'],
+    'Dock.lua': ['CATEGORY_NAMES', 'TABS'],
+};
+
+// Bewusste Ausnahmen: hier ist Deutsch kein Oberflächentext, sondern eine
+// Kennung. Dock und Profiles vergleichen gespeicherte Leistennamen -
+// übersetzt man die, findet ein deutsch angelegtes Profil sich auf einem
+// englischen Client nicht wieder.
+const KENNUNGEN = new Set([
+    'Zauber verfolgen|Dock.lua',
+    'Gegenstände verfolgen|Dock.lua',
+    'Gegenstände|Dock.lua',
+    'Gegenstände verfolgen|Profiles.lua',
+    'Gegenstände|Profiles.lua',
 ]);
 
 const GERMAN = /[äöüÄÖÜß]/;
@@ -40,12 +55,27 @@ for (const file of files) {
         used.add(m[1]);
     }
 
+    // Die Beschriftungstabellen heraustrennen und ihre Werte als benutzte
+    // Schlüssel zählen.
+    let rest = text;
+    for (const name of LABEL_TABLES[file] || []) {
+        const start = rest.indexOf('local ' + name + ' = {');
+        if (start < 0) continue;
+        const end = rest.indexOf('\n}', start);
+        if (end < 0) continue;
+        const body = rest.slice(start, end);
+        for (const m of body.matchAll(/"((?:[^"\\]|\\.)*)"/g)) {
+            if (GERMAN.test(m[1]) || m[1].includes(' ')) used.add(m[1]);
+        }
+        rest = rest.slice(0, start) + rest.slice(end);
+    }
+
     // Kommentare ausblenden: dort ist Deutsch richtig und gewollt.
-    const code = text.replace(/--\[\[[\s\S]*?\]\]/g, '').replace(/--[^\n]*/g, '');
+    const code = rest.replace(/--\[\[[\s\S]*?\]\]/g, '').replace(/--[^\n]*/g, '');
     for (const m of code.matchAll(/(L\[)?"((?:[^"\\]|\\.)*)"/g)) {
         if (m[1]) continue;
         if (!GERMAN.test(m[2])) continue;
-        if (ERLAUBT.has(m[2] + "|" + file)) continue;
+        if (KENNUNGEN.has(m[2] + '|' + file)) continue;
         const line = code.slice(0, m.index).split('\n').length;
         loose.push(file + ':' + line + '  ' + m[2].slice(0, 60));
     }

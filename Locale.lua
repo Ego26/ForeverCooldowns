@@ -899,6 +899,293 @@ FCD.AddTranslations("enUS", {
     ["Auswahlrahmen übernommen (%d Texturen)."] = "Selection frame borrowed (%d textures).",
     ["== Blizzards Einträge als Vorlage =="] = "== Blizzard's entries as a template ==",
     ["Öffne es und rufe den Befehl erneut auf."] = "Open it and run the command again.",
+-- ------------------------------------------ Panel: Abschnitte
+
+    ["Auf der Leiste"] = "On the bar",
+    ["Nicht in Blizzards Manager"] = "Not in Blizzard's manager",
+    ["Im Manager vorhanden"] = "Present in the manager",
+    ["In Taschen"] = "In bags",
+    ["Noch nichts gesetzt - unten etwas anklicken."] =
+        "Nothing set yet - click something below.",
+    ["Die Leiste ist leer - unten etwas anklicken."] =
+        "The bar is empty - click something below.",
+    ["Symbole hierher ziehen"] = "Drag icons here",
+    ["Leiste nicht gefunden. Aktives Profil: %s, Leisten: %d."] =
+        "Bar not found. Active profile: %s, bars: %d.",
+    ["Kategorie "] = "Category ",
+    ["nur gelernte"] = "known only",
+    ["nur mit Abklingzeit"] = "with a cooldown only",
+    ["sofort wirksam"] = "apply immediately",
+    ["Zauber aufnehmen"] = "Add a spell",
+    ["Ziehen geht auch."] = "Dragging works too.",
+    ["Dieselben Daten, nur mit mehr Platz pro Zeile."] =
+        "The same data, just with more room per row.",
+    ["Blizzards Abklingzeit-Fenster"] = "Blizzard's cooldown window",
+    ["Das Layout wechseln geht nur dort - ihr Layoutverwalter ist"] =
+        "Layouts can only be switched there - their layout manager is",
+    ["Ziehen: in einen anderen Abschnitt"] = "Drag: into another section",
+    ["Doppelklick: von der Leiste nehmen"] = "Double-click: take off the bar",
+    ["Doppelklick: auf die Leiste legen"] = "Double-click: put on the bar",
+    ["Doppelklick: ein-/ausblenden"] = "Double-click: show or hide",
+    ["Rechtsklick: aus der Liste entfernen"] = "Right-click: remove from the list",
+    ["Abklingzeit "] = "Cooldown ",
+    ["Profil "] = "Profile ",
+    ["Leiste"] = "Bar",
+    ["Symbol"] = "Icon",
+
+    -- ------------------------------------------ Fertig-Meldung
+
+    ["Diese Leiste meldet: "] = "This bar alerts: ",
+    ["Diese Leiste meldet: %s (%s)."] = "This bar alerts: %s (%s).",
+    ["unsere Leiste angeklickt"] = "our own bar was clicked",
+    ["ihr Fenster ging zu"] = "their window closed",
+    ["Bearbeitungsmodus zu"] = "Edit Mode closed",
+
+    -- ------------------------------------------ Profile und Layout
+
+    ["Layout-Profil importieren"] = "Import layout profile",
+    ["Kein Name angegeben"] = "No name given",
+    ["Unbekanntes Profil"] = "Unknown profile",
+    ["Unbekanntes Profil."] = "Unknown profile.",
+    ["Kein Text"] = "No text",
+    ["Kein Text."] = "No text.",
+    ["Kein Layout-Profil (erwartet "] = "Not a layout profile (expected ",
+    ["Kein Forever-Cooldowns-Profil (erwartet "] =
+        "Not a Forever Cooldowns profile (expected ",
+    ["kein Inhalt"] = "no content",
+    ["kein Tabelleninhalt"] = "no table content",
+    ["unerwartetes Zeichen an Position "] = "unexpected character at position ",
+    ["Keine Sicherung vorhanden"] = "No backup available",
+    ["Kategorie-Zuordnung im Blob nicht gefunden"] =
+        "Category mapping not found in the blob",
+    ["Neu erzeugter Blob ist nicht wieder lesbar: "] =
+        "The rebuilt blob cannot be read again: ",
+    ["Inhalt weicht ab: "] = "Content differs: ",
+    ["keine eigenen Leisten in Benutzung"] = "no own bars in use",
+
+    -- ------------------------------------------ Speicher
+
+    ["noch nichts gelesen"] = "nothing read yet",
+    ["Im Layout liegt noch kein Bestand."] = "There is no data in the layout yet.",
+    ["kein Bestand"] = "no data",
+    ["Bestand im Layout ist unlesbar."] = "The data in the layout is unreadable.",
+    ["Bestand aus dem Layout gelesen (%d Zeichen)."] =
+        "Data read from the layout (%d characters).",
+    ["Bestand im Layout gesichert (%d Zeichen)."] =
+        "Data saved into the layout (%d characters).",
+    ["im Kampf nicht"] = "not in combat",
+    ["nichts zu schreiben"] = "nothing to write",
+
+    -- ------------------------------------------ Client-Fähigkeiten
+
+    ["GetLayoutData fehlt in diesem Client"] = "GetLayoutData is missing in this client",
+    ["SetLayoutData fehlt in diesem Client"] = "SetLayoutData is missing in this client",
+    ["GetGroupBuffItems fehlt in diesem Client"] =
+        "GetGroupBuffItems is missing in this client",
+    ["GetLayoutData lieferte keine Zeichenkette"] =
+        "GetLayoutData returned no string",
+    ["C_EncodingUtil.DecodeBase64 fehlt in diesem Client"] =
+        "C_EncodingUtil.DecodeBase64 is missing in this client",
+    ["Serialisierung oder Base64 fehlt"] = "Serialisation or Base64 is missing",
+    ["Keine Kombination aus Zuschnitt, Kompression und Serialisierung passte"] =
+        "No combination of trimming, compression and serialisation matched",
+    ["]: nur im neuen Blob vorhanden"] = "]: present only in the new blob",
+    ["Keine Zauber-ID"] = "No spell ID",
+    ["Der Client kennt diese ID nicht"] = "The client does not know this ID",
+    ["Der Wert muss eine Zahl sein."] = "The value has to be a number.",
+    ["Kein Einstellungs-Enum in diesem Client."] =
+        "No settings enum in this client.",
+    ["keine settings-Tabelle"] = "no settings table",
+
+    -- ------------------------------------------ Grafik abschauen
+
+    ["noch nicht gesucht"] = "not searched yet",
+    ["abgeschaltet mit  /fcd art off"] = "switched off with  /fcd art off",
+    ["noch keine eigenen Symbole zum Abgleichen vorhanden."] =
+        "no icons of our own to compare against yet.",
+    ["Blizzards Fenster ist zu - ohne offenes Fenster gibt es nichts abzulesen."] =
+        "Blizzard's window is closed - with it shut there is nothing to read.",
+    ["Die Suche im Rahmenbaum ist abgebrochen."] =
+        "The search through the frame tree was aborted.",
+    ["Kein Eintrag gefunden, der eines unserer Symbole zeigt."] =
+        "No entry found that shows one of our icons.",
+    ["kein "] = "no ",
+    ["Auswahlrahmen im Bearbeitungsmodus nicht gefunden."] =
+        "Selection frame not found in Edit Mode.",
+    ["Nachbau des Auswahlrahmens erfolglos (%d Texturen)."] =
+        "Rebuilding the selection frame failed (%d textures).",
+    ["nicht gefunden"] = "not found",
+    ["Blizzards Abklingzeit-Fenster ist gerade nicht offen."] =
+        "Blizzard's cooldown window is not open right now.",
+    ["Eigene Symbole zum Abgleich: %d"] = "Own icons for comparison: %d",
+    ["nicht versucht"] = "not attempted",
+    ["noch nicht versucht"] = "not attempted yet",
+    ["Sinnbilder der Reiter: %s"] = "Tab glyphs: %s",
+    ["keine gefunden"] = "none found",
+    ["    Symbol %s (%.0fx%.0f) in Rahmen %s (%.0fx%.0f), Masken: %d"] =
+        "    icon %s (%.0fx%.0f) in frame %s (%.0fx%.0f), masks: %d",
+    ["Davon in ihrem Fenster sichtbar: %d"] = "Of those visible in their window: %d",
+    ["-- alle breiten Treffer --"] = "-- all wide hits --",
+    ["-- alle quadratischen Treffer --"] = "-- all square hits --",
+    [" mit Symbol"] = " with icon",
+    [" ohne Symbol"] = " without icon",
+
+    -- ------------------------------------------ Katalogbericht
+
+    ["Dieser Client bietet keine Funktion, die eine Abklingzeit-ID zu einem"] =
+        "This client offers no function that resolves a cooldown ID to a",
+    ["Vorhandene IDs je Kategorie stehen in /fcd probe."] =
+        "The IDs per category are listed in /fcd probe.",
+    ["  Abklingzeit-ID %s -> Zauber %d: kein Name im Client"] =
+        "  cooldown ID %s -> spell %d: no name in the client",
+    ["  %s (bester Rang %s, Zauber %s, CD %.0fs)"] =
+        "  %s (highest rank %s, spell %s, CD %.0fs)",
+    ["  ... und %d weitere"] = "  ... and %d more",
+    ["    ... und %d weitere"] = "    ... and %d more",
+    ["  ... und "] = "  ... and ",
+    ["    ... und "] = "    ... and ",
+
+    -- ------------------------------------------ Berichtstitel
+
+    ["Forever Cooldowns - Layout-Daten des Abklingzeit-Managers"] =
+        "Forever Cooldowns - layout data of the cooldown manager",
+    ["Forever Cooldowns - Suche nach '"] = "Forever Cooldowns - search for '",
+    ["Forever Cooldowns - Inhalt von "] = "Forever Cooldowns - contents of ",
+    ["Forever Cooldowns - Suche nach laufenden Objekten"] =
+        "Forever Cooldowns - search for live objects",
+    ["Forever Cooldowns - Abgleich der Kategorien"] =
+        "Forever Cooldowns - category comparison",
+    ["Forever Cooldowns - Zustand einer Abklingzeit"] =
+        "Forever Cooldowns - state of a cooldown",
+    ["Forever Cooldowns - Vergleich der Layout-Daten"] =
+        "Forever Cooldowns - layout data comparison",
+    ["Mitglieder von C_*-Namespaces"] = "Members of C_* namespaces",
+
+    -- ------------------------------------------ Layout-Diagnose
+
+    ["GetLayoutData vorhanden: "] = "GetLayoutData present: ",
+    ["SetLayoutData vorhanden: "] = "SetLayoutData present: ",
+    ["Ohne GetLayoutData ist hier nichts zu holen."] =
+        "Without GetLayoutData there is nothing to get here.",
+    ["  Alle Kategorien liefern denselben Blob (Argument wird ignoriert)."] =
+        "  All categories return the same blob (the argument is ignored).",
+    ["== Selbsttest: eigener Blob mit Blizzards Funktionen =="] =
+        "== Self-test: our own blob with Blizzard's functions ==",
+    ["  Erste Bytes der Layout-Daten: "] = "  First bytes of the layout data: ",
+    ["== Zuordnung Kategorie -> Abklingzeiten =="] =
+        "== Mapping category -> cooldowns ==",
+    ["  Keine Kategorie-Zuordnung gefunden."] = "  No category mapping found.",
+    ["    %d -> Zauber %s, %s%s"] = "    %d -> spell %s, %s%s",
+    ["  Zum Vergleich, was GetCooldownViewerCategorySet meldet:"] =
+        "  For comparison, what GetCooldownViewerCategorySet reports:",
+    ["Kein Objekt unter '"] = "No object under '",
+    ["' existiert nicht."] = "' does not exist.",
+    ["  %-52s (nicht lesbar, gesperrt)"] = "  %-52s (not readable, locked)",
+    ["<- sieht nach laufendem Objekt aus"] = "<- looks like a live object",
+    ["(nur Vorlage)"] = "(template only)",
+    [" - Objekt fehlt oder gesperrt"] = " - object missing or locked",
+    ["Liest Blizzards Datenmodell direkt. Das markiert ihren Viewer als"] =
+        "Reads Blizzard's data model directly. That marks their viewer as",
+    ["GetOrderedCooldownIDsForCategory fehlt in diesem Client."] =
+        "GetOrderedCooldownIDsForCategory is missing in this client.",
+    ["== %s (%d) ==  Blizzard: %d, wir: %d%s"] = "== %s (%d) ==  Blizzard: %d, us: %d%s",
+    ["bei Blizzard, bei uns nicht"] = "in Blizzard's, not in ours",
+    ["bei uns, bei Blizzard nicht"] = "in ours, not in Blizzard's",
+    ["aufteilen, wie Blizzards Fenster sie aufteilt."] =
+        "the way Blizzard's window splits them.",
+    ["Felder mit nur einem Wert sind weggelassen - sie trennen nichts."] =
+        "Fields with a single value are left out - they separate nothing.",
+    ["kein Cache-Eintrag"] = "no cache entry",
+    ["Datenmodell nicht erreichbar"] = "Data model not reachable",
+    ["in keiner Kategorie des Modells"] = "in no category of the model",
+    ["Format: /fcd state <AbklingzeitID>. Die IDs stehen in /fcd layout."] =
+        "Format: /fcd state <cooldownID>. The IDs are listed in /fcd layout.",
+    ["Abklingzeit %d: %s%s (Zauber %s)"] = "Cooldown %d: %s%s (spell %s)",
+    ["Blob nicht lesbar: "] = "Blob not readable: ",
+    ["Im Blob: "] = "In the blob: ",
+    ["keine Abweichung vom Standard"] = "no deviation from the default",
+    ["nicht gelistet"] = "not listed",
+    [" von "] = " of ",
+    ["keine"] = "none",
+    ["Wirksam: "] = "Effective: ",
+    ["Cache-Eintrag:"] = "Cache entry:",
+    ["Keine Momentaufnahme vorhanden. Erst  /fcd snapshot  aufrufen,"] =
+        "No snapshot available. Run  /fcd snapshot  first,",
+    ["Momentaufnahme von "] = "Snapshot from ",
+    ["      vorher: nicht vorhanden"] = "      before: not present",
+    ["      jetzt:  nicht mehr vorhanden"] = "      now:    no longer present",
+    ["  Keine - der Blob unterscheidet sich nur in der Kodierung."] =
+        "  None - the blob differs only in its encoding.",
+    ["  Globale Namen mit 'secret': "] = "  Global names containing 'secret': ",
+    ["  in diesem Client unbekannt: "] = "  unknown in this client: ",
+    ["== Inhalt von C_CooldownViewer =="] = "== Contents of C_CooldownViewer ==",
+    ["  C_CooldownViewer ist keine Tabelle oder leer."] =
+        "  C_CooldownViewer is not a table, or is empty.",
+    ["== Abklingzeit-Manager =="] = "== Cooldown manager ==",
+    ["  Hinweis: Es gibt keine Funktion, die eine Abklingzeit-ID zu einem"] =
+        "  Note: there is no function resolving a cooldown ID to a",
+    ["  nicht. Der richtige Name steht vermutlich in der Liste oben."] =
+        "  not. The right name is probably in the list above.",
+    ["  Enum.CooldownViewerCategory nicht vorhanden."] =
+        "  Enum.CooldownViewerCategory is not present.",
+    ["keine Antwort"] = "no answer",
+    ["    Beispiel-Eintrag "] = "    example entry ",
+    ["    GetCooldownViewerCacheInfo lieferte keine Tabelle."] =
+        "    GetCooldownViewerCacheInfo returned no table.",
+    ["  nicht gelernt"] = "  not learned",
+    ["    Entweder hat der Charakter noch keine, oder die Untertitel"] =
+        "    Either the character has none yet, or the subtitles",
+    ["    werden in diesem Client anders geliefert als 'Rang N'."] =
+        "    come in a different form than 'Rank N' in this client.",
+    ["Registrierung von '%s' (%d AddOns bekannt):"] =
+        "Registration of '%s' (%d addons known):",
+    ["X-FCD-Toc (steht in der .toc unter SavedVariables)"] =
+        "X-FCD-Toc (it sits in the .toc below SavedVariables)",
+    ["Nicht ladbar"] = "Not loadable",
+    [" gibt es nicht."] = " does not exist.",
+    ["  gibt es nicht."] = "  does not exist.",
+    ["Nichts gefunden, das nach einer Layout-Liste aussieht."] =
+        "Nothing found that looks like a layout list.",
+    ["Ist Blizzards Abklingzeit-Fenster offen?"] =
+        "Is Blizzard's cooldown window open?",
+    ["' - mit >> markiert."] = "' - marked with >>.",
+
+    -- ------------------------------------------ Bearbeitungsmodus-Bericht
+
+    ["-- Globale Namen mit 'EditMode' --"] = "-- Global names containing 'EditMode' --",
+    ["  keine - dieser Client kennt den Bearbeitungsmodus nicht"] =
+        "  none - this client does not have Edit Mode",
+    ["-- Felder von EditModeManagerFrame --"] = "-- Fields of EditModeManagerFrame --",
+    ["  keine"] = "  none",
+    ["  dann diesen Befehl erneut absetzen."] = "  then run this command again.",
+    ["  keine gefunden."] = "  none found.",
+    ["-- EditModeManagerFrame: Methoden mit Setting/Change/Update --"] =
+        "-- EditModeManagerFrame: methods containing Setting/Change/Update --",
+    ["  keine - dann steht der Setzer in einem Mixin."] =
+        "  none - then the setter lives in a mixin.",
+    ["EditModeSystemSettingsDialog gibt es nicht."] =
+        "EditModeSystemSettingsDialog does not exist.",
+    ["Ihr Fenster ist zu - erst eine Leiste im Bearbeitungsmodus anklicken."] =
+        "Their window is closed - click a bar in Edit Mode first.",
+    ["== Einstellungen der angeklickten Leiste =="] =
+        "== Settings of the bar you clicked ==",
+    ["Leiste: %s  (%s)"] = "Bar: %s  (%s)",
+    ["Kein Einstellungs-Enum gefunden - ohne das sind die"] =
+        "No settings enum found - without it the numbers of the",
+    ["Nummern der Einstellungen nicht zu benennen."] = "settings cannot be named.",
+    ["Aus "] = "From ",
+    ["|cff888888(hat diese Leiste nicht)|r"] = "|cff888888(this bar does not have it)|r",
+    ["-- Ablage der Werte --"] = "-- Where the values are stored --",
+    ["  system.systemInfo vorhanden:"] = "  system.systemInfo present:",
+    ["  kein system.systemInfo - dann liegt es woanders."] =
+        "  no system.systemInfo - then it lives somewhere else.",
+    ["  system.settingMap vorhanden ("] = "  system.settingMap present (",
+-- Blizzards eigene Kategorienamen, im Wortlaut ihres Fensters.
+    ["Essenzielle Abklingzeiten"] = "Essential Cooldowns",
+    ["Strategische Abklingzeiten"] = "Utility Cooldowns",
+    ["Verfolgte Leisten"] = "Tracked Bars",
+    ["Nicht angezeigt"] = "Hidden",
+    ["Nicht angezeigt (passiv)"] = "Hidden (passive)",
 })
 
 FCD.SetLanguage("auto")

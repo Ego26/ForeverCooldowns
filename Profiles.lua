@@ -223,7 +223,7 @@ parseValue = function(text, position)
     if number and number ~= "" and tonumber(number) then
         return tonumber(number), position + #number
     end
-    return nil, position, "unerwartetes Zeichen an Position " .. position
+    return nil, position, L["unerwartetes Zeichen an Position "] .. position
 end
 
 -- ------------------------------------------------------------------ Aufbau
@@ -245,7 +245,7 @@ local function nextBarID(profile)
 end
 
 function Profiles:NewBar(profile, name)
-    local bar = { id = nextBarID(profile), name = name or ("Leiste " .. (#profile.bars + 1)), entries = {}, visibility = {} }
+    local bar = { id = nextBarID(profile), name = name or (L["Leiste "] .. (#profile.bars + 1)), entries = {}, visibility = {} }
     copyDefaults(bar, BAR_DEFAULTS)
     copyDefaults(bar.visibility, VISIBILITY_DEFAULTS)
     bar.y = BAR_DEFAULTS.y + (#profile.bars * (BAR_DEFAULTS.iconSize + 10))
@@ -558,16 +558,16 @@ end
 
 function Profiles:Import(text, overrideName)
     if type(text) ~= "string" then
-        return nil, "Kein Text."
+        return nil, L["Kein Text."]
     end
     text = text:gsub("^%s+", ""):gsub("%s+$", "")
     if text:sub(1, #EXPORT_PREFIX) ~= EXPORT_PREFIX then
-        return nil, "Kein Forever-Cooldowns-Profil (erwartet " .. EXPORT_PREFIX .. "...)."
+        return nil, L["Kein Forever-Cooldowns-Profil (erwartet "] .. EXPORT_PREFIX .. "...)."
     end
     local body = text:sub(#EXPORT_PREFIX + 1)
     local parsed, _, err = parseValue(body, 1)
     if err or type(parsed) ~= "table" then
-        return nil, L["Profilstring beschädigt: "] .. tostring(err or "kein Tabelleninhalt")
+        return nil, L["Profilstring beschädigt: "] .. tostring(err or L["kein Tabelleninhalt"])
     end
     local profile = self:Sanitize(parsed)
     if not profile then
@@ -676,7 +676,7 @@ end
 -- Regel: { kind = "form"|"combat"|"spec", value = <Zahl|bool>, profile = "Name" }
 function Profiles:AddRule(kind, value, profileName)
     if not FCD.db.profiles[profileName] then
-        return false, "Unbekanntes Profil."
+        return false, L["Unbekanntes Profil."]
     end
     FCD.charDB.rules[#FCD.charDB.rules + 1] = { kind = kind, value = value, profile = profileName }
     return true
