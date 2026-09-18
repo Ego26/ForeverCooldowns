@@ -304,11 +304,11 @@ local CATEGORY_NAMES = {
     [-1] = "Nicht angezeigt",
     [0] = "Essenzielle Abklingzeiten",
     [1] = "Strategische Abklingzeiten",
-    [2] = L["Verfolgte Stärkungseffekte"],
+    [2] = "Verfolgte Stärkungseffekte",
     [3] = "Verfolgte Leisten",
-    [4] = L["Gruppenstärkungseffekte"],
-    [7] = L["Gegenstände"],
-    [8] = L["Gegenstände (verfolgt)"],
+    [4] = "Gruppenstärkungseffekte",
+    [7] = "Gegenstände",
+    [8] = "Gegenstände (verfolgt)",
 }
 
 -- Blizzard teilt die Kategorien auf zwei Reiter auf, jeder mit eigenem
@@ -317,13 +317,13 @@ local CATEGORY_NAMES = {
 local TABS = {
     {
         id = "spells",
-        label = L["Zauber"],
+        label = "Zauber",
         icon = "Interface\\Icons\\Spell_Nature_Lightning",
         categories = { 0, 1, -1 },
     },
     {
         id = "buffs",
-        label = L["Stärkungseffekte"],
+        label = "Stärkungseffekte",
         icon = "Interface\\Icons\\Spell_Holy_WordFortitude",
         categories = { 2, 3, 7, 8, -1 },
     },
@@ -335,7 +335,7 @@ local TABS = {
     -- Zauber aus dem Zauberbuch kann auf unsere eigene Leiste.
     {
         id = "ownspells",
-        label = L["Eigene Zauber"],
+        label = "Eigene Zauber",
         icon = "Interface\\Icons\\INV_Misc_Book_09",
         categories = {},
         ownBar = true,
@@ -343,7 +343,7 @@ local TABS = {
     },
     {
         id = "items",
-        label = L["Gegenstände"],
+        label = "Gegenstände",
         -- Kein Zaubersymbol: das Händler-Sinnbild aus dem Gesprächsfenster ist
         -- freigestellt und wirkt damit wie Blizzards Reiter, nicht wie eine
         -- Kachel. Blizzard selbst hat keinen Gegenstandsreiter, von dem wir
@@ -358,10 +358,14 @@ local TABS = {
 -- Die Leisten, auf denen unsere eigenen Einträge landen. Sie werden erst
 -- angelegt, wenn wirklich etwas daraufgelegt wird.
 local SPELL_BAR_NAME = "Zauber verfolgen"
-local ITEM_BAR_NAME = L["Gegenstände verfolgen"]
+-- Nicht uebersetzt: der Name steht so im Profil und wird zum Wiederfinden
+-- der Leiste verglichen. Uebersetzt wuerde ein englischer Client die
+-- vorhandene Leiste nicht finden und eine zweite anlegen. Angezeigt wird er
+-- uebersetzt, siehe L[bar.name] in den Optionsfenstern.
+local ITEM_BAR_NAME = "Gegenstände verfolgen"
 -- Die Leiste hieß zuerst nur "Gegenstände". Wer sie schon hat, soll keine
 -- zweite bekommen, sondern die vorhandene umbenannt.
-local ITEM_BAR_LEGACY = L["Gegenstände"]
+local ITEM_BAR_LEGACY = "Gegenstände"
 
 local function ownBar(name, create)
     local profile = FCD.Profiles:GetActive()
@@ -436,7 +440,10 @@ local function currentTab()
 end
 
 local function categoryName(value)
-    return CATEGORY_NAMES[value] or ("Kategorie " .. tostring(value))
+    -- Der Name in der Tabelle ist der deutsche Schlüssel; übersetzt wird
+    -- hier, damit ein späterer Sprachwechsel greift.
+    return (CATEGORY_NAMES[value] and L[CATEGORY_NAMES[value]])
+        or (L["Kategorie "] .. tostring(value))
 end
 
 -- Standard-Einordnung je Abklingzeit.
@@ -578,9 +585,9 @@ local function buildItemSections()
     end
 
     local groups = {
-        { id = "item:onbar", title = "Auf der Leiste" },
+        { id = "item:onbar", title = L["Auf der Leiste"] },
         { id = "item:equipped", title = L["Ausgerüstet"] },
-        { id = "item:bags", title = "In Taschen" },
+        { id = "item:bags", title = L["In Taschen"] },
         { id = "item:manual", title = L["Selbst hinzugefügt"] },
     }
     local buckets = {}
@@ -633,11 +640,11 @@ local function buildItemSections()
     if not bar then
         local profile = FCD.Profiles:GetActive()
         emptyReason = string.format(
-            "Leiste nicht gefunden. Aktives Profil: %s, Leisten: %d.",
+            L["Leiste nicht gefunden. Aktives Profil: %s, Leisten: %d."],
             profile and (profile.name or "ohne Namen") or "keines",
             profile and #profile.bars or 0)
     elseif #bar.entries == 0 then
-        emptyReason = "Die Leiste ist leer - unten etwas anklicken."
+        emptyReason = L["Die Leiste ist leer - unten etwas anklicken."]
     else
         emptyReason = string.format(
             L["Die Leiste hat %d Eintrag/Einträge, aber keiner ist ein Gegenstand."],
@@ -678,7 +685,7 @@ local function buildSpellSections()
                 local name, icon = Compat.GetSpellInfo(spellID)
                 barItems[#barItems + 1] = {
                     key = key,
-                    label = name or ("Zauber " .. tostring(entry.id)),
+                    label = name or (L["Zauber "] .. tostring(entry.id)),
                     icon = icon,
                     known = true,
                     onBar = true,
@@ -694,9 +701,9 @@ local function buildSpellSections()
     end
 
     local groups = {
-        { id = "spell:onbar", title = "Auf der Leiste" },
-        { id = "spell:missing", title = "Nicht in Blizzards Manager" },
-        { id = "spell:known", title = "Im Manager vorhanden" },
+        { id = "spell:onbar", title = L["Auf der Leiste"] },
+        { id = "spell:missing", title = L["Nicht in Blizzards Manager"] },
+        { id = "spell:known", title = L["Im Manager vorhanden"] },
     }
     local buckets = {}
     for _, group in ipairs(groups) do
@@ -749,7 +756,7 @@ local function buildSpellSections()
             items = items,
             headerText = string.format("%s  (%d)", group.title, #items),
             emptyText = (group.id == "spell:onbar")
-                and "Noch nichts gesetzt - unten etwas anklicken."
+                and L["Noch nichts gesetzt - unten etwas anklicken."]
                 or "Nichts gefunden.",
         }
     end
@@ -806,7 +813,7 @@ local function buildSections()
                     if not group then
                         group = {
                             key = "c" .. category .. ":" .. groupKey,
-                            label = name or ("Abklingzeit " .. cooldownID),
+                            label = name or (L["Abklingzeit "] .. cooldownID),
                             icon = icon,
                             cooldownIDs = {},
                             category = category,
@@ -830,7 +837,7 @@ local function buildSections()
                 else
                     bucket[#bucket + 1] = {
                         key = "c" .. category .. ":" .. cooldownID,
-                        label = name or ("Abklingzeit " .. cooldownID),
+                        label = name or (L["Abklingzeit "] .. cooldownID),
                         icon = icon,
                         rank = rank,
                         known = known,
@@ -878,7 +885,7 @@ local function buildSections()
                 category = value,
                 items = items,
                 knownCount = knownCount,
-                emptyText = "Symbole hierher ziehen",
+                emptyText = L["Symbole hierher ziehen"],
             }
         end
     end
@@ -1276,11 +1283,11 @@ local function attachItemHandlers(widget)
                 and function(tip) tip:SetSpellByID(item.spellID) end
                 or (item.itemID and function(tip) tip:SetItemByID(item.itemID) end)
             FCD.Widgets.ShowEntryTooltip(self, "ANCHOR_LEFT", setter, item.label,
-                "Ziehen: in einen anderen Abschnitt",
-                item.onBar and "Doppelklick: von der Leiste nehmen"
-                    or "Doppelklick: auf die Leiste legen",
+                L["Ziehen: in einen anderen Abschnitt"],
+                item.onBar and L["Doppelklick: von der Leiste nehmen"]
+                    or L["Doppelklick: auf die Leiste legen"],
                 (item.itemEntry.kind == "item")
-                    and "Rechtsklick: aus der Liste entfernen" or nil)
+                    and L["Rechtsklick: aus der Liste entfernen"] or nil)
             return
         end
 
@@ -1290,8 +1297,8 @@ local function attachItemHandlers(widget)
             item.label,
             (item.stackSize and item.stackSize > 1)
                 and (item.stackSize .. L[" Ränge - bewegen sich gemeinsam"]) or nil,
-            "Ziehen: in einen anderen Abschnitt",
-            "Doppelklick: ein-/ausblenden")
+            L["Ziehen: in einen anderen Abschnitt"],
+            L["Doppelklick: ein-/ausblenden"])
     end)
     widget:SetScript("OnLeave", FCD.Widgets.HideTooltip)
 end
@@ -1952,7 +1959,7 @@ function Dock:Build()
         FCD.Widgets.ShowTooltip(self, "ANCHOR_LEFT",
             state.wide and "Schmale Ansicht" or "Breite Ansicht",
             state.wide and L["Zurück an Blizzards Fenster andocken."]
-                or "Dieselben Daten, nur mit mehr Platz pro Zeile.")
+                or L["Dieselben Daten, nur mit mehr Platz pro Zeile."])
     end)
     expand:SetScript("OnLeave", FCD.Widgets.HideTooltip)
     panel.expandButton = expand
@@ -2029,7 +2036,7 @@ function Dock:Build()
             Dock:Refresh()
         end)
         button:SetScript("OnEnter", function(self)
-            FCD.Widgets.ShowTooltip(self, "ANCHOR_RIGHT", self.tab.label)
+            FCD.Widgets.ShowTooltip(self, "ANCHOR_RIGHT", L[self.tab.label])
         end)
         button:SetScript("OnLeave", FCD.Widgets.HideTooltip)
 
@@ -2090,10 +2097,10 @@ function Dock:Build()
     addButton:SetScript("OnEnter", function(self)
         local spells = currentTab().entryKind == "spell"
         FCD.Widgets.ShowTooltip(self, "ANCHOR_BOTTOMLEFT",
-            spells and "Zauber aufnehmen" or "Gegenstand aufnehmen",
+            spells and L["Zauber aufnehmen"] or "Gegenstand aufnehmen",
             spells and L["Beliebige Zauber-ID oder eingefügten Link - auch was im Zauberbuch nicht steht."]
                 or L["Beliebige Gegenstands-ID oder eingefügten Link - auch was gerade nicht im Beutel liegt."],
-            "Ziehen geht auch.")
+            L["Ziehen geht auch."])
     end)
     addButton:SetScript("OnLeave", FCD.Widgets.HideTooltip)
     panel.addButton = addButton
@@ -2115,7 +2122,7 @@ function Dock:Build()
     end)
     stackCheck:SetPoint("TOPLEFT", PAD, -102)
 
-    local knownCheck = FCD.Widgets.CreateCheck(panel, "nur gelernte", function()
+    local knownCheck = FCD.Widgets.CreateCheck(panel, L["nur gelernte"], function()
         return state.onlyKnown
     end, function(value)
         state.onlyKnown = value
@@ -2143,7 +2150,7 @@ function Dock:Build()
 
     -- Fußzeile: Modus, Rückgängig, und der Neuladen-Knopf nur dann, wenn
     -- er überhaupt etwas bewirkt.
-    panel.instantCheck = FCD.Widgets.CreateCheck(panel, "sofort wirksam", function()
+    panel.instantCheck = FCD.Widgets.CreateCheck(panel, L["sofort wirksam"], function()
         return FCD.Layout:NativeWritesAllowed()
     end, function(value)
         settings().allowNativeWrites = value
@@ -2249,7 +2256,7 @@ function Dock:Build()
     filterLabel:SetText(L["Weitere Filter"])
     offsetY = offsetY - 28
 
-    local cooldownCheck = FCD.Widgets.CreateCheck(sidebar, "nur mit Abklingzeit", function()
+    local cooldownCheck = FCD.Widgets.CreateCheck(sidebar, L["nur mit Abklingzeit"], function()
         return state.onlyWithCooldown
     end, function(value)
         state.onlyWithCooldown = value
@@ -2297,8 +2304,8 @@ function Dock:Build()
         Dock:OpenBlizzardWindow()
     end)
     blizzButton:SetScript("OnEnter", function(self)
-        FCD.Widgets.ShowTooltip(self, "ANCHOR_LEFT", "Blizzards Abklingzeit-Fenster",
-            "Das Layout wechseln geht nur dort - ihr Layoutverwalter ist"
+        FCD.Widgets.ShowTooltip(self, "ANCHOR_LEFT", L["Blizzards Abklingzeit-Fenster"],
+            L["Das Layout wechseln geht nur dort - ihr Layoutverwalter ist"]
                 .. L[" geschützt."])
     end)
     blizzButton:SetScript("OnLeave", FCD.Widgets.HideTooltip)

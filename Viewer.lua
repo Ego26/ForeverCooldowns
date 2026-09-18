@@ -332,8 +332,11 @@ local function createBarFrame(bar)
         Viewer:PaintBarState(self)
         if Viewer.unlocked and self.config then
             FCD.Widgets.ShowTooltip(self, "ANCHOR_TOP",
-                self.config.name or ("Leiste " .. tostring(self.config.id)),
-                "Zum Bearbeiten anklicken")
+                -- Der gespeicherte Name ist die Kennung der Leiste; für die
+                -- Anzeige wird er übersetzt, sofern es eine Übersetzung gibt.
+                self.config.name and L[self.config.name]
+                    or (L["Leiste "] .. tostring(self.config.id)),
+                L["Zum Bearbeiten anklicken"])
         end
     end)
     frame:SetScript("OnLeave", function(self)
@@ -430,25 +433,25 @@ local soundBlockedUntil = 0
 -- Welche Töne dieser Client kennt, steht in SOUNDKIT. Die Liste wird daraus
 -- gebaut statt geraten: was dort fehlt, wird gar nicht erst angeboten.
 local SOUND_CANDIDATES = {
-    { key = "RAID_WARNING", label = L["Schlachtzugswarnung"] },
-    { key = "READY_CHECK", label = L["Bereitschaftsprüfung"] },
-    { key = "ALARM_CLOCK_WARNING_3", label = L["Wecker"] },
-    { key = "IG_QUEST_LIST_COMPLETE", label = L["Quest erledigt"] },
-    { key = "UI_RAID_BOSS_DEFEATED", label = L["Sieg"] },
-    { key = "IG_MAINMENU_OPTION_CHECKBOX_ON", label = L["Klick"] },
+    { key = "RAID_WARNING", label = "Schlachtzugswarnung" },
+    { key = "READY_CHECK", label = "Bereitschaftsprüfung" },
+    { key = "ALARM_CLOCK_WARNING_3", label = "Wecker" },
+    { key = "IG_QUEST_LIST_COMPLETE", label = "Quest erledigt" },
+    { key = "UI_RAID_BOSS_DEFEATED", label = "Sieg" },
+    { key = "IG_MAINMENU_OPTION_CHECKBOX_ON", label = "Klick" },
 }
 
 function Viewer:GetSoundChoices()
-    if self.soundChoices then
-        return self.soundChoices
-    end
+    -- Ohne Zwischenspeicher: er hielte die Sprache fest, in der zum ersten
+    -- Mal ein Auswahlfeld geoeffnet wurde. Die Liste hat sechs Einträge.
+    
     local list = {}
     local kit = _G.SOUNDKIT
     if type(kit) == "table" then
         for _, candidate in ipairs(SOUND_CANDIDATES) do
             local id = rawget(kit, candidate.key)
             if type(id) == "number" then
-                list[#list + 1] = { id = id, label = candidate.label }
+                list[#list + 1] = { id = id, label = L[candidate.label] }
             end
         end
     end
@@ -457,7 +460,6 @@ function Viewer:GetSoundChoices()
         -- jeher gibt. Hört man nichts, taugt sie in diesem Client nicht.
         list[1] = { id = 8959, label = L["Standardton"] }
     end
-    self.soundChoices = list
     return list
 end
 

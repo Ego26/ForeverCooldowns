@@ -715,12 +715,12 @@ end
 function Compat.DecodeLayoutString(text)
     local steps = {}
     if type(text) ~= "string" then
-        return nil, "GetLayoutData lieferte keine Zeichenkette", steps
+        return nil, L["GetLayoutData lieferte keine Zeichenkette"], steps
     end
 
     local decodeBase64 = method(C_EncodingUtil, "DecodeBase64")
     if not decodeBase64 then
-        return nil, "C_EncodingUtil.DecodeBase64 fehlt in diesem Client", steps
+        return nil, L["C_EncodingUtil.DecodeBase64 fehlt in diesem Client"], steps
     end
     local decompress = method(C_EncodingUtil, "DecompressString")
     local deserializers = {
@@ -777,7 +777,7 @@ function Compat.DecodeLayoutString(text)
         end
     end
 
-    return nil, "Keine Kombination aus Zuschnitt, Kompression und Serialisierung passte", steps
+    return nil, L["Keine Kombination aus Zuschnitt, Kompression und Serialisierung passte"], steps
 end
 
 -- Sucht in den entschlüsselten Daten die Zuordnung Kategorie -> ID-Liste.
@@ -845,7 +845,7 @@ function Compat.DeepEqual(a, b, path)
     end
     for key in pairs(b) do
         if a[key] == nil then
-            return false, path .. "[" .. safeToString(key) .. "]: nur im neuen Blob vorhanden"
+            return false, path .. "[" .. safeToString(key) .. L["]: nur im neuen Blob vorhanden"]
         end
     end
     return true
@@ -920,7 +920,7 @@ function Compat.EncodeLayoutString(prefix, data, recipe)
     local compress = method(C_EncodingUtil, "CompressString")
     local encodeBase64 = method(C_EncodingUtil, "EncodeBase64")
     if not serialize or not encodeBase64 then
-        return nil, "Serialisierung oder Base64 fehlt"
+        return nil, L["Serialisierung oder Base64 fehlt"]
     end
 
     local ok, payload = pcall(serialize, data)
@@ -999,7 +999,7 @@ local cvGroupBuffItems = method(C_CooldownViewer, "GetGroupBuffItems")
 -- Rückgabe: daten, fehlertext
 function Compat.GetGroupBuffItems(...)
     if not cvGroupBuffItems then
-        return nil, "GetGroupBuffItems fehlt in diesem Client"
+        return nil, L["GetGroupBuffItems fehlt in diesem Client"]
     end
     local ok, result = pcall(cvGroupBuffItems, ...)
     if not ok then
@@ -1019,7 +1019,7 @@ end
 -- Rückgabe: daten, fehlertext
 function Compat.GetLayoutData(...)
     if not cvGetLayout then
-        return nil, "GetLayoutData fehlt in diesem Client"
+        return nil, L["GetLayoutData fehlt in diesem Client"]
     end
     local ok, result = pcall(cvGetLayout, ...)
     if not ok then
@@ -1032,7 +1032,7 @@ end
 -- geschützte Funktionen quittieren das mit einem Fehler statt zu wirken.
 function Compat.SetLayoutData(...)
     if not cvSetLayout then
-        return false, "SetLayoutData fehlt in diesem Client"
+        return false, L["SetLayoutData fehlt in diesem Client"]
     end
     local ok, err = pcall(cvSetLayout, ...)
     if not ok then

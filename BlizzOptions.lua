@@ -128,36 +128,36 @@ local function findEnum(entry)
 end
 
 local SETTINGS = {
-    { key = "Orientation", label = L["Ausrichtung"], kind = "dropdown",
+    { key = "Orientation", label = "Ausrichtung", kind = "dropdown",
         enums = { "CooldownViewerOrientation" },
         names = { Horizontal = "Horizontal", Vertical = "Vertikal" } },
-    { key = "IconDirection", label = L["Symbolausrichtung"], kind = "dropdown",
+    { key = "IconDirection", label = "Symbolausrichtung", kind = "dropdown",
         enums = { "CooldownViewerIconDirection" },
         -- Hoch und Runter kennt dieser Client bei Abklingzeit-Leisten nicht;
         -- die Namen stehen trotzdem hier, falls ein Build sie nachreicht.
         names = { Left = "Nach links", Right = "Nach rechts",
             Up = "Nach oben", Down = "Nach unten" } },
-    { key = "BarContent", label = L["Balkeninhalt"], kind = "dropdown",
+    { key = "BarContent", label = "Balkeninhalt", kind = "dropdown",
         enums = { "CooldownViewerBarContent" },
         names = { IconAndName = "Symbol und Name", IconOnly = "Nur Symbol",
             NameOnly = "Nur Name" } },
-    { key = "IconLimit", label = L["Symbole je Reihe"], kind = "slider",
+    { key = "IconLimit", label = "Symbole je Reihe", kind = "slider",
         minimum = 1, maximum = 20, step = 1 },
-    { key = "IconSize", label = L["Symbolgröße"], kind = "slider",
+    { key = "IconSize", label = "Symbolgröße", kind = "slider",
         minimum = 50, maximum = 200, step = 5, percent = true },
-    { key = "IconPadding", label = L["Symbolabstand"], kind = "slider",
+    { key = "IconPadding", label = "Symbolabstand", kind = "slider",
         minimum = 0, maximum = 20, step = 1 },
-    { key = "BarWidthScale", label = L["Balkenbreite"], kind = "slider",
+    { key = "BarWidthScale", label = "Balkenbreite", kind = "slider",
         minimum = 50, maximum = 200, step = 5, percent = true },
-    { key = "Opacity", label = L["Transparenz"], kind = "slider",
+    { key = "Opacity", label = "Transparenz", kind = "slider",
         minimum = 10, maximum = 100, step = 5, percent = true },
-    { key = "VisibleSetting", label = L["Sichtbarkeit"], kind = "dropdown",
+    { key = "VisibleSetting", label = "Sichtbarkeit", kind = "dropdown",
         enums = { "CooldownViewerVisibleSetting" },
         names = { Always = "Immer sichtbar", InCombat = "Nur im Kampf",
-            OutOfCombat = L["Außerhalb des Kampfes"], Hidden = "Nie" } },
-    { key = "HideWhenInactive", label = L["Bei Inaktivität verbergen"], kind = "check" },
-    { key = "ShowTimer", label = L["Timer anzeigen"], kind = "check" },
-    { key = "ShowTooltips", label = L["Tooltips anzeigen"], kind = "check" },
+            OutOfCombat = "Außerhalb des Kampfes", Hidden = "Nie" } },
+    { key = "HideWhenInactive", label = "Bei Inaktivität verbergen", kind = "check" },
+    { key = "ShowTimer", label = "Timer anzeigen", kind = "check" },
+    { key = "ShowTooltips", label = "Tooltips anzeigen", kind = "check" },
 }
 
 -- Auswahlliste eines Dropdowns: Schlüssel des Enums, deutsch benannt. Fehlt
@@ -178,7 +178,7 @@ local function optionsFor(entry)
         if type(key) == "string" and type(value) == "number" then
             items[#items + 1] = {
                 value = value,
-                text = (entry.names and entry.names[key]) or key,
+                text = L[(entry.names and entry.names[key]) or key],
             }
         end
     end
@@ -215,7 +215,7 @@ local function systemTitle(system)
         return name
     end
     local okFrame, frameName = pcall(system.GetName, system)
-    return okFrame and frameName or "Leiste"
+    return okFrame and frameName or L["Leiste"]
 end
 
 local function build()
@@ -262,7 +262,7 @@ local function build()
         local control = { entry = entry }
 
         if entry.kind == "check" then
-            control.widget = FCD.Widgets.CreateCheck(dialog, entry.label, function()
+            control.widget = FCD.Widgets.CreateCheck(dialog, L[entry.label], function()
                 if not currentSystem then
                     return false
                 end
@@ -274,7 +274,7 @@ local function build()
 
         elseif entry.kind == "dropdown" then
             control.label = dialog:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-            control.label:SetText(entry.label)
+            control.label:SetText(L[entry.label])
             control.widget = FCD.Widgets.CreateDropdown(dialog, 150, function()
                 return entry.items or {}
             end, function(value)
@@ -287,7 +287,7 @@ local function build()
             end)
 
         else
-            control.widget = FCD.BarOptions.CreateSlider(dialog, entry.label,
+            control.widget = FCD.BarOptions.CreateSlider(dialog, L[entry.label],
                 entry.minimum, entry.maximum, entry.step,
                 function()
                     return getValue(currentSystem, control.id) or entry.minimum
@@ -642,7 +642,7 @@ function BlizzOptions:HookDialog()
         end
         local system = rawget(blizzard, "attachedToSystem")
         if not isCooldownViewer(system) then
-            BlizzOptions:Close("ihr Fenster ging zu")
+            BlizzOptions:Close(L["ihr Fenster ging zu"])
         end
     end)
 
@@ -650,7 +650,7 @@ function BlizzOptions:HookDialog()
     if type(editManager) == "table" and type(editManager.HookScript) == "function" then
         pcall(editManager.HookScript, editManager, "OnHide", function()
             if type(C_Timer) ~= "table" or type(C_Timer.After) ~= "function" then
-                BlizzOptions:Close("Bearbeitungsmodus zu")
+                BlizzOptions:Close(L["Bearbeitungsmodus zu"])
                 return
             end
             -- Einen Durchlauf warten: ihr Verwalter blendet sich zwischendurch
@@ -662,7 +662,7 @@ function BlizzOptions:HookDialog()
                     stillHidden = not _G.EditModeManagerFrame:IsShown()
                 end)
                 if stillHidden then
-                    BlizzOptions:Close("Bearbeitungsmodus zu")
+                    BlizzOptions:Close(L["Bearbeitungsmodus zu"])
                 end
             end)
         end)

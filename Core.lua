@@ -482,7 +482,7 @@ SlashCmdList.FOREVERCOOLDOWNS = function(message)
     outputBuffer, pendingWindow = nil, nil
 
     if not ok then
-        lines[#lines + 1] = "Fehler im Befehl /fcd " .. command .. ":"
+        lines[#lines + 1] = L["Fehler im Befehl /fcd "] .. command .. ":"
         lines[#lines + 1] = tostring(err)
     end
 
@@ -549,7 +549,7 @@ function FCD:ShowText(title, text)
 end
 
 function FCD:ShowImport()
-    local window = self:ShowText("Profil importieren", "")
+    local window = self:ShowText(L["Profil importieren"], "")
     window.edit:SetFocus()
     if not window.importButton then
         local button = CreateFrame("Button", nil, window, "UIPanelButtonTemplate")
@@ -778,7 +778,7 @@ function FCD:ChangeVisibility(cooldownID, hidden)
 
     local info = self.Compat.GetCooldownInfo(cooldownID)
     local spellID = info and (info.spellID or info.overrideSpellID)
-    local displayName = spellID and self.Compat.GetSpellName(spellID) or ("Abklingzeit " .. cooldownID)
+    local displayName = spellID and self.Compat.GetSpellName(spellID) or (L["Abklingzeit "] .. cooldownID)
 
     -- Bevorzugt Blizzards eigene Datenschicht: sie wendet die Änderung an
     -- und speichert sie selbst. Der Weg über den serialisierten Blob bleibt
@@ -960,7 +960,7 @@ function FCD:SetTrace(enabled, filterText)
 
     lines[#lines + 1] = ""
     lines[#lines + 1] = highlighted > 0
-        and (highlighted .. " Ereignis(se) enthalten '" .. traceHighlight .. "' - mit >> markiert.")
+        and (highlighted .. " Ereignis(se) enthalten '" .. traceHighlight .. L["' - mit >> markiert."])
         or (L["Kein Ereignis enthält '"] .. traceHighlight .. "'.")
 
     outputWindow(L["Ereignis-Mitschnitt"], table.concat(lines, "\n"))
@@ -1005,7 +1005,7 @@ function FCD:OpenMainUI()
 end
 
 function FCD:ShowLayoutImport()
-    local window = self:ShowText("Layout-Profil importieren", "")
+    local window = self:ShowText(L["Layout-Profil importieren"], "")
     window.edit:SetFocus()
     if not window.layoutImportButton then
         local button = CreateFrame("Button", nil, window, "UIPanelButtonTemplate")
@@ -1277,7 +1277,7 @@ local function onEvent(_, event, ...)
             for _, bar in ipairs(profile.bars) do
                 if #bar.entries > 0 then
                     parts[#parts + 1] = string.format("%s: %d",
-                        bar.name or ("Leiste " .. tostring(bar.id)), #bar.entries)
+                        bar.name or (L["Leiste "] .. tostring(bar.id)), #bar.entries)
                 end
             end
             -- "Alle Leisten leer" las sich wie ein Verlust, auch wenn nie
@@ -1288,7 +1288,7 @@ local function onEvent(_, event, ...)
             elseif #profile.bars > 0 then
                 summary = L["Leisten angelegt, aber ohne Einträge"]
             else
-                summary = "keine eigenen Leisten in Benutzung"
+                summary = L["keine eigenen Leisten in Benutzung"]
             end
             logMessage(string.format(L["Profil '%s' - %s."], profile.name or "?", summary))
         else

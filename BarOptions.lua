@@ -25,26 +25,26 @@ local current, currentFrame
 -- "Ausrichtung" (waagerecht oder senkrecht) und "Symbolausrichtung" (in
 -- welche Richtung die Symbole laufen). Beides zusammen ergibt unser growth.
 local ORIENTATION_OPTIONS = {
-    { value = "HORIZONTAL", text = L["Horizontal"] },
-    { value = "VERTICAL", text = L["Vertikal"] },
+    { value = "HORIZONTAL", text = "Horizontal" },
+    { value = "VERTICAL", text = "Vertikal" },
 }
 
 local DIRECTION_OPTIONS = {
     HORIZONTAL = {
-        { value = "RIGHT", text = L["Nach rechts"] },
-        { value = "LEFT", text = L["Nach links"] },
+        { value = "RIGHT", text = "Nach rechts" },
+        { value = "LEFT", text = "Nach links" },
     },
     VERTICAL = {
-        { value = "DOWN", text = L["Nach unten"] },
-        { value = "UP", text = L["Nach oben"] },
+        { value = "DOWN", text = "Nach unten" },
+        { value = "UP", text = "Nach oben" },
     },
 }
 
 local GROWTH_OPTIONS = {
-    { value = "RIGHT", text = L["Nach rechts"] },
-    { value = "LEFT", text = L["Nach links"] },
-    { value = "DOWN", text = L["Nach unten"] },
-    { value = "UP", text = L["Nach oben"] },
+    { value = "RIGHT", text = "Nach rechts" },
+    { value = "LEFT", text = "Nach links" },
+    { value = "DOWN", text = "Nach unten" },
+    { value = "UP", text = "Nach oben" },
 }
 
 local function orientationOf(growth)
@@ -57,20 +57,20 @@ end
 local function orientationText(value)
     for _, option in ipairs(ORIENTATION_OPTIONS) do
         if option.value == value then
-            return option.text
+            return L[option.text]
         end
     end
-    return ORIENTATION_OPTIONS[1].text
+    return L[ORIENTATION_OPTIONS[1].text]
 end
 
 local VISIBILITY_OPTIONS = {
-    { value = "always", text = L["Immer sichtbar"] },
-    { value = "inCombat", text = L["Nur im Kampf"] },
-    { value = "hasTarget", text = L["Nur mit Ziel"] },
+    { value = "always", text = "Immer sichtbar" },
+    { value = "inCombat", text = "Nur im Kampf" },
+    { value = "hasTarget", text = "Nur mit Ziel" },
     -- "Nie" blendet die Leiste im Spiel aus, ohne ihren Inhalt zu verlieren.
     -- Erreichbar bleibt sie über den Bearbeitungsmodus, dort wird jede Leiste
     -- gezeigt - sonst käme man an diese Einstellung nie wieder heran.
-    { value = "never", text = L["Nie"] },
+    { value = "never", text = "Nie" },
 }
 
 -- "Keines" steht mit in der Liste, statt als eigener Haken daneben. Vorher
@@ -78,10 +78,10 @@ local VISIBILITY_OPTIONS = {
 -- zwei Bedienelemente für eine Entscheidung, und "Keines" fehlte trotzdem.
 -- Die Eintragsliste macht es seit jeher so, jetzt beide gleich.
 local ALERT_MODES = {
-    { value = "off", text = L["Keines"] },
-    { value = "both", text = L["Leuchten und Ton"] },
-    { value = "glow", text = L["Nur Leuchten"] },
-    { value = "sound", text = L["Nur Ton"] },
+    { value = "off", text = "Keines" },
+    { value = "both", text = "Leuchten und Ton" },
+    { value = "glow", text = "Nur Leuchten" },
+    { value = "sound", text = "Nur Ton" },
 }
 
 -- Der gespeicherte Zustand sind zwei Felder; im Auswahlfeld ist es einer.
@@ -95,10 +95,10 @@ end
 local function alertModeText(value)
     for _, option in ipairs(ALERT_MODES) do
         if option.value == value then
-            return option.text
+            return L[option.text]
         end
     end
-    return ALERT_MODES[1].text
+    return L[ALERT_MODES[1].text]
 end
 
 local function soundLabelFor(id)
@@ -113,10 +113,10 @@ end
 local function growthText(value)
     for _, option in ipairs(GROWTH_OPTIONS) do
         if option.value == value then
-            return option.text
+            return L[option.text]
         end
     end
-    return GROWTH_OPTIONS[1].text
+    return L[GROWTH_OPTIONS[1].text]
 end
 
 local function visibilityValue(bar)
@@ -136,10 +136,10 @@ end
 local function visibilityText(value)
     for _, option in ipairs(VISIBILITY_OPTIONS) do
         if option.value == value then
-            return option.text
+            return L[option.text]
         end
     end
-    return VISIBILITY_OPTIONS[1].text
+    return L[VISIBILITY_OPTIONS[1].text]
 end
 
 -- Eine Gegenstandsleiste braucht andere Schalter als eine Zauberleiste:
@@ -385,7 +385,7 @@ local function build()
     dialog.orientation = FCD.Widgets.CreateDropdown(dialog, 150, function()
         local items = {}
         for _, option in ipairs(ORIENTATION_OPTIONS) do
-            items[#items + 1] = { text = option.text, value = option.value }
+            items[#items + 1] = { text = L[option.text], value = option.value }
         end
         return items
     end, function(value)
@@ -407,7 +407,7 @@ local function build()
         local items = {}
         local orientation = orientationOf(current and current.growth)
         for _, option in ipairs(DIRECTION_OPTIONS[orientation]) do
-            items[#items + 1] = { text = option.text, value = option.value }
+            items[#items + 1] = { text = L[option.text], value = option.value }
         end
         return items
     end, function(value)
@@ -462,7 +462,7 @@ local function build()
     dialog.visibility = FCD.Widgets.CreateDropdown(dialog, 150, function()
         local items = {}
         for _, option in ipairs(VISIBILITY_OPTIONS) do
-            items[#items + 1] = { text = option.text, value = option.value }
+            items[#items + 1] = { text = L[option.text], value = option.value }
         end
         return items
     end, function(value)
@@ -519,7 +519,7 @@ local function build()
     dialog.alertMode = FCD.Widgets.CreateDropdown(dialog, 150, function()
         local items = {}
         for _, option in ipairs(ALERT_MODES) do
-            items[#items + 1] = { text = option.text, value = option.value }
+            items[#items + 1] = { text = L[option.text], value = option.value }
         end
         return items
     end, function(value)
@@ -584,9 +584,9 @@ local function build()
         end
     end)
     dialog.entryAlerts:SetScript("OnEnter", function(self)
-        FCD.Widgets.ShowTooltip(self, "ANCHOR_RIGHT", "Fertig-Meldung je Eintrag",
+        FCD.Widgets.ShowTooltip(self, "ANCHOR_RIGHT", L["Fertig-Meldung je Eintrag"],
             L["Einzelne Symbole dürfen von der Leiste abweichen -"],
-            "melden, obwohl die Leiste stumm ist, oder umgekehrt.")
+            L["melden, obwohl die Leiste stumm ist, oder umgekehrt."])
     end)
     dialog.entryAlerts:SetScript("OnLeave", FCD.Widgets.HideTooltip)
     offsetY = offsetY - 26
@@ -686,7 +686,10 @@ function BarOptions:Refresh()
     -- Gegenstände werden nicht gelernt; der Schalter hätte keine Wirkung.
     dialog.unknownCheck:SetShown(not items)
 
-    dialog.title:SetText(current.name or (L["Leiste "] .. tostring(current.id)))
+    -- Der gespeicherte Name ist die Kennung der Leiste und bleibt deutsch;
+    -- fuer die Anzeige wird er uebersetzt, sofern es eine Uebersetzung gibt.
+    dialog.title:SetText(current.name and L[current.name]
+        or (L["Leiste "] .. tostring(current.id)))
     dialog.orientation:SetText(orientationText(orientationOf(current.growth)))
     dialog.growth:SetText(growthText(current.growth))
     dialog.visibility:SetText(visibilityText(visibilityValue(current)))
@@ -722,7 +725,7 @@ function BarOptions:Open(bar, barFrame)
     -- standen zwei Leisten golden umrandet da, während nur ein Fenster offen
     -- war, und man sah nicht mehr, welche gerade bearbeitet wird.
     if FCD.BlizzOptions then
-        FCD.BlizzOptions:Close("unsere Leiste angeklickt")
+        FCD.BlizzOptions:Close(L["unsere Leiste angeklickt"])
         FCD.BlizzOptions:ClearBlizzardSelection()
     end
 
@@ -770,11 +773,11 @@ end
 local INHERIT = "inherit"
 
 local ENTRY_ALERT_OPTIONS = {
-    { value = INHERIT, text = L["Wie Leiste"] },
-    { value = "off", text = L["Aus"] },
-    { value = "both", text = L["Leuchten und Ton"] },
-    { value = "glow", text = L["Nur Leuchten"] },
-    { value = "sound", text = L["Nur Ton"] },
+    { value = INHERIT, text = "Wie Leiste" },
+    { value = "off", text = "Aus" },
+    { value = "both", text = "Leuchten und Ton" },
+    { value = "glow", text = "Nur Leuchten" },
+    { value = "sound", text = "Nur Ton" },
 }
 
 local ENTRY_WIDTH = 460
@@ -800,10 +803,10 @@ local function entryAlertText(entry)
     local value = entryAlertValue(entry)
     for _, option in ipairs(ENTRY_ALERT_OPTIONS) do
         if option.value == value then
-            return option.text
+            return L[option.text]
         end
     end
-    return ENTRY_ALERT_OPTIONS[1].text
+    return L[ENTRY_ALERT_OPTIONS[1].text]
 end
 
 local function setEntryAlert(entry, value)
@@ -818,7 +821,7 @@ end
 
 local function entrySoundText(entry)
     if entry.alertSoundID == nil then
-        return "Wie Leiste"
+        return L["Wie Leiste"]
     end
     return soundLabelFor(entry.alertSoundID)
 end
@@ -830,9 +833,9 @@ local function entryDisplay(entry)
         local spellID = FCD.Ranks:Resolve(entry)
         if spellID then
             local name, icon = Compat.GetSpellInfo(spellID)
-            return name or ("Zauber " .. tostring(spellID)), icon
+            return name or (L["Zauber "] .. tostring(spellID)), icon
         end
-        return "Zauber " .. tostring(entry.id or "?"), nil
+        return L["Zauber "] .. tostring(entry.id or "?"), nil
     end
     local name, icon = FCD.Items:GetDisplay(entry)
     return name or ("Gegenstand " .. tostring(entry.id or "?")), icon
@@ -843,12 +846,12 @@ end
 local function barAlertSummary(bar)
     local value = barAlertValue(bar)
     if value == "off" then
-        return "Diese Leiste meldet nichts."
+        return L["Diese Leiste meldet nichts."]
     end
     if value == "glow" then
-        return "Diese Leiste meldet: " .. alertModeText(value) .. "."
+        return L["Diese Leiste meldet: "] .. alertModeText(value) .. "."
     end
-    return string.format("Diese Leiste meldet: %s (%s).",
+    return string.format(L["Diese Leiste meldet: %s (%s)."],
         alertModeText(value), soundLabelFor(bar.alertSoundID))
 end
 
@@ -877,7 +880,7 @@ local function acquireEntryRow(index)
     row.mode = FCD.Widgets.CreateDropdown(row, 128, function()
         local items = {}
         for _, option in ipairs(ENTRY_ALERT_OPTIONS) do
-            items[#items + 1] = { text = option.text, value = option.value }
+            items[#items + 1] = { text = L[option.text], value = option.value }
         end
         return items
     end, function(value)
@@ -978,7 +981,8 @@ function BarOptions:RefreshEntries()
 
     local entries = entryBar.entries or {}
     entryDialog.title:SetText(L["Fertig-Meldung: "]
-        .. (entryBar.name or (L["Leiste "] .. tostring(entryBar.id))))
+        .. (entryBar.name and L[entryBar.name]
+            or (L["Leiste "] .. tostring(entryBar.id))))
     -- Schützt der Client die Abklingzeit-Werte, ist das Ende nicht zu
     -- erkennen und es meldet von selbst gar nichts. Das gehört hierhin und
     -- nicht nur als Chatzeile beim Einschalten - sonst sucht man den Fehler
@@ -1032,7 +1036,7 @@ function BarOptions:OpenEntries(bar)
     buildEntries()
 
     if entryBar ~= bar then
-        FCD.Profiles:PushUndo("Fertig-Meldung je Eintrag")
+        FCD.Profiles:PushUndo(L["Fertig-Meldung je Eintrag"])
     end
     entryBar = bar
 

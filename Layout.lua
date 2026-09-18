@@ -220,7 +220,7 @@ end
 function Layout:Read()
     local raw, err = Compat.GetLayoutData()
     if err or type(raw) ~= "string" then
-        return nil, err or "GetLayoutData lieferte keine Zeichenkette"
+        return nil, err or L["GetLayoutData lieferte keine Zeichenkette"]
     end
 
     local data, decodeErr, _, recipe = Compat.DecodeLayoutString(raw)
@@ -230,7 +230,7 @@ function Layout:Read()
 
     local sections = Compat.FindLayoutSections(data)
     if not sections or not sections.categories then
-        return nil, "Kategorie-Zuordnung im Blob nicht gefunden"
+        return nil, L["Kategorie-Zuordnung im Blob nicht gefunden"]
     end
 
     local prefix = Compat.SplitLayoutString(raw)
@@ -418,7 +418,7 @@ end
 
 function Layout:SaveProfile(name)
     if not name or name == "" then
-        return false, "Kein Name angegeben"
+        return false, L["Kein Name angegeben"]
     end
     local state, err = self:Read()
     if not state then
@@ -435,7 +435,7 @@ end
 function Layout:DeleteProfile(name)
     local profiles = self:GetProfiles()
     if not profiles[name] then
-        return false, "Unbekanntes Profil"
+        return false, L["Unbekanntes Profil"]
     end
     profiles[name] = nil
     return true
@@ -447,9 +447,9 @@ end
 function Layout:ApplyProfile(name)
     local profile = self:GetProfiles()[name]
     if not profile then
-        return false, "Unbekanntes Profil"
+        return false, L["Unbekanntes Profil"]
     end
-    return self:ApplyAssignments(profile.assignments or {}, "Profil " .. name)
+    return self:ApplyAssignments(profile.assignments or {}, L["Profil "] .. name)
 end
 
 -- Ohne Zuweisungen bleibt überall die Standardeinordnung stehen - das ist
@@ -526,7 +526,7 @@ end
 function Layout:ExportProfile(name)
     local profile = self:GetProfiles()[name]
     if not profile then
-        return nil, "Unbekanntes Profil"
+        return nil, L["Unbekanntes Profil"]
     end
     local out = {}
     FCD.Profiles.Serialize(profile, out)
@@ -535,15 +535,15 @@ end
 
 function Layout:ImportProfile(text)
     if type(text) ~= "string" then
-        return nil, "Kein Text"
+        return nil, L["Kein Text"]
     end
     text = text:gsub("^%s+", ""):gsub("%s+$", "")
     if text:sub(1, #PROFILE_PREFIX) ~= PROFILE_PREFIX then
-        return nil, "Kein Layout-Profil (erwartet " .. PROFILE_PREFIX .. "...)"
+        return nil, L["Kein Layout-Profil (erwartet "] .. PROFILE_PREFIX .. "...)"
     end
     local parsed, _, err = FCD.Profiles.Deserialize(text:sub(#PROFILE_PREFIX + 1), 1)
     if err or type(parsed) ~= "table" or type(parsed.assignments) ~= "table" then
-        return nil, L["Profilstring beschädigt: "] .. tostring(err or "kein Inhalt")
+        return nil, L["Profilstring beschädigt: "] .. tostring(err or L["kein Inhalt"])
     end
 
     local name = parsed.name or "Import"
@@ -583,7 +583,7 @@ function Layout:Restore(index)
     local backups = self:GetBackups()
     local backup = backups[index or #backups]
     if not backup then
-        return false, "Keine Sicherung vorhanden"
+        return false, L["Keine Sicherung vorhanden"]
     end
     local ok, err = Compat.SetLayoutData(backup.raw)
     if not ok then
@@ -598,7 +598,7 @@ end
 -- Rückgabe: erfolg, fehlertext
 function Layout:Commit(state, label)
     if not Compat.CanWriteLayoutData() then
-        return false, "SetLayoutData fehlt in diesem Client"
+        return false, L["SetLayoutData fehlt in diesem Client"]
     end
 
     local rebuilt, encodeErr = Compat.EncodeLayoutString(state.prefix, state.data, state.recipe)
@@ -649,7 +649,7 @@ function Layout:VerifyRoundTrip(state)
 
     local redecoded, decodeErr = Compat.DecodeLayoutString(rebuilt)
     if not redecoded then
-        return false, "Neu erzeugter Blob ist nicht wieder lesbar: " .. tostring(decodeErr)
+        return false, L["Neu erzeugter Blob ist nicht wieder lesbar: "] .. tostring(decodeErr)
     end
 
     local same, difference = Compat.DeepEqual(state.data, redecoded)
@@ -659,5 +659,5 @@ function Layout:VerifyRoundTrip(state)
             #rebuilt, #trimmed)
     end
 
-    return false, "Inhalt weicht ab: " .. tostring(difference)
+    return false, L["Inhalt weicht ab: "] .. tostring(difference)
 end

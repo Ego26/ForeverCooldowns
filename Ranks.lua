@@ -1,5 +1,6 @@
 local FCD = ForeverCooldowns
 local Compat = FCD.Compat
+local L = FCD.L
 
 local Ranks = {}
 FCD.Ranks = Ranks
@@ -123,10 +124,10 @@ end
 function Ranks:AddCustom(spellID)
     spellID = tonumber(spellID)
     if not spellID then
-        return false, "Keine Zauber-ID"
+        return false, L["Keine Zauber-ID"]
     end
     if not Compat.GetSpellInfo(spellID) then
-        return false, "Der Client kennt diese ID nicht"
+        return false, L["Der Client kennt diese ID nicht"]
     end
     FCD.db.customSpells = FCD.db.customSpells or {}
     FCD.db.customSpells[spellID] = true

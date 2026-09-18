@@ -21,7 +21,7 @@ local CLONE_DEPTH = 5         -- wie tief wir Kindrahmen mitkopieren
 local MIN_ICON = 14           -- kleiner ist kein Symbolfeld
 local RETRY_SECONDS = 2       -- nicht bei jedem Neuaufbau erneut durchsuchen
 
-Art.status = "noch nicht gesucht"
+Art.status = L["noch nicht gesucht"]
 Art.learned = false
 Art.report = {}
 
@@ -468,11 +468,11 @@ function Art:Learn()
         return true
     end
     if not self:Enabled() then
-        self.status = "abgeschaltet mit  /fcd art off"
+        self.status = L["abgeschaltet mit  /fcd art off"]
         return false
     end
     if type(self.iconSet) ~= "table" or next(self.iconSet) == nil then
-        self.status = "noch keine eigenen Symbole zum Abgleichen vorhanden."
+        self.status = L["noch keine eigenen Symbole zum Abgleichen vorhanden."]
         return false
     end
     local now = GetTime and GetTime() or 0
@@ -483,14 +483,14 @@ function Art:Learn()
 
     local window = self:Source()
     if not window then
-        self.status = "Blizzards Fenster ist zu - ohne offenes Fenster gibt es nichts abzulesen."
+        self.status = L["Blizzards Fenster ist zu - ohne offenes Fenster gibt es nichts abzulesen."]
         return false
     end
 
     local found = { tile = {}, bar = {} }
     local ok = pcall(walk, window, 0, found)
     if not ok then
-        self.status = "Die Suche im Rahmenbaum ist abgebrochen."
+        self.status = L["Die Suche im Rahmenbaum ist abgebrochen."]
         return false
     end
 
@@ -498,13 +498,13 @@ function Art:Learn()
     self.tileSource = pick(found.tile)
     self.barSource = pick(found.bar)
     if not self.tileSource and not self.barSource then
-        self.status = "Kein Eintrag gefunden, der eines unserer Symbole zeigt."
+        self.status = L["Kein Eintrag gefunden, der eines unserer Symbole zeigt."]
         return false
     end
 
     local function describe(entry, label)
         if not entry then
-            return "kein " .. label
+            return L["kein "] .. label
         end
         return string.format(L["%s %s (%d Grafiken, %d gleich große)"],
             label, entry.sizeKey, entry.art, entry.siblings or 1)
@@ -795,7 +795,7 @@ function Art:DecorateEditSelection(widget)
     end
     local overlay = selectionOverlay(system)
     if not overlay then
-        self.editStatus = "Auswahlrahmen im Bearbeitungsmodus nicht gefunden."
+        self.editStatus = L["Auswahlrahmen im Bearbeitungsmodus nicht gefunden."]
         return false
     end
 
@@ -808,7 +808,7 @@ function Art:DecorateEditSelection(widget)
             texture:Hide()
         end
         widget.editArtFailed = true
-        self.editStatus = string.format("Nachbau des Auswahlrahmens erfolglos (%d Texturen).",
+        self.editStatus = string.format(L["Nachbau des Auswahlrahmens erfolglos (%d Texturen)."],
             #textures)
         return false
     end
@@ -917,7 +917,7 @@ function Art:LearnSliderArt()
     self.sliderArt = art
     self.sliderStatus = string.format("Griff %s, Pfeile %s",
         tostring(art.thumb.atlas or art.thumb.file),
-        (art.left and art.right) and "gefunden" or "nicht gefunden")
+        (art.left and art.right) and "gefunden" or L["nicht gefunden"])
     return art
 end
 
@@ -1038,7 +1038,7 @@ function Art:Describe()
 
     local window = self:Source()
     if not window then
-        lines[#lines + 1] = "Blizzards Abklingzeit-Fenster ist gerade nicht offen."
+        lines[#lines + 1] = L["Blizzards Abklingzeit-Fenster ist gerade nicht offen."]
         lines[#lines + 1] = L["Öffne es und rufe den Befehl erneut auf."]
         return table.concat(lines, "\n")
     end
@@ -1051,17 +1051,17 @@ function Art:Describe()
             known = known + 1
         end
     end
-    lines[#lines + 1] = string.format("Eigene Symbole zum Abgleich: %d", known)
+    lines[#lines + 1] = string.format(L["Eigene Symbole zum Abgleich: %d"], known)
     for _, kind in ipairs({ "tile", "bar" }) do
         local result = self.lastClone and self.lastClone[kind]
         lines[#lines + 1] = string.format("Letzter Nachbau %s: %s",
-            (kind == "bar") and "Balken" or "Symbol", result or "nicht versucht")
+            (kind == "bar") and "Balken" or L["Symbol"], result or L["nicht versucht"])
     end
     lines[#lines + 1] = "Auswahlrahmen Bearbeitungsmodus: "
-        .. tostring(self.editStatus or "noch nicht versucht")
+        .. tostring(self.editStatus or L["noch nicht versucht"])
     local tabIcons = self.tabIcons
-    lines[#lines + 1] = string.format("Sinnbilder der Reiter: %s",
-        tabIcons and (#tabIcons .. " abgeholt") or "keine gefunden")
+    lines[#lines + 1] = string.format(L["Sinnbilder der Reiter: %s"],
+        tabIcons and (#tabIcons .. " abgeholt") or L["keine gefunden"])
     for index, glyph in ipairs(tabIcons or {}) do
         lines[#lines + 1] = string.format("    %d: %s", index,
             tostring(glyph.atlas or glyph.file))
@@ -1078,7 +1078,7 @@ function Art:Describe()
                         local width, height = sizeOf(region)
                         local pw, ph = sizeOf(frame)
                         samples[#samples + 1] = string.format(
-                            "    Symbol %s (%.0fx%.0f) in Rahmen %s (%.0fx%.0f), Masken: %d",
+                            L["    Symbol %s (%.0fx%.0f) in Rahmen %s (%.0fx%.0f), Masken: %d"],
                             tostring(file), width or 0, height or 0,
                             tostring(call(frame, "GetObjectType")), pw or 0, ph or 0,
                             #describeMasks(region))
@@ -1095,7 +1095,7 @@ function Art:Describe()
         end
     end
     pcall(hunt, window, MAX_DEPTH)
-    lines[#lines + 1] = string.format("Davon in ihrem Fenster sichtbar: %d", hits)
+    lines[#lines + 1] = string.format(L["Davon in ihrem Fenster sichtbar: %d"], hits)
     for _, sample in ipairs(samples) do
         lines[#lines + 1] = sample
     end
@@ -1153,10 +1153,10 @@ function Art:Describe()
         for _, kind in ipairs({ "tile", "bar" }) do
             local list = self.candidates[kind]
             lines[#lines + 1] = (kind == "bar")
-                and "-- alle breiten Treffer --" or "-- alle quadratischen Treffer --"
+                and L["-- alle breiten Treffer --"] or L["-- alle quadratischen Treffer --"]
             local counts, order = {}, {}
             for _, entry in ipairs(list or {}) do
-                local key = entry.sizeKey .. (entry.icon and " mit Symbol" or " ohne Symbol")
+                local key = entry.sizeKey .. (entry.icon and L[" mit Symbol"] or L[" ohne Symbol"])
                 if not counts[key] then
                     order[#order + 1] = key
                     counts[key] = 0
@@ -1164,7 +1164,7 @@ function Art:Describe()
                 counts[key] = counts[key] + 1
             end
             if #order == 0 then
-                lines[#lines + 1] = "  keine"
+                lines[#lines + 1] = L["  keine"]
             end
             for _, key in ipairs(order) do
                 lines[#lines + 1] = string.format("  %s: %d", key, counts[key])

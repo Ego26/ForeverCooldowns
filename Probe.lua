@@ -8,30 +8,30 @@ FCD.Probe = Probe
 -- Jedes geplante Feature hängt an konkreten API-Funktionen. Die Matrix macht
 -- sichtbar, was dieser Client wirklich hergibt, statt es zu vermuten.
 local FEATURES = {
-    { name = L["Eigene Leisten, Layout, Sichtbarkeit"], needs = {} },
-    { name = L["Mehrfachauswahl und Sammelaktionen"], needs = {} },
-    { name = L["Profile, Import/Export, Rückgängig"], needs = {} },
-    { name = L["Rang-Stapelung (immer bester Rang)"], needs = { "spellbook", "spellSubtext" } },
-    { name = L["Downranking (fester Rang)"], needs = { "spellbook", "spellSubtext" } },
-    { name = L["Rangzahl auf dem Icon"], needs = { "spellSubtext" } },
-    { name = L["Abklingzeit-Anzeige"], needs = { "spellCooldown" } },
-    { name = L["Aufladungen / Stapel"], needs = { "spellCharges" }, optional = true },
-    { name = L["Ressourcen-Abdunklung (zu wenig Wut)"], needs = { "spellUsable" } },
-    { name = L["Filter 'nur mit Abklingzeit'"], needs = { "spellBaseCooldown" }, optional = true },
-    { name = L["Item- und Schmuckstück-Abklingzeiten"], needs = { "itemCooldown", "inventoryCooldown" } },
-    { name = L["Aura-/Buff-Verfolgung"], needs = { "aura" }, optional = true },
-    { name = L["Abgleich mit dem Blizzard-Manager"], needs = { "cooldownViewerRead", "cooldownViewerInfo" } },
+    { name = "Eigene Leisten, Layout, Sichtbarkeit", needs = {} },
+    { name = "Mehrfachauswahl und Sammelaktionen", needs = {} },
+    { name = "Profile, Import/Export, Rückgängig", needs = {} },
+    { name = "Rang-Stapelung (immer bester Rang)", needs = { "spellbook", "spellSubtext" } },
+    { name = "Downranking (fester Rang)", needs = { "spellbook", "spellSubtext" } },
+    { name = "Rangzahl auf dem Icon", needs = { "spellSubtext" } },
+    { name = "Abklingzeit-Anzeige", needs = { "spellCooldown" } },
+    { name = "Aufladungen / Stapel", needs = { "spellCharges" }, optional = true },
+    { name = "Ressourcen-Abdunklung (zu wenig Wut)", needs = { "spellUsable" } },
+    { name = "Filter 'nur mit Abklingzeit'", needs = { "spellBaseCooldown" }, optional = true },
+    { name = "Item- und Schmuckstück-Abklingzeiten", needs = { "itemCooldown", "inventoryCooldown" } },
+    { name = "Aura-/Buff-Verfolgung", needs = { "aura" }, optional = true },
+    { name = "Abgleich mit dem Blizzard-Manager", needs = { "cooldownViewerRead", "cooldownViewerInfo" } },
     -- Umsortieren geht über zwei Wege. Der Layout-Weg ist der tragende; die
     -- Zeile stand vorher auf "fehlt", obwohl das Umsortieren funktioniert -
     -- sie prüfte nur den zweiten, schnelleren Weg.
-    { name = L["Blizzards Kategorien umsortieren"], needs = { "layoutRead", "layoutWrite" } },
-    { name = L["... ohne Neuladen wirksam"], needs = { "cooldownViewerWrite" }, optional = true },
-    { name = L["Fertig-Meldung (Leuchten und Ton)"], forbids = { "secretCooldown" } },
-    { name = L["Blizzards Leuchten für 'bereit'"], needs = { "overlayGlow" }, optional = true },
-    { name = L["Ihre Leisten im eigenen Fenster einstellen"],
+    { name = "Blizzards Kategorien umsortieren", needs = { "layoutRead", "layoutWrite" } },
+    { name = "... ohne Neuladen wirksam", needs = { "cooldownViewerWrite" }, optional = true },
+    { name = "Fertig-Meldung (Leuchten und Ton)", forbids = { "secretCooldown" } },
+    { name = "Blizzards Leuchten für 'bereit'", needs = { "overlayGlow" }, optional = true },
+    { name = "Ihre Leisten im eigenen Fenster einstellen",
         needs = { "editModeSettings" }, optional = true },
-    { name = L["Profilwechsel bei Haltung/Form"], needs = { "shapeshift" }, optional = true },
-    { name = L["Profilwechsel bei Spezialisierung"], needs = { "specialization" }, optional = true },
+    { name = "Profilwechsel bei Haltung/Form", needs = { "shapeshift" }, optional = true },
+    { name = "Profilwechsel bei Spezialisierung", needs = { "specialization" }, optional = true },
 }
 
 local function statusFor(feature)
@@ -72,7 +72,7 @@ function Probe:PrintFeatureMatrix()
     FCD.Print(L["Funktionsprüfung für Client-Build "] .. tostring(FCD.build) .. ":")
     for _, feature in ipairs(FEATURES) do
         local status, missing = statusFor(feature)
-        local line = (STATUS_TEXT[status] or "") .. " " .. feature.name
+        local line = (STATUS_TEXT[status] or "") .. " " .. L[feature.name]
         if missing then
             line = line .. " |cff888888(" .. missing .. ")|r"
         end
@@ -131,7 +131,7 @@ local function dumpTable(lines, indent, label, value, depth)
         dumpTable(lines, indent + 1, "[" .. index .. "]", value[index], depth - 1)
     end
     if arrayLength > 40 then
-        lines[#lines + 1] = prefix .. "  ... und " .. (arrayLength - 40) .. " weitere"
+        lines[#lines + 1] = prefix .. L["  ... und "] .. (arrayLength - 40) .. " weitere"
     end
 
     local keys = {}
@@ -152,16 +152,16 @@ end
 -- lassen: was GetLayoutData liefert und ob das Schreiben erlaubt wäre.
 function Probe:BuildLayoutReport()
     local lines = {
-        "Forever Cooldowns - Layout-Daten des Abklingzeit-Managers",
+        L["Forever Cooldowns - Layout-Daten des Abklingzeit-Managers"],
         string.format("Client %s, Build %s", FCD.clientVersion, tostring(FCD.build)),
         "",
-        "GetLayoutData vorhanden: " .. tostring(Compat.HasLayoutData()),
-        "SetLayoutData vorhanden: " .. tostring(Compat.CanWriteLayoutData()),
+        L["GetLayoutData vorhanden: "] .. tostring(Compat.HasLayoutData()),
+        L["SetLayoutData vorhanden: "] .. tostring(Compat.CanWriteLayoutData()),
         "",
     }
 
     if not Compat.HasLayoutData() then
-        lines[#lines + 1] = "Ohne GetLayoutData ist hier nichts zu holen."
+        lines[#lines + 1] = L["Ohne GetLayoutData ist hier nichts zu holen."]
         return table.concat(lines, "\n")
     end
 
@@ -210,7 +210,7 @@ function Probe:BuildLayoutReport()
         end
         lines[#lines + 1] = #differing > 0
             and ("  Abweichend je Kategorie: " .. table.concat(differing, ", "))
-            or "  Alle Kategorien liefern denselben Blob (Argument wird ignoriert)."
+            or L["  Alle Kategorien liefern denselben Blob (Argument wird ignoriert)."]
     else
         dumpTable(lines, 1, "layout", data, 6)
     end
@@ -218,7 +218,7 @@ function Probe:BuildLayoutReport()
     -- Zeigt, wie ein Blob aussieht, den dieser Client selbst erzeugt.
     -- Stimmt die Form mit den Layout-Daten überein, ist die Kette gefunden.
     lines[#lines + 1] = ""
-    lines[#lines + 1] = "== Selbsttest: eigener Blob mit Blizzards Funktionen =="
+    lines[#lines + 1] = L["== Selbsttest: eigener Blob mit Blizzards Funktionen =="]
     for _, line in ipairs(Compat.EncodingSelfTest()) do
         lines[#lines + 1] = "  " .. line
     end
@@ -229,7 +229,7 @@ function Probe:BuildLayoutReport()
         for index = 1, math.min(8, #data) do
             prefix[#prefix + 1] = string.byte(data, index)
         end
-        lines[#lines + 1] = "  Erste Bytes der Layout-Daten: " .. table.concat(prefix, " ")
+        lines[#lines + 1] = L["  Erste Bytes der Layout-Daten: "] .. table.concat(prefix, " ")
     end
 
     lines[#lines + 1] = ""
@@ -246,9 +246,9 @@ function Probe:BuildLayoutReport()
         -- wird sichtbar, ob die Schlüssel den Kategorie-Werten entsprechen.
         local categories, path = Compat.FindLayoutCategories(decoded)
         lines[#lines + 1] = ""
-        lines[#lines + 1] = "== Zuordnung Kategorie -> Abklingzeiten =="
+        lines[#lines + 1] = L["== Zuordnung Kategorie -> Abklingzeiten =="]
         if not categories then
-            lines[#lines + 1] = "  Keine Kategorie-Zuordnung gefunden."
+            lines[#lines + 1] = L["  Keine Kategorie-Zuordnung gefunden."]
         else
             lines[#lines + 1] = "  Gefunden unter: " .. tostring(path)
             local keys = {}
@@ -264,13 +264,13 @@ function Probe:BuildLayoutReport()
                     local spellID = info and (info.spellID or info.overrideSpellID)
                     local name = spellID and Compat.GetSpellName(spellID) or "?"
                     local subText = spellID and Compat.GetSpellSubtext(spellID)
-                    lines[#lines + 1] = string.format("    %d -> Zauber %s, %s%s",
+                    lines[#lines + 1] = string.format(L["    %d -> Zauber %s, %s%s"],
                         cooldownID, tostring(spellID or "?"), name,
                         (subText and subText ~= "") and (" [" .. subText .. "]") or "")
                 end
             end
             lines[#lines + 1] = ""
-            lines[#lines + 1] = "  Zum Vergleich, was GetCooldownViewerCategorySet meldet:"
+            lines[#lines + 1] = L["  Zum Vergleich, was GetCooldownViewerCategorySet meldet:"]
             for _, category in ipairs(Compat.GetCooldownViewerCategories()) do
                 local ids = Compat.GetCategorySet(category.value)
                 if ids and #ids > 0 then
@@ -303,7 +303,7 @@ function Probe:BuildSearchReport(needle)
     end
     local lower = string.lower(needle)
     local lines = {
-        "Forever Cooldowns - Suche nach '" .. needle .. "'",
+        L["Forever Cooldowns - Suche nach '"] .. needle .. "'",
         "",
     }
 
@@ -348,19 +348,19 @@ function Probe:BuildSearchReport(needle)
         table.sort(list)
         lines[#lines + 1] = string.format("== %s (%d) ==", title, #list)
         if #list == 0 then
-            lines[#lines + 1] = "  keine"
+            lines[#lines + 1] = L["  keine"]
         end
         for index = 1, math.min(#list, 80) do
             lines[#lines + 1] = list[index]
         end
         if #list > 80 then
-            lines[#lines + 1] = "  ... und " .. (#list - 80) .. " weitere"
+            lines[#lines + 1] = L["  ... und "] .. (#list - 80) .. " weitere"
         end
         lines[#lines + 1] = ""
     end
 
     section("Globale Namen", globals)
-    section("Mitglieder von C_*-Namespaces", members)
+    section(L["Mitglieder von C_*-Namespaces"], members)
     section("Enum-Typen", enumTypes)
     section("Enum-Konstanten", enumValues)
 
@@ -378,17 +378,17 @@ function Probe:BuildDumpReport(pathText)
     local target, walked = _G, {}
     for part in string.gmatch(pathText, "[^%.]+") do
         if type(target) ~= "table" then
-            return "Kein Objekt unter '" .. table.concat(walked, ".") .. "'."
+            return L["Kein Objekt unter '"] .. table.concat(walked, ".") .. "'."
         end
         target = target[part]
         walked[#walked + 1] = part
         if target == nil then
-            return "'" .. table.concat(walked, ".") .. "' existiert nicht."
+            return "'" .. table.concat(walked, ".") .. L["' existiert nicht."]
         end
     end
 
     local lines = {
-        "Forever Cooldowns - Inhalt von " .. pathText,
+        L["Forever Cooldowns - Inhalt von "] .. pathText,
         "Typ: " .. type(target),
     }
 
@@ -441,13 +441,13 @@ function Probe:BuildDumpReport(pathText)
         lines[#lines + 1] = ""
         lines[#lines + 1] = string.format("== %s (%d) ==", title, #list)
         if #list == 0 then
-            lines[#lines + 1] = "  keine"
+            lines[#lines + 1] = L["  keine"]
         end
         for index = 1, math.min(#list, 150) do
             lines[#lines + 1] = list[index]
         end
         if #list > 150 then
-            lines[#lines + 1] = "  ... und " .. (#list - 150) .. " weitere"
+            lines[#lines + 1] = L["  ... und "] .. (#list - 150) .. " weitere"
         end
     end
 
@@ -491,7 +491,7 @@ end
 local function describeCandidate(path, object)
     local entries = safePairs(object)
     if not entries then
-        return string.format("  %-52s (nicht lesbar, gesperrt)", path)
+        return string.format(L["  %-52s (nicht lesbar, gesperrt)"], path)
     end
     local functions, values = 0, 0
     for _, entry in ipairs(entries) do
@@ -503,7 +503,7 @@ local function describeCandidate(path, object)
     end
     return string.format("  %-52s %d Funktionen, %d Werte  %s",
         path, functions, values,
-        values > 0 and "<- sieht nach laufendem Objekt aus" or "(nur Vorlage)")
+        values > 0 and L["<- sieht nach laufendem Objekt aus"] or L["(nur Vorlage)"])
 end
 
 -- Sucht Objekte, die die gesuchten Methoden tragen - in _G und eine Ebene
@@ -515,7 +515,7 @@ function Probe:BuildInstanceReport()
     }
 
     local lines = {
-        "Forever Cooldowns - Suche nach laufenden Objekten",
+        L["Forever Cooldowns - Suche nach laufenden Objekten"],
         "",
         L["Eine Vorlage trägt nur Funktionen. Erst ein Objekt mit Zustandsfeldern"],
         L["kann Änderungen wirklich ausführen."],
@@ -566,7 +566,7 @@ function Probe:BuildInstanceReport()
         table.sort(found)
         lines[#lines + 1] = string.format("== %s (%d Treffer) ==", signature.label, #found)
         if #found == 0 then
-            lines[#lines + 1] = "  keine"
+            lines[#lines + 1] = L["  keine"]
         end
         for index = 1, math.min(#found, 60) do
             lines[#lines + 1] = found[index]
@@ -591,7 +591,7 @@ function Probe:BuildInstanceReport()
         local label = entry[1] .. ":" .. entry[2] .. "()"
         local method = type(owner) == "table" and safeIndex(owner, entry[2]) or nil
         if type(owner) ~= "table" then
-            lines[#lines + 1] = "  " .. label .. " - Objekt fehlt oder gesperrt"
+            lines[#lines + 1] = "  " .. label .. L[" - Objekt fehlt oder gesperrt"]
         elseif type(method) ~= "function" then
             lines[#lines + 1] = "  " .. label .. " - Methode fehlt"
         else
@@ -618,9 +618,9 @@ end
 -- Deshalb ein eigener Befehl und keine Nebenwirkung der Oberfläche.
 function Probe:BuildCategoryComparison()
     local lines = {
-        "Forever Cooldowns - Abgleich der Kategorien",
+        L["Forever Cooldowns - Abgleich der Kategorien"],
         "",
-        "Liest Blizzards Datenmodell direkt. Das markiert ihren Viewer als",
+        L["Liest Blizzards Datenmodell direkt. Das markiert ihren Viewer als"],
         L["tainted - ein /reload danach räumt das auf."],
         "",
     }
@@ -631,7 +631,7 @@ function Probe:BuildCategoryComparison()
         return table.concat(lines, "\n")
     end
     if type(provider.GetOrderedCooldownIDsForCategory) ~= "function" then
-        lines[#lines + 1] = "GetOrderedCooldownIDsForCategory fehlt in diesem Client."
+        lines[#lines + 1] = L["GetOrderedCooldownIDsForCategory fehlt in diesem Client."]
         return table.concat(lines, "\n")
     end
 
@@ -655,7 +655,7 @@ function Probe:BuildCategoryComparison()
             end
         end
 
-        lines[#lines + 1] = string.format("== %s (%d) ==  Blizzard: %d, wir: %d%s",
+        lines[#lines + 1] = string.format(L["== %s (%d) ==  Blizzard: %d, wir: %d%s"],
             category.name, category.value, #theirs, #ours,
             (#theirs == #ours) and "  gleich" or "  ABWEICHUNG")
 
@@ -688,12 +688,12 @@ function Probe:BuildCategoryComparison()
                         Compat.SafeToString(FCD.Dock:EffectiveCategory(cooldownID)))
                 end
                 if #list > 8 then
-                    lines[#lines + 1] = "    ... und " .. (#list - 8) .. " weitere"
+                    lines[#lines + 1] = L["    ... und "] .. (#list - 8) .. " weitere"
                 end
             end
 
-            describe(missing, "bei Blizzard, bei uns nicht")
-            describe(extra, "bei uns, bei Blizzard nicht")
+            describe(missing, L["bei Blizzard, bei uns nicht"])
+            describe(extra, L["bei uns, bei Blizzard nicht"])
         end
         lines[#lines + 1] = ""
     end
@@ -713,7 +713,7 @@ function Probe:BuildFieldAnalysis()
         L["Forever Cooldowns - Felderanalyse der Cache-Einträge"],
         "",
         L["Gesucht ist ein Feld, dessen Werte die Einträge einer Kategorie so"],
-        "aufteilen, wie Blizzards Fenster sie aufteilt.",
+        L["aufteilen, wie Blizzards Fenster sie aufteilt."],
         "",
     }
 
@@ -776,7 +776,7 @@ function Probe:BuildFieldAnalysis()
         lines[#lines + 1] = ""
     end
 
-    lines[#lines + 1] = "Felder mit nur einem Wert sind weggelassen - sie trennen nichts."
+    lines[#lines + 1] = L["Felder mit nur einem Wert sind weggelassen - sie trennen nichts."]
     return table.concat(lines, "\n")
 end
 
@@ -787,7 +787,7 @@ end
 function Probe:GetEffectiveState(cooldownID)
     local info = Compat.GetCooldownInfo(cooldownID)
     if type(info) ~= "table" then
-        return "kein Cache-Eintrag", nil
+        return L["kein Cache-Eintrag"], nil
     end
     return string.format("Kategorie %s, isInvisible=%s, isKnown=%s",
         tostring(info.category), tostring(info.isInvisible), tostring(info.isKnown)), info
@@ -800,7 +800,7 @@ end
 function Probe:GetLiveState(cooldownID)
     local provider = FCD.Layout.GetDataProvider()
     if not provider then
-        return "Datenmodell nicht erreichbar", {}
+        return L["Datenmodell nicht erreichbar"], {}
     end
 
     local lines, categories = {}, {}
@@ -841,7 +841,7 @@ function Probe:GetLiveState(cooldownID)
         end
     end
 
-    local summary = #categories > 0 and table.concat(categories, "; ") or "in keiner Kategorie des Modells"
+    local summary = #categories > 0 and table.concat(categories, "; ") or L["in keiner Kategorie des Modells"]
     return summary, lines
 end
 
@@ -867,7 +867,7 @@ end
 -- Als Text statt in den Chat: nur im Textfenster lässt es sich kopieren.
 function Probe:BuildCooldownStateReport(cooldownID)
     if not cooldownID then
-        return "Format: /fcd state <AbklingzeitID>. Die IDs stehen in /fcd layout."
+        return L["Format: /fcd state <AbklingzeitID>. Die IDs stehen in /fcd layout."]
     end
 
     local info = Compat.GetCooldownInfo(cooldownID)
@@ -876,41 +876,41 @@ function Probe:BuildCooldownStateReport(cooldownID)
     local subText = spellID and Compat.GetSpellSubtext(spellID)
 
     local lines = {
-        "Forever Cooldowns - Zustand einer Abklingzeit",
+        L["Forever Cooldowns - Zustand einer Abklingzeit"],
         string.format("Client %s, Build %s", FCD.clientVersion, tostring(FCD.build)),
         "",
-        string.format("Abklingzeit %d: %s%s (Zauber %s)", cooldownID, name,
+        string.format(L["Abklingzeit %d: %s%s (Zauber %s)"], cooldownID, name,
             (subText and subText ~= "") and (", " .. subText) or "", tostring(spellID or "?")),
         "",
     }
 
     local state, err = FCD.Layout:Read()
     if not state then
-        lines[#lines + 1] = "Blob nicht lesbar: " .. tostring(err)
+        lines[#lines + 1] = L["Blob nicht lesbar: "] .. tostring(err)
     else
         local assigned = FCD.Layout:GetAssignedCategory(state, cooldownID)
-        lines[#lines + 1] = "Im Blob: " .. (FCD.Layout:IsHidden(state, cooldownID)
+        lines[#lines + 1] = L["Im Blob: "] .. (FCD.Layout:IsHidden(state, cooldownID)
             and "ausgeblendet (-1)"
-            or (assigned and ("Kategorie " .. assigned) or "keine Abweichung vom Standard"))
+            or (assigned and ("Kategorie " .. assigned) or L["keine Abweichung vom Standard"]))
         local position
         for index, id in ipairs(state.order or {}) do
             if id == cooldownID then
                 position = index
             end
         end
-        lines[#lines + 1] = "Reihenfolge-Position: " .. tostring(position or "nicht gelistet")
-            .. " von " .. #(state.order or {})
+        lines[#lines + 1] = "Reihenfolge-Position: " .. tostring(position or L["nicht gelistet"])
+            .. L[" von "] .. #(state.order or {})
     end
 
     local hits = self:FindInCategorySets(cooldownID)
-    lines[#lines + 1] = "Statische Zuordnung: " .. (#hits > 0 and table.concat(hits, ", ") or "keine")
+    lines[#lines + 1] = "Statische Zuordnung: " .. (#hits > 0 and table.concat(hits, ", ") or L["keine"])
 
     -- Der wirksame Zustand, auf den es ankommt
     local summary, cacheInfo = self:GetEffectiveState(cooldownID)
-    lines[#lines + 1] = "Wirksam: " .. summary
+    lines[#lines + 1] = L["Wirksam: "] .. summary
     if cacheInfo then
         lines[#lines + 1] = ""
-        lines[#lines + 1] = "Cache-Eintrag:"
+        lines[#lines + 1] = L["Cache-Eintrag:"]
         local fields = {}
         for field in pairs(cacheInfo) do
             fields[#fields + 1] = field
@@ -986,15 +986,15 @@ local function diffTables(before, after, path, out)
 end
 
 function Probe:BuildLayoutDiff()
-    local lines = { "Forever Cooldowns - Vergleich der Layout-Daten", "" }
+    local lines = { L["Forever Cooldowns - Vergleich der Layout-Daten"], "" }
 
     local snapshot = FCD.db.layoutSnapshot
     if not snapshot or not snapshot.raw then
-        lines[#lines + 1] = "Keine Momentaufnahme vorhanden. Erst  /fcd snapshot  aufrufen,"
+        lines[#lines + 1] = L["Keine Momentaufnahme vorhanden. Erst  /fcd snapshot  aufrufen,"]
         lines[#lines + 1] = L["dann im Blizzard-Fenster etwas ändern, dann  /fcd diff."]
         return table.concat(lines, "\n")
     end
-    lines[#lines + 1] = "Momentaufnahme von " .. tostring(snapshot.taken)
+    lines[#lines + 1] = L["Momentaufnahme von "] .. tostring(snapshot.taken)
 
     local current, err = Compat.GetLayoutData()
     if err or type(current) ~= "string" then
@@ -1044,13 +1044,13 @@ function Probe:BuildLayoutDiff()
         lines[#lines + 1] = string.format("  %s", difference.path)
         if difference.subtreeBefore ~= nil or difference.subtreeAfter ~= nil then
             if difference.subtreeBefore == nil then
-                lines[#lines + 1] = "      vorher: nicht vorhanden"
+                lines[#lines + 1] = L["      vorher: nicht vorhanden"]
             else
                 lines[#lines + 1] = "      vorher:"
                 flatten(difference.subtreeBefore, "", lines, "        ")
             end
             if difference.subtreeAfter == nil then
-                lines[#lines + 1] = "      jetzt:  nicht mehr vorhanden"
+                lines[#lines + 1] = L["      jetzt:  nicht mehr vorhanden"]
             else
                 lines[#lines + 1] = "      jetzt:"
                 flatten(difference.subtreeAfter, "", lines, "        ")
@@ -1062,7 +1062,7 @@ function Probe:BuildLayoutDiff()
     end
 
     if #differences == 0 then
-        lines[#lines + 1] = "  Keine - der Blob unterscheidet sich nur in der Kodierung."
+        lines[#lines + 1] = L["  Keine - der Blob unterscheidet sich nur in der Kodierung."]
     end
 
     return table.concat(lines, "\n")
@@ -1192,15 +1192,15 @@ function Probe:BuildReport()
         end
     end
     table.sort(secretGlobals)
-    lines[#lines + 1] = "  Globale Namen mit 'secret': "
-        .. (#secretGlobals > 0 and table.concat(secretGlobals, ", ") or "keine")
+    lines[#lines + 1] = L["  Globale Namen mit 'secret': "]
+        .. (#secretGlobals > 0 and table.concat(secretGlobals, ", ") or L["keine"])
 
     lines[#lines + 1] = ""
     lines[#lines + 1] = "== Ereignisse =="
     lines[#lines + 1] = "  registriert: " .. table.concat(FCD.registeredEvents or {}, ", ")
     local unknownEvents = FCD.unavailableEvents or {}
-    lines[#lines + 1] = "  in diesem Client unbekannt: "
-        .. (#unknownEvents > 0 and table.concat(unknownEvents, ", ") or "keine")
+    lines[#lines + 1] = L["  in diesem Client unbekannt: "]
+        .. (#unknownEvents > 0 and table.concat(unknownEvents, ", ") or L["keine"])
 
     lines[#lines + 1] = ""
     lines[#lines + 1] = L["== Funktionsprüfung =="]
@@ -1212,30 +1212,30 @@ function Probe:BuildReport()
 
     -- Der einzige verlässliche Weg an die echten Funktionsnamen dieses Builds
     lines[#lines + 1] = ""
-    lines[#lines + 1] = "== Inhalt von C_CooldownViewer =="
+    lines[#lines + 1] = L["== Inhalt von C_CooldownViewer =="]
     local members = Compat.DumpNamespace(C_CooldownViewer)
     if #members == 0 then
-        lines[#lines + 1] = "  C_CooldownViewer ist keine Tabelle oder leer."
+        lines[#lines + 1] = L["  C_CooldownViewer ist keine Tabelle oder leer."]
     end
     for _, member in ipairs(members) do
         lines[#lines + 1] = string.format("  %-44s %s", member.name, member.kind)
     end
 
     lines[#lines + 1] = ""
-    lines[#lines + 1] = "== Abklingzeit-Manager =="
+    lines[#lines + 1] = L["== Abklingzeit-Manager =="]
     if not Compat.HasCooldownInfo() then
-        lines[#lines + 1] = "  Hinweis: Es gibt keine Funktion, die eine Abklingzeit-ID zu einem"
+        lines[#lines + 1] = L["  Hinweis: Es gibt keine Funktion, die eine Abklingzeit-ID zu einem"]
         lines[#lines + 1] = L["  Zauber auflöst. Die Kategorie-Listen sind lesbar, die Zuordnung"]
-        lines[#lines + 1] = "  nicht. Der richtige Name steht vermutlich in der Liste oben."
+        lines[#lines + 1] = L["  nicht. Der richtige Name steht vermutlich in der Liste oben."]
     end
     local categories = Compat.GetCooldownViewerCategories()
     if #categories == 0 then
-        lines[#lines + 1] = "  Enum.CooldownViewerCategory nicht vorhanden."
+        lines[#lines + 1] = L["  Enum.CooldownViewerCategory nicht vorhanden."]
     end
     for _, category in ipairs(categories) do
         local ids = Compat.GetCategorySet(category.value)
         lines[#lines + 1] = string.format(L["  %s (%d): %s Einträge"],
-            category.name, category.value, ids and #ids or "keine Antwort")
+            category.name, category.value, ids and #ids or L["keine Antwort"])
         if ids and #ids > 0 then
             local shown = {}
             for index = 1, math.min(#ids, 20) do
@@ -1252,12 +1252,12 @@ function Probe:BuildReport()
                     fields[#fields + 1] = field
                 end
                 table.sort(fields)
-                lines[#lines + 1] = "    Beispiel-Eintrag " .. tostring(ids[1]) .. ":"
+                lines[#lines + 1] = L["    Beispiel-Eintrag "] .. tostring(ids[1]) .. ":"
                 for _, field in ipairs(fields) do
                     lines[#lines + 1] = string.format("      %s = %s", field, describeValue(info[field]))
                 end
             else
-                lines[#lines + 1] = "    GetCooldownViewerCacheInfo lieferte keine Tabelle."
+                lines[#lines + 1] = L["    GetCooldownViewerCacheInfo lieferte keine Tabelle."]
             end
         end
     end
@@ -1282,11 +1282,11 @@ function Probe:BuildReport()
                 subText and ('"' .. subText .. '"') or "(keiner)",
                 tostring(FCD.Ranks:ParseRank(subText) or "-"),
                 isPassive and "  passiv" or "",
-                known and "" or "  nicht gelernt")
+                known and "" or L["  nicht gelernt"])
         end
     end)
     if listed > 30 then
-        lines[#lines + 1] = string.format("    ... und %d weitere", listed - 30)
+        lines[#lines + 1] = string.format(L["    ... und %d weitere"], listed - 30)
     end
 
     -- Stichprobe: die Familien mit den meisten Rängen zeigen, ob die
@@ -1310,8 +1310,8 @@ function Probe:BuildReport()
     end
     if #sample == 0 then
         lines[#lines + 1] = L["    Keine Fähigkeit mit mehreren Rängen gefunden."]
-        lines[#lines + 1] = "    Entweder hat der Charakter noch keine, oder die Untertitel"
-        lines[#lines + 1] = "    werden in diesem Client anders geliefert als 'Rang N'."
+        lines[#lines + 1] = L["    Entweder hat der Charakter noch keine, oder die Untertitel"]
+        lines[#lines + 1] = L["    werden in diesem Client anders geliefert als 'Rang N'."]
     end
 
     lines[#lines + 1] = ""
@@ -1336,7 +1336,7 @@ function Probe:BuildRegistrationLines()
     end
 
     local name, title, loadable, reason = Compat.GetAddOnInfo(FCD.name)
-    lines[#lines + 1] = string.format("Registrierung von '%s' (%d AddOns bekannt):",
+    lines[#lines + 1] = string.format(L["Registrierung von '%s' (%d AddOns bekannt):"],
         tostring(FCD.name), Compat.GetNumAddOns())
     show("Name laut Client", name)
     show("Titel", title)
@@ -1346,10 +1346,10 @@ function Probe:BuildRegistrationLines()
     -- Version und eigene X-Felder. Ein eigenes X-Feld ist deshalb die einzige
     -- Möglichkeit zu prüfen, wie weit der Client unsere .toc gelesen hat -
     -- es steht dort UNTER der SavedVariables-Zeile.
-    show("X-FCD-Toc (steht in der .toc unter SavedVariables)",
+    show(L["X-FCD-Toc (steht in der .toc unter SavedVariables)"],
         Compat.GetAddOnMetadata(FCD.name, "X-FCD-Toc"))
     if loadable == false then
-        show("Nicht ladbar", reason)
+        show(L["Nicht ladbar"], reason)
     end
     return lines
 end
@@ -1414,13 +1414,13 @@ function Probe:BuildBlizzardLayoutReport()
         if type(root) == "table" then
             pcall(walk, root, name, 0)
         else
-            lines[#lines + 1] = name .. " gibt es nicht."
+            lines[#lines + 1] = name .. L[" gibt es nicht."]
         end
     end
 
     if found == 0 then
-        lines[#lines + 1] = "Nichts gefunden, das nach einer Layout-Liste aussieht."
-        lines[#lines + 1] = "Ist Blizzards Abklingzeit-Fenster offen?"
+        lines[#lines + 1] = L["Nichts gefunden, das nach einer Layout-Liste aussieht."]
+        lines[#lines + 1] = L["Ist Blizzards Abklingzeit-Fenster offen?"]
     end
     return table.concat(lines, "\n")
 end
@@ -1454,7 +1454,7 @@ function Probe:BuildEditModeReport()
     end
 
     -- 1. Globale Namen
-    lines[#lines + 1] = "-- Globale Namen mit 'EditMode' --"
+    lines[#lines + 1] = L["-- Globale Namen mit 'EditMode' --"]
     -- Nur Namen, die mit "EditMode" beginnen. Die Gamepad-Rahmen tragen es
     -- mitten im Namen und machten neun Zehntel der Ausgabe aus, ohne etwas
     -- beizutragen. Mixins ebenfalls weg: das sind Bauvorlagen, keine Rahmen.
@@ -1470,14 +1470,14 @@ function Probe:BuildEditModeReport()
         lines[#lines + 1] = string.format("  %s  (%s)", name, describeFrame(_G[name]))
     end
     if #names == 0 then
-        lines[#lines + 1] = "  keine - dieser Client kennt den Bearbeitungsmodus nicht"
+        lines[#lines + 1] = L["  keine - dieser Client kennt den Bearbeitungsmodus nicht"]
     end
     lines[#lines + 1] = ""
 
     -- 2. Felder des Verwalters, die selbst Rahmen sind
     local manager = _G.EditModeManagerFrame
     if type(manager) == "table" then
-        lines[#lines + 1] = "-- Felder von EditModeManagerFrame --"
+        lines[#lines + 1] = L["-- Felder von EditModeManagerFrame --"]
         local fields = {}
         for key, value in pairs(manager) do
             if type(key) == "string" and type(value) == "table" then
@@ -1493,7 +1493,7 @@ function Probe:BuildEditModeReport()
             lines[#lines + 1] = string.format("  .%s  (%s)", key, describeFrame(manager[key]))
         end
         if #fields == 0 then
-            lines[#lines + 1] = "  keine"
+            lines[#lines + 1] = L["  keine"]
         end
         lines[#lines + 1] = ""
     end
@@ -1555,7 +1555,7 @@ function Probe:BuildEditModeReport()
     if reported == 0 then
         lines[#lines + 1] = "  nichts offen."
         lines[#lines + 1] = L["  Bearbeitungsmodus öffnen, eine ihrer Leisten anklicken,"]
-        lines[#lines + 1] = "  dann diesen Befehl erneut absetzen."
+        lines[#lines + 1] = L["  dann diesen Befehl erneut absetzen."]
     end
 
     -- Abfangen können wir ihr Fenster. Die offene Frage ist, ob sich ihre
@@ -1565,7 +1565,7 @@ function Probe:BuildEditModeReport()
         lines[#lines + 1] = ""
         lines[#lines + 1] = "-- " .. title .. " --"
         if type(namespace) ~= "table" then
-            lines[#lines + 1] = "  gibt es nicht."
+            lines[#lines + 1] = L["  gibt es nicht."]
             return
         end
         local members = {}
@@ -1615,7 +1615,7 @@ function Probe:BuildEditModeReport()
             lines[#lines + 1] = "  " .. name .. ":  " .. table.concat(parts, ", ")
         end
         if #names == 0 then
-            lines[#lines + 1] = "  keine gefunden."
+            lines[#lines + 1] = L["  keine gefunden."]
         end
     end
 
@@ -1623,7 +1623,7 @@ function Probe:BuildEditModeReport()
     -- Verwalters ist mehrere hundert Zeilen lang.
     do
         lines[#lines + 1] = ""
-        lines[#lines + 1] = "-- EditModeManagerFrame: Methoden mit Setting/Change/Update --"
+        lines[#lines + 1] = L["-- EditModeManagerFrame: Methoden mit Setting/Change/Update --"]
         local manager = _G.EditModeManagerFrame
         local hits = {}
         if type(manager) == "table" then
@@ -1640,7 +1640,7 @@ function Probe:BuildEditModeReport()
             lines[#lines + 1] = line
         end
         if #hits == 0 then
-            lines[#lines + 1] = "  keine - dann steht der Setzer in einem Mixin."
+            lines[#lines + 1] = L["  keine - dann steht der Setzer in einem Mixin."]
         end
     end
     listMembers("EditModeCooldownViewerSystemMixin", _G.EditModeCooldownViewerSystemMixin)
@@ -1686,11 +1686,11 @@ end
 local function attachedSystem()
     local dialog = _G.EditModeSystemSettingsDialog
     if type(dialog) ~= "table" then
-        return nil, "EditModeSystemSettingsDialog gibt es nicht."
+        return nil, L["EditModeSystemSettingsDialog gibt es nicht."]
     end
     local system = rawget(dialog, "attachedToSystem")
     if type(system) ~= "table" then
-        return nil, "Ihr Fenster ist zu - erst eine Leiste im Bearbeitungsmodus anklicken."
+        return nil, L["Ihr Fenster ist zu - erst eine Leiste im Bearbeitungsmodus anklicken."]
     end
     return system
 end
@@ -1713,7 +1713,7 @@ local function settingEnum()
 end
 
 function Probe:BuildEditModeSettingsReport()
-    local lines = { "== Einstellungen der angeklickten Leiste ==", "" }
+    local lines = { L["== Einstellungen der angeklickten Leiste =="], "" }
 
     local system, err = attachedSystem()
     if not system then
@@ -1725,16 +1725,16 @@ function Probe:BuildEditModeSettingsReport()
     pcall(function() name = system:GetSystemName() end)
     local frameName = "?"
     pcall(function() frameName = system:GetName() end)
-    lines[#lines + 1] = string.format("Leiste: %s  (%s)", tostring(name), tostring(frameName))
+    lines[#lines + 1] = string.format(L["Leiste: %s  (%s)"], tostring(name), tostring(frameName))
     lines[#lines + 1] = ""
 
     local enum, enumName = settingEnum()
     if not enum then
-        lines[#lines + 1] = "Kein Einstellungs-Enum gefunden - ohne das sind die"
-        lines[#lines + 1] = "Nummern der Einstellungen nicht zu benennen."
+        lines[#lines + 1] = L["Kein Einstellungs-Enum gefunden - ohne das sind die"]
+        lines[#lines + 1] = L["Nummern der Einstellungen nicht zu benennen."]
         return table.concat(lines, "\n")
     end
-    lines[#lines + 1] = "Aus " .. enumName .. ":"
+    lines[#lines + 1] = L["Aus "] .. enumName .. ":"
     lines[#lines + 1] = ""
 
     local entries = {}
@@ -1752,17 +1752,17 @@ function Probe:BuildEditModeSettingsReport()
         pcall(function() current = system:GetSettingValue(entry.value) end)
         lines[#lines + 1] = string.format("  %-28s = %-6s %s",
             entry.key, tostring(current),
-            has and "" or "|cff888888(hat diese Leiste nicht)|r")
+            has and "" or L["|cff888888(hat diese Leiste nicht)|r"])
     end
 
     -- Wo die Zahlen liegen. Der Setzer muss genau hierhin schreiben,
     -- sonst liest GetSettingValue weiter den alten Wert - genau das ist beim
     -- ersten Versuch passiert.
     lines[#lines + 1] = ""
-    lines[#lines + 1] = "-- Ablage der Werte --"
+    lines[#lines + 1] = L["-- Ablage der Werte --"]
     local info = rawget(system, "systemInfo")
     if type(info) == "table" then
-        lines[#lines + 1] = "  system.systemInfo vorhanden:"
+        lines[#lines + 1] = L["  system.systemInfo vorhanden:"]
         for key, value in pairs(info) do
             lines[#lines + 1] = string.format("    .%s  (%s)", tostring(key), type(value))
         end
@@ -1776,12 +1776,12 @@ function Probe:BuildEditModeSettingsReport()
             end
         end
     else
-        lines[#lines + 1] = "  kein system.systemInfo - dann liegt es woanders."
+        lines[#lines + 1] = L["  kein system.systemInfo - dann liegt es woanders."]
     end
 
     local map = rawget(system, "settingMap")
     if type(map) == "table" then
-        lines[#lines + 1] = "  system.settingMap vorhanden (" .. tostring(#map) .. L[" Einträge)"]
+        lines[#lines + 1] = L["  system.settingMap vorhanden ("] .. tostring(#map) .. L[" Einträge)"]
     end
 
     lines[#lines + 1] = ""
@@ -1804,7 +1804,7 @@ function Probe:TryEditModeSetting(settingName, value)
 
     local enum = settingEnum()
     if not enum then
-        return nil, "Kein Einstellungs-Enum in diesem Client."
+        return nil, L["Kein Einstellungs-Enum in diesem Client."]
     end
 
     local settingID = rawget(enum, settingName)
@@ -1814,7 +1814,7 @@ function Probe:TryEditModeSetting(settingName, value)
 
     local number = tonumber(value)
     if not number then
-        return nil, "Der Wert muss eine Zahl sein."
+        return nil, L["Der Wert muss eine Zahl sein."]
     end
 
     local function currentValue()
@@ -1841,7 +1841,7 @@ function Probe:TryEditModeSetting(settingName, value)
             local info = rawget(system, "systemInfo")
             local settings = info and rawget(info, "settings")
             if type(settings) ~= "table" then
-                error("keine settings-Tabelle", 0)
+                error(L["keine settings-Tabelle"], 0)
             end
             -- Zwei Ablageformen sind möglich: Wert direkt, oder in einer
             -- Tabelle mit .setting und .value.
