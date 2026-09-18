@@ -1694,7 +1694,7 @@ local function refreshProfileMenu()
         text = L["Neues Layout"],
         onClick = function()
             menu:Hide()
-            StaticPopup_Show("FCD_NEW_LAYOUT_PROFILE")
+            FCD.ShowPopup("FCD_NEW_LAYOUT_PROFILE")
         end,
     })
     addRow({
@@ -1730,7 +1730,7 @@ local function refreshProfileMenu()
             onClick = function()
                 menu:Hide()
                 Dock.profileToDelete = active
-                StaticPopup_Show("FCD_DELETE_LAYOUT_PROFILE", active)
+                FCD.ShowPopup("FCD_DELETE_LAYOUT_PROFILE", active)
             end,
         })
     end
@@ -1948,16 +1948,25 @@ function Dock:Build()
     expand.fallback = expand:CreateFontString(nil, "BACKGROUND", "GameFontNormal")
     expand.fallback:SetAllPoints()
     expand.fallback:SetText("+")
-    expand:SetNormalTexture("Interface\\Buttons\\UI-Panel-BiggerButton-Up")
-    expand:SetPushedTexture("Interface\\Buttons\\UI-Panel-BiggerButton-Down")
     expand:SetHighlightTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Highlight")
+
+    -- Der Pfeil folgt dem Zustand: nach aussen, solange das Fenster schmal
+    -- ist, nach innen, sobald es breit ist. Vorher zeigte er immer nach
+    -- aussen und behauptete damit im breiten Fenster das Gegenteil dessen,
+    -- was der Klick tut.
+    function expand.UpdateArrow()
+        local art = state.wide and "UI-Panel-SmallerButton" or "UI-Panel-BiggerButton"
+        expand:SetNormalTexture("Interface\\Buttons\\" .. art .. "-Up")
+        expand:SetPushedTexture("Interface\\Buttons\\" .. art .. "-Down")
+    end
+    expand.UpdateArrow()
 
     expand:SetScript("OnClick", function()
         Dock:SetWide(not state.wide)
     end)
     expand:SetScript("OnEnter", function(self)
         FCD.Widgets.ShowTooltip(self, "ANCHOR_LEFT",
-            state.wide and "Schmale Ansicht" or "Breite Ansicht",
+            state.wide and L["Schmale Ansicht"] or L["Breite Ansicht"],
             state.wide and L["Zurück an Blizzards Fenster andocken."]
                 or L["Dieselben Daten, nur mit mehr Platz pro Zeile."])
     end)
@@ -2091,7 +2100,7 @@ function Dock:Build()
     addButton:SetPoint("LEFT", search, "RIGHT", 6, 0)
     addButton:SetText("+")
     addButton:SetScript("OnClick", function()
-        StaticPopup_Show(currentTab().entryKind == "spell"
+        FCD.ShowPopup(currentTab().entryKind == "spell"
             and "FCD_ADD_SPELL" or "FCD_ADD_ITEM")
     end)
     addButton:SetScript("OnEnter", function(self)
@@ -2265,7 +2274,7 @@ function Dock:Build()
     cooldownCheck:SetPoint("TOPLEFT", 0, offsetY)
     offsetY = offsetY - 24
 
-    local passiveCheck = FCD.Widgets.CreateCheck(sidebar, "Passive zeigen", function()
+    local passiveCheck = FCD.Widgets.CreateCheck(sidebar, L["Passive zeigen"], function()
         return state.showPassive
     end, function(value)
         state.showPassive = value
@@ -2279,7 +2288,7 @@ function Dock:Build()
     addSpellButton:SetPoint("TOPLEFT", 0, offsetY)
     addSpellButton:SetText(L["+ Zauber aufnehmen..."])
     addSpellButton:SetScript("OnClick", function()
-        StaticPopup_Show("FCD_ADD_SPELL")
+        FCD.ShowPopup("FCD_ADD_SPELL")
     end)
     offsetY = offsetY - 26
 
@@ -2288,7 +2297,7 @@ function Dock:Build()
     addItemButton:SetPoint("TOPLEFT", 0, offsetY)
     addItemButton:SetText(L["+ Gegenstand aufnehmen..."])
     addItemButton:SetScript("OnClick", function()
-        StaticPopup_Show("FCD_ADD_ITEM")
+        FCD.ShowPopup("FCD_ADD_ITEM")
     end)
     offsetY = offsetY - 26
 
@@ -2972,6 +2981,9 @@ function Dock:LayoutChrome()
     -- ihre Breite muss hier nicht mehr nachgezogen werden.
     if panel.expandButton then
         panel.expandButton.fallback:SetText(state.wide and "-" or "+")
+        if panel.expandButton.UpdateArrow then
+            panel.expandButton.UpdateArrow()
+        end
     end
 
     -- Der Scrollbereich endet in der breiten Ansicht vor der Werkzeugspalte

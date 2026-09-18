@@ -720,8 +720,26 @@ end
 
 -- ------------------------------------------------------------------ Dialoge
 
+-- Dialoge oeffnen. Der Text in der Tabelle ist der deutsche Schluessel;
+-- uebersetzt wird hier, weil beim Anlegen der Tabelle die gemerkte Sprache
+-- noch nicht feststeht.
+function FCD.ShowPopup(name, ...)
+    local dialog = StaticPopupDialogs[name]
+    if type(dialog) == "table" then
+        dialog.fcdText = dialog.fcdText or dialog.text
+        dialog.text = L[dialog.fcdText]
+        if dialog.fcdButton1 then
+            dialog.button1 = L[dialog.fcdButton1]
+        end
+        if dialog.fcdButton2 then
+            dialog.button2 = L[dialog.fcdButton2]
+        end
+    end
+    return StaticPopup_Show(name, ...)
+end
+
 StaticPopupDialogs["FCD_NEW_PROFILE"] = {
-    text = L["Name des neuen Profils:"],
+    text = "Name des neuen Profils:",
     button1 = ACCEPT,
     button2 = CANCEL,
     hasEditBox = true,
@@ -743,7 +761,7 @@ StaticPopupDialogs["FCD_NEW_PROFILE"] = {
 }
 
 StaticPopupDialogs["FCD_COPY_PROFILE"] = {
-    text = L["Name der Kopie:"],
+    text = "Name der Kopie:",
     button1 = ACCEPT,
     button2 = CANCEL,
     hasEditBox = true,
@@ -1029,7 +1047,7 @@ function FCD:ShowLayoutImport()
 end
 
 StaticPopupDialogs["FCD_ADD_SPELL"] = {
-    text = L["Zauber aufnehmen - ID oder Link einfügen\n(Umschalt-Klick auf einen Zauber fügt den Link ein):"],
+    text = "Zauber aufnehmen - ID oder Link einfügen\n(Umschalt-Klick auf einen Zauber fügt den Link ein):",
     button1 = ACCEPT,
     button2 = CANCEL,
     hasEditBox = true,
@@ -1060,7 +1078,7 @@ StaticPopupDialogs["FCD_ADD_SPELL"] = {
 }
 
 StaticPopupDialogs["FCD_ADD_ITEM"] = {
-    text = L["Gegenstand aufnehmen - ID oder Link einfügen\n(Shift-Klick auf einen Gegenstand fügt den Link ein):"],
+    text = "Gegenstand aufnehmen - ID oder Link einfügen\n(Shift-Klick auf einen Gegenstand fügt den Link ein):",
     button1 = ACCEPT,
     button2 = CANCEL,
     hasEditBox = true,
@@ -1085,7 +1103,12 @@ StaticPopupDialogs["FCD_ADD_ITEM"] = {
 }
 
 StaticPopupDialogs["FCD_DELETE_LAYOUT_PROFILE"] = {
-    text = L["Layout '%s' wirklich verwerfen?"],
+    text = "Layout '%s' wirklich verwerfen?",
+    -- Eigene Beschriftung, deshalb uebersetzbar. Wo ACCEPT und CANCEL
+    -- stehen, sind es Blizzards Globals - die tragen schon die Sprache des
+    -- Clients und bleiben unangetastet.
+    fcdButton1 = "Verwerfen",
+    fcdButton2 = "Abbrechen",
     button1 = "Verwerfen",
     button2 = "Abbrechen",
     timeout = 0,
@@ -1114,7 +1137,7 @@ StaticPopupDialogs["FCD_DELETE_LAYOUT_PROFILE"] = {
 }
 
 StaticPopupDialogs["FCD_NEW_LAYOUT_PROFILE"] = {
-    text = L["Name für das Layout-Profil:"],
+    text = "Name für das Layout-Profil:",
     button1 = ACCEPT,
     button2 = CANCEL,
     hasEditBox = true,

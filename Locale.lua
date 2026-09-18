@@ -1186,6 +1186,11 @@ FCD.AddTranslations("enUS", {
     ["Verfolgte Leisten"] = "Tracked Bars",
     ["Nicht angezeigt"] = "Hidden",
     ["Nicht angezeigt (passiv)"] = "Hidden (passive)",
+["Passive zeigen"] = "Show passives",
+    ["Schmale Ansicht"] = "Narrow view",
+    ["Breite Ansicht"] = "Wide view",
+["Verwerfen"] = "Delete",
+    ["Abbrechen"] = "Cancel",
 })
 
 FCD.SetLanguage("auto")

@@ -44,6 +44,9 @@ const KENNUNGEN = new Set([
 ]);
 
 const GERMAN = /[äöüÄÖÜß]/;
+const POPUP_HEAD = /StaticPopupDialogs\[[^\]]+\]\s*=\s*\{/g;
+const POPUP_FIELDS = /\b(text|fcdButton1|fcdButton2)\s*=\s*"((?:[^"\\]|\\.)*)"/g;
+
 const loose = [];
 const used = new Set();
 
@@ -68,6 +71,19 @@ for (const file of files) {
             if (GERMAN.test(m[1]) || m[1].includes(' ')) used.add(m[1]);
         }
         rest = rest.slice(0, start) + rest.slice(end);
+    }
+
+    // Dasselbe für Blizzards Dialoge: sie merken sich ihren Text beim
+    // Anlegen, also steht dort ebenfalls der deutsche Schlüssel. Von hinten
+    // nach vorn, damit die Stellen sich nicht verschieben.
+    for (const m of [...rest.matchAll(POPUP_HEAD)].reverse()) {
+        const end = rest.indexOf('\n}', m.index);
+        const stop = end < 0 ? rest.length : end;
+        const body = rest.slice(m.index, stop).replace(POPUP_FIELDS, (all, field, value) => {
+            used.add(value);
+            return ' '.repeat(all.length);
+        });
+        rest = rest.slice(0, m.index) + body + rest.slice(stop);
     }
 
     // Kommentare ausblenden: dort ist Deutsch richtig und gewollt.
