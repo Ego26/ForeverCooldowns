@@ -3,10 +3,10 @@
 **Blizzards Abklingzeit-Manager zeigt nur, was auf seiner Liste steht.
 Forever Cooldowns hebt diese Grenze auf.**
 
-Jeder Zauber aus dem Zauberbuch, jeder benutzbare Gegenstand – auf eine
-eigene Leiste, mit denselben Handgriffen wie in ihrem Fenster. Dazu ihre
-Kategorien bearbeiten, ohne sich durch dreißig identisch aussehende Einträge
-zu klicken.
+Jeder Zauber, jeder benutzbare Gegenstand – auf eine eigene Leiste, mit
+denselben Handgriffen wie in ihrem Fenster. Und nicht nur das: Forever
+Cooldowns tritt an die Stelle ihres Fensters und ersetzt im Bearbeitungsmodus
+auch die Einstellungen ihrer eigenen Leisten.
 
 Tippe `/fcd`.
 
@@ -30,8 +30,31 @@ gelernten Rang. Aus dreißig Zeilen wird eine.
 
 Zwei eigene Reiter, gleich bedienbar wie Blizzards Kategorien. Ein Abschnitt
 heißt **„Nicht in Blizzards Manager"** und zeigt genau das, was ihre
-kuratierte Liste auslässt. Gegenstände lassen sich aus der Tasche direkt auf
-das Panel ziehen.
+kuratierte Liste auslässt. Über `+` neben der Suche lässt sich jede Zauber-
+oder Gegenstands-ID aufnehmen – auch das, was im Zauberbuch gar nicht steht.
+Gegenstände gehen zusätzlich per Ziehen aus der Tasche.
+
+### Melden, wenn bereit
+
+Sobald etwas bereit wird, leuchtet es auf – mit Blizzards eigenem
+Spell-Alert-Leuchten, sofern der Client es kennt – und bleibt markiert,
+solange es bereit ist. Wahlweise dazu ein Ton, aus einer Liste der Töne, die
+dieser Client tatsächlich hat.
+
+Einstellbar pro Leiste und, über **Je Eintrag festlegen**, abweichend für
+einzelne Symbole. Eine stumme Leiste mit genau einem meldenden Zauber ist
+damit möglich – und umgekehrt genau einer von zwanzig ausgenommen.
+
+### Eine Oberfläche für alles
+
+Forever Cooldowns übernimmt Blizzards Abklingzeit-Fenster, und im
+Bearbeitungsmodus auch die Einstellungsfenster **ihrer** Leisten:
+Ausrichtung, Symbolgröße, Abstand, Transparenz, Sichtbarkeit.
+
+Die Werte bleiben dabei ihre. Gelesen und geschrieben wird über ihren eigenen
+Weg – ihre Oberfläche zieht von selbst nach, ihr „Änderungen speichern"
+sichert unsere Änderungen mit, und ein Neuladen überlebt es. Wer lieber ihre
+Fenster behält: `/fcd replace off` und `/fcd editui off`.
 
 ### Blizzards Kategorien bearbeiten
 
@@ -47,9 +70,10 @@ fester (Downranking). Wer einen neuen Rang lernt, muss nichts nachziehen.
 
 ### Eigene Leisten
 
-Ausrichtung, Spalten, Symbolgröße, Abstand, Transparenz, Sichtbarkeit – pro
-Leiste, in einem Fenster im Stil von Blizzards Bearbeitungsmodus. Die Leisten
-folgen ihm auch: geht er auf, sind sie verschiebbar und beschriftet.
+Ausrichtung, Spalten, Symbolgröße, Abstand, Transparenz, Sichtbarkeit
+einschließlich *Nie*, Tooltips und *Beim Anklicken benutzen* – pro Leiste, in
+einem Fenster im Stil von Blizzards Bearbeitungsmodus. Die Leisten folgen ihm
+auch: geht er auf, sind sie verschiebbar und beschriftet.
 
 ### Profile
 
@@ -64,6 +88,9 @@ Wechsel bei Haltung, Form oder Spezialisierung.
 | --- | --- |
 | `/fcd` | Panel öffnen |
 | `/fcd wide` | schmale oder breite Ansicht |
+| `/fcd spell <ID>` | beliebigen Zauber aufnehmen |
+| `/fcd replace on\|off` | ob FCD an die Stelle ihres Fensters tritt |
+| `/fcd editui on\|off` | eigenes Fenster im Bearbeitungsmodus |
 | `/fcd blizz` | Blizzards Fenster holen (dort wird das Layout gewechselt) |
 | `/fcd log` | alle Ausgaben zum Kopieren |
 | `/fcd check` | was dieser Client an API hergibt |
@@ -73,16 +100,28 @@ Wechsel bei Haltung, Form oder Spezialisierung.
 
 ## Ehrlich gesagt
 
-**Der Sofortmodus hat einen Preis.** Änderungen wirken ohne Neuladen, weil sie
-über Blizzards eigenes Datenmodell laufen. Sobald AddOn-Code das anfasst, gilt
-es für die restliche Sitzung als *tainted*, und ihr Viewer kann keine Auren
-mehr lesen – bis zum nächsten `/reload`. Betrifft ihre Anzeige, nicht unsere.
-Wem das nicht passt: `/fcd instant off` schreibt sicher, wirkt dann aber erst
-beim Neuladen.
+**Nicht jeder Client kann alles.** Jede benötigte Funktion wird einzeln
+gesucht; fehlt eine, entfällt genau das Merkmal, das auf ihr aufbaut – nicht
+das AddOn. `/fcd check` zeigt diese Prüfung als Liste. Schützt ein Client zum
+Beispiel die Abklingzeit-Werte, ist das Ende einer Abklingzeit für niemanden
+erkennbar, und die Fertig-Meldung steht dort als *fehlt*.
+
+**Der Sofortmodus hat einen Preis.** Änderungen an Blizzards Kategorien wirken
+ohne Neuladen, weil sie über ihr eigenes Datenmodell laufen. Sobald
+AddOn-Code das anfasst, gilt es für die restliche Sitzung als *tainted*, und
+ihr Viewer kann keine Auren mehr lesen – bis zum nächsten `/reload`. Betrifft
+ihre Anzeige, nicht unsere. Wem das nicht passt: `/fcd instant off` schreibt
+sicher, wirkt dann aber erst beim Neuladen.
 
 **Das Layout wechseln geht nur bei ihnen.** Ihr Layoutverwalter ist geschützt;
 ein Aufruf von außen würde die Sitzung taintieren. `/fcd blizz` holt ihr
 Fenster dafür.
+
+**Die Einstellungen hängen an Blizzards Layout.** Der Forever-Client legt für
+dieses AddOn keine SavedVariables an – nachgewiesen über mehrere Sitzungen.
+Was hier hält, ist ihr eigener Layout-Speicher, also schreibt Forever
+Cooldowns den Bestand zusätzlich dorthin. Nebeneffekt: die Daten wandern mit
+demselben Layout mit wie Blizzards eigene Einstellungen.
 
 **Vor jedem Schreibvorgang** wird geprüft, ob der Layout-Blob unsere
 Kodierkette verlustfrei übersteht, und eine Sicherung angelegt.
