@@ -1,0 +1,61 @@
+# Was nicht ins Repository gehoert.
+#
+# Nicht zu verwechseln mit der ignore-Liste in .pkgmeta: die bestimmt, was
+# nicht ins Release-Paket wandert. "branding" und "Tests" stehen dort, gehoeren
+# hier aber sehr wohl ins Repository - sie sind Quellen des Projekts, nur eben
+# nichts, was ein Spieler herunterlaedt.
+
+# ---------------------------------------------------------------- Werkzeuge
+
+# Wird zum Pruefen in Tests/ hineinkopiert und danach wieder geloescht. Landet
+# es doch einmal im Ordner, soll es nicht mitgehen.
+node_modules/
+package-lock.json
+
+# ------------------------------------------------------------------ Ausgaben
+
+# Der BigWigs-Packager legt das fertige Paket hier ab.
+.release/
+*.zip
+
+# ---------------------------------------------------------- Nicht zum AddOn
+
+# Notizen, Entwuerfe, erzeugte Dokumentation - nichts davon wird ausgeliefert
+# oder geladen. Wer hier einmal echte Projektdokumentation ablegen will,
+# nimmt die Zeile wieder heraus.
+docs/
+notes/
+scratch/
+tmp/
+
+# ------------------------------------------------------------ Spielumgebung
+
+# Reste aus dem Spielordner. Die SavedVariables des AddOns gehoeren dem
+# Spieler, nicht dem Projekt - und in diesem Client schreibt der Bestand
+# ohnehin in Blizzards Layout, nicht in die Datei.
+WTF/
+Interface/
+ForeverCooldownsDB.lua
+
+# ------------------------------------------------------------------- System
+
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# ------------------------------------------------------------------ Editoren
+
+.vscode/
+.idea/
+*.code-workspace
+*.swp
+*~
+
+# -------------------------------------------------------------- Sicherungen
+
+# Beim Umbauen entstehen leicht Kopien wie brand.js.bak; keine davon gehoert
+# in die Historie.
+*.bak
+*.orig
+*.rej
+*.old
