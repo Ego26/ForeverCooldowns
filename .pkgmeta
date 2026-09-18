@@ -1,0 +1,26 @@
+package-as: ForeverCooldowns
+
+# Keine externen Bibliotheken: Forever Cooldowns nutzt ausschliesslich
+# Blizzard-API. Jede API wird einzeln auf Vorhandensein geprueft, damit das
+# AddOn auf Classic-artigen und modernen Clients gleichermassen laeuft.
+externals: {}
+
+# Ohne diese Angabe baut der Packager die Release-Notes aus den Commit-Texten
+# zusammen. Was bei CurseForge steht, soll hier stehen.
+manual-changelog:
+  filename: RELEASE-NOTES.md
+  markup-type: markdown
+
+# Nicht ins Release-Paket
+ignore:
+  - branding
+  - Tests
+  - .github
+  - .editorconfig
+  - .gitattributes
+  - .gitignore
+  - .pkgmeta
+  - README.md
+  # Die Historie bleibt im Repository. Ins Paket geht RELEASE-NOTES.md mit
+  # dem, was diese eine Version gebracht hat.
+  - CHANGELOG.md

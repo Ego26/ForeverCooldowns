@@ -1,0 +1,15 @@
+# Zeilenenden festnageln.
+#
+# Ohne diese Datei wandelt Git unter Windows beim Auschecken in CRLF um. Der
+# Packager und der Spielclient kommen damit zurecht, ein Vergleich zweier
+# Arbeitskopien auf verschiedenen Systemen aber nicht: dann unterscheidet sich
+# jede Zeile jeder Datei.
+* text=auto eol=lf
+
+# Binaerdateien nicht anfassen. Eine TGA mit umgeschriebenen Zeilenenden ist
+# keine TGA mehr - das Symbol waere danach kaputt.
+*.tga binary
+*.png binary
+*.blp binary
+*.ttf binary
+*.zip binary

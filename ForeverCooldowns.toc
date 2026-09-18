@@ -1,0 +1,28 @@
+## Interface: 120000
+## Title: Forever Cooldowns
+## Title-deDE: Forever Cooldowns
+## Notes: Rank-aware cooldown manager. Track any spell or item, not just Blizzard's list. Type /fcd.
+## Notes-deDE: Rangbewusster Abklingzeit-Manager. Beliebige Zauber und Gegenstaende verfolgen, nicht nur Blizzards Liste. Tippe /fcd.
+## Author: Ego26
+## Version: @project-version@
+## SavedVariables: ForeverCooldownsDB
+## IconTexture: Interface\AddOns\ForeverCooldowns\Media\Textures\logo
+## X-Category: Combat
+## X-Website: https://github.com/Ego26/ForeverCooldowns
+## X-FCD-Toc: v5
+
+Compat.lua
+Profiles.lua
+Ranks.lua
+Items.lua
+Catalog.lua
+Layout.lua
+Viewer.lua
+Widgets.lua
+Art.lua
+BarOptions.lua
+BlizzOptions.lua
+Dock.lua
+Probe.lua
+Store.lua
+Core.lua
