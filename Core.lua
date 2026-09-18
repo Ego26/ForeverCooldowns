@@ -69,6 +69,7 @@ local function printHelp()
     printMessage("/fcd blizz - Blizzards Fenster holen (Layout wechseln)")
     printMessage("/fcd replace on|off - ob FCD an die Stelle ihres Fensters tritt")
     printMessage("/fcd editui on|off - eigenes Fenster im Bearbeitungsmodus")
+    printMessage("/fcd lang de|en|auto - Sprache der Oberfläche")
     printMessage("/fcd round on|off - abgerundete Symbolecken (wirkt nach /reload)")
     printMessage("/fcd check - Funktionsprüfung dieses Clients im Chat")
     printMessage("/fcd probe - vollständigen API-Bericht als Text öffnen")
@@ -193,6 +194,24 @@ local function dispatch(command, argument)
         else
             printMessage("Nicht aufgenommen: " .. tostring(err))
         end
+    elseif command == "lang" then
+        local mode = string.lower(trim(argument))
+        if mode == "de" or mode == "deutsch" then
+            FCD.db.settings.language = "deDE"
+        elseif mode == "en" or mode == "english" or mode == "englisch" then
+            FCD.db.settings.language = "enUS"
+        elseif mode == "auto" then
+            FCD.db.settings.language = nil
+        else
+            printMessage("Sprache: " .. FCD.GetLanguage()
+                .. " - umschalten mit  /fcd lang de|en|auto")
+            return
+        end
+        FCD.SetLanguage(FCD.db.settings.language)
+        FCD.Store:Save()
+        -- Einige Beschriftungen stehen schon beim Laden in Tabellen; die
+        -- wechseln erst beim naechsten Durchlauf.
+        printMessage("Sprache: " .. FCD.GetLanguage() .. " - wirkt nach /reload.")
     elseif command == "editui" then
         local mode = string.lower(trim(argument))
         if mode == "off" or mode == "aus" then
@@ -1243,6 +1262,12 @@ local function onEvent(_, event, ...)
                 .. " %d Leiste(n), %d Eintrag/Einträge.",
                 loadInfo.profiles or 0, loadInfo.bars or 0, loadInfo.entries or 0))
         end
+        -- Locale.lua setzt die Sprache beim Laden nach der Clientsprache;
+        -- eine eigene Wahl steht erst jetzt zur Verfuegung.
+        if FCD.db.settings.language then
+            FCD.SetLanguage(FCD.db.settings.language)
+        end
+
         -- Beim Anmelden ungefragt sagen, was auf den eigenen Leisten liegt.
         -- Ob ein Eintrag die Sitzung überlebt, war sonst nur zu erraten.
         local profile = FCD.Profiles:GetActive()

@@ -1,5 +1,6 @@
 local FCD = ForeverCooldowns
 local Compat = FCD.Compat
+local L = FCD.L
 
 local Viewer = {}
 FCD.Viewer = Viewer
@@ -202,8 +203,8 @@ local function setClickAction(button, bar, kind, value)
     if bar.clickToUse and not button.secure then
         if not Viewer.secureWarned then
             Viewer.secureWarned = true
-            FCD.Print("Dieser Client kennt SecureActionButtonTemplate nicht -")
-            FCD.Print("'Beim Anklicken benutzen' bleibt deshalb wirkungslos.")
+            FCD.Print(L["Dieser Client kennt SecureActionButtonTemplate nicht -"])
+            FCD.Print(L["'Beim Anklicken benutzen' bleibt deshalb wirkungslos."])
         end
         return
     end
@@ -429,12 +430,12 @@ local soundBlockedUntil = 0
 -- Welche Töne dieser Client kennt, steht in SOUNDKIT. Die Liste wird daraus
 -- gebaut statt geraten: was dort fehlt, wird gar nicht erst angeboten.
 local SOUND_CANDIDATES = {
-    { key = "RAID_WARNING", label = "Schlachtzugswarnung" },
-    { key = "READY_CHECK", label = "Bereitschaftsprüfung" },
-    { key = "ALARM_CLOCK_WARNING_3", label = "Wecker" },
-    { key = "IG_QUEST_LIST_COMPLETE", label = "Quest erledigt" },
-    { key = "UI_RAID_BOSS_DEFEATED", label = "Sieg" },
-    { key = "IG_MAINMENU_OPTION_CHECKBOX_ON", label = "Klick" },
+    { key = "RAID_WARNING", label = L["Schlachtzugswarnung"] },
+    { key = "READY_CHECK", label = L["Bereitschaftsprüfung"] },
+    { key = "ALARM_CLOCK_WARNING_3", label = L["Wecker"] },
+    { key = "IG_QUEST_LIST_COMPLETE", label = L["Quest erledigt"] },
+    { key = "UI_RAID_BOSS_DEFEATED", label = L["Sieg"] },
+    { key = "IG_MAINMENU_OPTION_CHECKBOX_ON", label = L["Klick"] },
 }
 
 function Viewer:GetSoundChoices()
@@ -454,7 +455,7 @@ function Viewer:GetSoundChoices()
     if #list == 0 then
         -- Ohne SOUNDKIT bleibt die Nummer der Schlachtzugswarnung, die es seit
         -- jeher gibt. Hört man nichts, taugt sie in diesem Client nicht.
-        list[1] = { id = 8959, label = "Standardton" }
+        list[1] = { id = 8959, label = L["Standardton"] }
     end
     self.soundChoices = list
     return list
@@ -540,8 +541,8 @@ function Viewer:PreviewAlert(bar, entry)
     -- Der Ton hängt an derselben Auswahl. Bei "Nur Leuchten" fällt er weg,
     -- das erledigt AnnounceReady bereits selbst.
     if not shown and mode ~= "sound" then
-        FCD.Print("Die Leiste zeigt dieses Symbol gerade nicht -")
-        FCD.Print("das Aufleuchten ist deshalb nicht zu sehen.")
+        FCD.Print(L["Die Leiste zeigt dieses Symbol gerade nicht -"])
+        FCD.Print(L["das Aufleuchten ist deshalb nicht zu sehen."])
     end
     return shown
 end

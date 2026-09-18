@@ -37,6 +37,7 @@ const KNOWN = new Set([
     'CreateFrame', 'UIParent', 'GameTooltip', 'DEFAULT_CHAT_FRAME', 'GetTime', 'GetCursorPosition',
     'GetCursorInfo', 'ClearCursor', 'CreateColor', 'HideUIPanel', 'ShowUIPanel',
     'GetBuildInfo', 'UnitClass', 'UnitName', 'UnitLevel', 'UnitExists', 'InCombatLockdown',
+    'GetLocale',
     'IsControlKeyDown', 'IsShiftKeyDown', 'StaticPopupDialogs', 'StaticPopup_Show', 'ACCEPT',
     'CANCEL', 'C_Timer', 'Enum',
     'C_Spell', 'C_SpellBook', 'C_Item', 'C_Container', 'C_UnitAuras', 'C_CooldownViewer',
