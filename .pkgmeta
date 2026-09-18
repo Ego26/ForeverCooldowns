@@ -21,6 +21,8 @@ ignore:
   - .gitignore
   - .pkgmeta
   - README.md
+  - README.en.md
   # Die Historie bleibt im Repository. Ins Paket geht RELEASE-NOTES.md mit
   # dem, was diese eine Version gebracht hat.
   - CHANGELOG.md
+  - CHANGELOG.en.md
