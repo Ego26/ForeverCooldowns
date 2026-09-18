@@ -1,5 +1,6 @@
 local FCD = ForeverCooldowns
 local Compat = FCD.Compat
+local L = FCD.L
 
 local BlizzOptions = {}
 FCD.BlizzOptions = BlizzOptions
@@ -78,8 +79,8 @@ local function setValue(system, settingID, value)
     end
     local ok, err = pcall(frame.OnSystemSettingChange, frame, system, settingID, value)
     if not ok then
-        FCD.LogOnly("Einstellung nicht geschrieben: " .. tostring(err))
-        FCD.Print("Diese Einstellung ließ sich nicht setzen - Einzelheiten in /fcd log.")
+        FCD.LogOnly(L["Einstellung nicht geschrieben: "] .. tostring(err))
+        FCD.Print(L["Diese Einstellung ließ sich nicht setzen - Einzelheiten in /fcd log."])
         return false
     end
     return true
@@ -127,36 +128,36 @@ local function findEnum(entry)
 end
 
 local SETTINGS = {
-    { key = "Orientation", label = "Ausrichtung", kind = "dropdown",
+    { key = "Orientation", label = L["Ausrichtung"], kind = "dropdown",
         enums = { "CooldownViewerOrientation" },
         names = { Horizontal = "Horizontal", Vertical = "Vertikal" } },
-    { key = "IconDirection", label = "Symbolausrichtung", kind = "dropdown",
+    { key = "IconDirection", label = L["Symbolausrichtung"], kind = "dropdown",
         enums = { "CooldownViewerIconDirection" },
         -- Hoch und Runter kennt dieser Client bei Abklingzeit-Leisten nicht;
         -- die Namen stehen trotzdem hier, falls ein Build sie nachreicht.
         names = { Left = "Nach links", Right = "Nach rechts",
             Up = "Nach oben", Down = "Nach unten" } },
-    { key = "BarContent", label = "Balkeninhalt", kind = "dropdown",
+    { key = "BarContent", label = L["Balkeninhalt"], kind = "dropdown",
         enums = { "CooldownViewerBarContent" },
         names = { IconAndName = "Symbol und Name", IconOnly = "Nur Symbol",
             NameOnly = "Nur Name" } },
-    { key = "IconLimit", label = "Symbole je Reihe", kind = "slider",
+    { key = "IconLimit", label = L["Symbole je Reihe"], kind = "slider",
         minimum = 1, maximum = 20, step = 1 },
-    { key = "IconSize", label = "Symbolgröße", kind = "slider",
+    { key = "IconSize", label = L["Symbolgröße"], kind = "slider",
         minimum = 50, maximum = 200, step = 5, percent = true },
-    { key = "IconPadding", label = "Symbolabstand", kind = "slider",
+    { key = "IconPadding", label = L["Symbolabstand"], kind = "slider",
         minimum = 0, maximum = 20, step = 1 },
-    { key = "BarWidthScale", label = "Balkenbreite", kind = "slider",
+    { key = "BarWidthScale", label = L["Balkenbreite"], kind = "slider",
         minimum = 50, maximum = 200, step = 5, percent = true },
-    { key = "Opacity", label = "Transparenz", kind = "slider",
+    { key = "Opacity", label = L["Transparenz"], kind = "slider",
         minimum = 10, maximum = 100, step = 5, percent = true },
-    { key = "VisibleSetting", label = "Sichtbarkeit", kind = "dropdown",
+    { key = "VisibleSetting", label = L["Sichtbarkeit"], kind = "dropdown",
         enums = { "CooldownViewerVisibleSetting" },
         names = { Always = "Immer sichtbar", InCombat = "Nur im Kampf",
             OutOfCombat = "Außerhalb des Kampfes", Hidden = "Nie" } },
-    { key = "HideWhenInactive", label = "Bei Inaktivität verbergen", kind = "check" },
-    { key = "ShowTimer", label = "Timer anzeigen", kind = "check" },
-    { key = "ShowTooltips", label = "Tooltips anzeigen", kind = "check" },
+    { key = "HideWhenInactive", label = L["Bei Inaktivität verbergen"], kind = "check" },
+    { key = "ShowTimer", label = L["Timer anzeigen"], kind = "check" },
+    { key = "ShowTooltips", label = L["Tooltips anzeigen"], kind = "check" },
 }
 
 -- Auswahlliste eines Dropdowns: Schlüssel des Enums, deutsch benannt. Fehlt
@@ -165,12 +166,12 @@ local SETTINGS = {
 local function optionsFor(entry)
     local enum, enumName = findEnum(entry)
     if not enum then
-        FCD.LogOnly("Kein Enum für " .. entry.key .. " - Feld bleibt weg.")
+        FCD.LogOnly(L["Kein Enum für "] .. entry.key .. L[" - Feld bleibt weg."])
         return nil
     end
     if entry.enumName ~= enumName then
         entry.enumName = enumName
-        FCD.LogOnly(entry.key .. " nutzt Enum " .. tostring(enumName))
+        FCD.LogOnly(entry.key .. L[" nutzt Enum "] .. tostring(enumName))
     end
     local items = {}
     for key, value in pairs(enum) do
@@ -234,7 +235,7 @@ local function build()
     dialog:SetClampedToScreen(true)
     dialog:Hide()
     dialog:SetScript("OnHide", function()
-        FCD.LogOnly("Leistenfenster zu: " .. (BlizzOptions.closeReason or "von außen"))
+        FCD.LogOnly(L["Leistenfenster zu: "] .. (BlizzOptions.closeReason or L["von außen"]))
         BlizzOptions.closeReason = nil
     end)
 
@@ -313,19 +314,19 @@ local function build()
         return button
     end
 
-    dialog.resetButton = addButton("Auf Standardposition zurücksetzen", function()
+    dialog.resetButton = addButton(L["Auf Standardposition zurücksetzen"], function()
         if currentSystem then
             pcall(currentSystem.ResetToDefaultPosition, currentSystem)
         end
     end)
 
-    dialog.managerButton = addButton("Abklingzeitmanager-Optionen", function()
+    dialog.managerButton = addButton(L["Abklingzeitmanager-Optionen"], function()
         FCD:OpenMainUI()
     end)
 
     -- Fluchtweg: zeigt eine Einstellung dieser Client anders an, als wir sie
     -- nachgebaut haben, kommt man so an ihr Original heran.
-    dialog.blizzButton = addButton("Blizzards Fenster öffnen", function()
+    dialog.blizzButton = addButton(L["Blizzards Fenster öffnen"], function()
         BlizzOptions:OpenBlizzardDialog()
     end)
 
@@ -521,7 +522,7 @@ function BlizzOptions:OpenBlizzardDialog()
     end)
     if not ok then
         self.allowBlizzardDialog = nil
-        FCD.Print("Ihr Fenster ließ sich nicht öffnen.")
+        FCD.Print(L["Ihr Fenster ließ sich nicht öffnen."])
         return false
     end
     return true
@@ -529,14 +530,14 @@ end
 
 local function takeOver(blizzard)
     local system = rawget(blizzard, "attachedToSystem")
-    FCD.LogOnly("Ihr Leistenfenster geht auf: "
-        .. tostring(isCooldownViewer(system) and systemTitle(system) or "keine Abklingzeit-Leiste"))
+    FCD.LogOnly(L["Ihr Leistenfenster geht auf: "]
+        .. tostring(isCooldownViewer(system) and systemTitle(system) or L["keine Abklingzeit-Leiste"]))
 
     if not isCooldownViewer(system) then
         return
     end
     if not BlizzOptions:ShouldReplace() then
-        FCD.LogOnly("Keine Übernahme: Einstellung=" ..
+        FCD.LogOnly(L["Keine Übernahme: Einstellung="] ..
             tostring(settings().replaceEditModeDialog))
         return
     end
@@ -545,12 +546,12 @@ local function takeOver(blizzard)
     -- soll wenigstens ihr Fenster stehen bleiben.
     local ok, err = pcall(BlizzOptions.Open, BlizzOptions, system)
     if not ok then
-        FCD.LogOnly("Eigenes Leistenfenster fehlgeschlagen: " .. tostring(err))
-        FCD.Print("Unser Fenster ließ sich nicht öffnen - Einzelheiten in /fcd log.")
+        FCD.LogOnly(L["Eigenes Leistenfenster fehlgeschlagen: "] .. tostring(err))
+        FCD.Print(L["Unser Fenster ließ sich nicht öffnen - Einzelheiten in /fcd log."])
         return
     end
     if not BlizzOptions:IsShown() then
-        FCD.LogOnly("Eigenes Leistenfenster hat abgelehnt (Enum oder Verwalter fehlt).")
+        FCD.LogOnly(L["Eigenes Leistenfenster hat abgelehnt (Enum oder Verwalter fehlt)."])
         return
     end
 
@@ -584,9 +585,9 @@ local function takeOver(blizzard)
             -- einmal gescheitert - offen, richtig platziert, und einen
             -- Bruchteil später zu.
             if not BlizzOptions:IsShown() then
-                FCD.LogOnly("Eigenes Leistenfenster war zu - erneut geöffnet."
-                    .. " (Sollte nicht mehr vorkommen, seit es nicht mehr in"
-                    .. " UISpecialFrames steht.)")
+                FCD.LogOnly(L["Eigenes Leistenfenster war zu - erneut geöffnet."]
+                    .. L[" (Sollte nicht mehr vorkommen, seit es nicht mehr in"]
+                    .. L[" UISpecialFrames steht.)"])
                 pcall(BlizzOptions.Open, BlizzOptions, system)
             end
         end
@@ -596,7 +597,7 @@ local function takeOver(blizzard)
     end
 
     FCD.LogOnly(string.format(
-        "Übernommen: Ebene=%s, Höhe=%.0f, links=%s, oben=%s, Deckkraft=%s, offen=%s",
+        L["Übernommen: Ebene=%s, Höhe=%.0f, links=%s, oben=%s, Deckkraft=%s, offen=%s"],
         tostring(BlizzOptions:Strata()), BlizzOptions:Height(),
         tostring(BlizzOptions:Edge("GetLeft")), tostring(BlizzOptions:Edge("GetTop")),
         tostring(BlizzOptions:Alpha()), tostring(BlizzOptions:IsShown())))
@@ -622,8 +623,8 @@ function BlizzOptions:HookDialog()
         -- Fenster noch unseres offen, ohne jede Meldung.
         local okTake, takeErr = pcall(takeOver, self)
         if not okTake then
-            FCD.LogOnly("Übernahme fehlgeschlagen: " .. tostring(takeErr))
-            FCD.Print("Leistenfenster ließ sich nicht übernehmen - /fcd log.")
+            FCD.LogOnly(L["Übernahme fehlgeschlagen: "] .. tostring(takeErr))
+            FCD.Print(L["Leistenfenster ließ sich nicht übernehmen - /fcd log."])
         end
     end)
     if not ok then
@@ -668,6 +669,6 @@ function BlizzOptions:HookDialog()
     end
 
     self.hooked = true
-    FCD.LogOnly("Haken auf ihrem Bearbeitungsmodus-Fenster gesetzt.")
+    FCD.LogOnly(L["Haken auf ihrem Bearbeitungsmodus-Fenster gesetzt."])
     return true
 end

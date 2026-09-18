@@ -1,5 +1,6 @@
 local FCD = ForeverCooldowns
 local Compat = FCD.Compat
+local L = FCD.L
 
 local BarOptions = {}
 FCD.BarOptions = BarOptions
@@ -24,26 +25,26 @@ local current, currentFrame
 -- "Ausrichtung" (waagerecht oder senkrecht) und "Symbolausrichtung" (in
 -- welche Richtung die Symbole laufen). Beides zusammen ergibt unser growth.
 local ORIENTATION_OPTIONS = {
-    { value = "HORIZONTAL", text = "Horizontal" },
-    { value = "VERTICAL", text = "Vertikal" },
+    { value = "HORIZONTAL", text = L["Horizontal"] },
+    { value = "VERTICAL", text = L["Vertikal"] },
 }
 
 local DIRECTION_OPTIONS = {
     HORIZONTAL = {
-        { value = "RIGHT", text = "Nach rechts" },
-        { value = "LEFT", text = "Nach links" },
+        { value = "RIGHT", text = L["Nach rechts"] },
+        { value = "LEFT", text = L["Nach links"] },
     },
     VERTICAL = {
-        { value = "DOWN", text = "Nach unten" },
-        { value = "UP", text = "Nach oben" },
+        { value = "DOWN", text = L["Nach unten"] },
+        { value = "UP", text = L["Nach oben"] },
     },
 }
 
 local GROWTH_OPTIONS = {
-    { value = "RIGHT", text = "Nach rechts" },
-    { value = "LEFT", text = "Nach links" },
-    { value = "DOWN", text = "Nach unten" },
-    { value = "UP", text = "Nach oben" },
+    { value = "RIGHT", text = L["Nach rechts"] },
+    { value = "LEFT", text = L["Nach links"] },
+    { value = "DOWN", text = L["Nach unten"] },
+    { value = "UP", text = L["Nach oben"] },
 }
 
 local function orientationOf(growth)
@@ -63,13 +64,13 @@ local function orientationText(value)
 end
 
 local VISIBILITY_OPTIONS = {
-    { value = "always", text = "Immer sichtbar" },
-    { value = "inCombat", text = "Nur im Kampf" },
-    { value = "hasTarget", text = "Nur mit Ziel" },
+    { value = "always", text = L["Immer sichtbar"] },
+    { value = "inCombat", text = L["Nur im Kampf"] },
+    { value = "hasTarget", text = L["Nur mit Ziel"] },
     -- "Nie" blendet die Leiste im Spiel aus, ohne ihren Inhalt zu verlieren.
     -- Erreichbar bleibt sie über den Bearbeitungsmodus, dort wird jede Leiste
     -- gezeigt - sonst käme man an diese Einstellung nie wieder heran.
-    { value = "never", text = "Nie" },
+    { value = "never", text = L["Nie"] },
 }
 
 -- "Keines" steht mit in der Liste, statt als eigener Haken daneben. Vorher
@@ -77,10 +78,10 @@ local VISIBILITY_OPTIONS = {
 -- zwei Bedienelemente für eine Entscheidung, und "Keines" fehlte trotzdem.
 -- Die Eintragsliste macht es seit jeher so, jetzt beide gleich.
 local ALERT_MODES = {
-    { value = "off", text = "Keines" },
-    { value = "both", text = "Leuchten und Ton" },
-    { value = "glow", text = "Nur Leuchten" },
-    { value = "sound", text = "Nur Ton" },
+    { value = "off", text = L["Keines"] },
+    { value = "both", text = L["Leuchten und Ton"] },
+    { value = "glow", text = L["Nur Leuchten"] },
+    { value = "sound", text = L["Nur Ton"] },
 }
 
 -- Der gespeicherte Zustand sind zwei Felder; im Auswahlfeld ist es einer.
@@ -380,7 +381,7 @@ local function build()
     -- Ausrichtung
     local orientationLabel = dialog:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     orientationLabel:SetPoint("TOPLEFT", PAD, offsetY - 4)
-    orientationLabel:SetText("Ausrichtung")
+    orientationLabel:SetText(L["Ausrichtung"])
     dialog.orientation = FCD.Widgets.CreateDropdown(dialog, 150, function()
         local items = {}
         for _, option in ipairs(ORIENTATION_OPTIONS) do
@@ -401,7 +402,7 @@ local function build()
     -- Symbolausrichtung
     local growthLabel = dialog:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     growthLabel:SetPoint("TOPLEFT", PAD, offsetY - 4)
-    growthLabel:SetText("Symbolausrichtung")
+    growthLabel:SetText(L["Symbolausrichtung"])
     dialog.growth = FCD.Widgets.CreateDropdown(dialog, 150, function()
         local items = {}
         local orientation = orientationOf(current and current.growth)
@@ -420,14 +421,14 @@ local function build()
     offsetY = offsetY - ROW - 4
 
     -- Zahlenwerte
-    dialog.columns = remember(createSlider(dialog, "Spalten", 1, 24, 1, function()
+    dialog.columns = remember(createSlider(dialog, L["Spalten"], 1, 24, 1, function()
         return current and current.columns or 12
     end, function(value)
         current.columns = value
     end))
     place(dialog.columns)
 
-    dialog.iconSize = remember(createSlider(dialog, "Symbolgröße", 20, 80, 2, function()
+    dialog.iconSize = remember(createSlider(dialog, L["Symbolgröße"], 20, 80, 2, function()
         return current and current.iconSize or 40
     end, function(value)
         current.iconSize = value
@@ -436,14 +437,14 @@ local function build()
     end))
     place(dialog.iconSize)
 
-    dialog.spacing = remember(createSlider(dialog, "Symbolabstand", 0, 20, 1, function()
+    dialog.spacing = remember(createSlider(dialog, L["Symbolabstand"], 0, 20, 1, function()
         return current and current.spacing or 4
     end, function(value)
         current.spacing = value
     end))
     place(dialog.spacing)
 
-    dialog.alpha = remember(createSlider(dialog, "Transparenz", 10, 100, 5, function()
+    dialog.alpha = remember(createSlider(dialog, L["Transparenz"], 10, 100, 5, function()
         return math.floor((current and current.alpha or 1) * 100 + 0.5)
     end, function(value)
         current.alpha = value / 100
@@ -457,7 +458,7 @@ local function build()
     -- Sichtbarkeit
     local visibilityLabel = dialog:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     visibilityLabel:SetPoint("TOPLEFT", PAD, offsetY - 4)
-    visibilityLabel:SetText("Sichtbarkeit")
+    visibilityLabel:SetText(L["Sichtbarkeit"])
     dialog.visibility = FCD.Widgets.CreateDropdown(dialog, 150, function()
         local items = {}
         for _, option in ipairs(VISIBILITY_OPTIONS) do
@@ -489,14 +490,14 @@ local function build()
         return check
     end
 
-    addCheck("Bei Inaktivität verbergen", function()
+    addCheck(L["Bei Inaktivität verbergen"], function()
         return current and (current.visibility or {}).onlyOnCooldown
     end, function(value)
         current.visibility = current.visibility or {}
         current.visibility.onlyOnCooldown = value
     end)
 
-    addCheck("Timer anzeigen", function()
+    addCheck(L["Timer anzeigen"], function()
         return current and current.showTimer
     end, function(value)
         current.showTimer = value
@@ -504,7 +505,7 @@ local function build()
 
     -- Ohne Angabe an, wie bei Blizzard. Steht er aus, nehmen die Symbole die
     -- Maus gar nicht erst an - Klicks gehen dann durch die Leiste hindurch.
-    addCheck("Tooltips anzeigen", function()
+    addCheck(L["Tooltips anzeigen"], function()
         return current and current.showTooltips ~= false
     end, function(value)
         current.showTooltips = value
@@ -514,7 +515,7 @@ local function build()
     -- Symbolen würde sonst dauernd etwas leuchten.
     local alertLabel = dialog:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     alertLabel:SetPoint("TOPLEFT", PAD, offsetY - 4)
-    alertLabel:SetText("Melden, wenn bereit")
+    alertLabel:SetText(L["Melden, wenn bereit"])
     dialog.alertMode = FCD.Widgets.CreateDropdown(dialog, 150, function()
         local items = {}
         for _, option in ipairs(ALERT_MODES) do
@@ -536,8 +537,8 @@ local function build()
         applied()
 
         if value ~= "off" and Compat.caps.secretCooldown then
-            FCD.Print("Dieser Client schützt die Abklingzeit-Werte -")
-            FCD.Print("das Ende lässt sich damit nicht erkennen.")
+            FCD.Print(L["Dieser Client schützt die Abklingzeit-Werte -"])
+            FCD.Print(L["das Ende lässt sich damit nicht erkennen."])
         else
             -- Wie beim Ton: sofort zeigen, was gewählt wurde.
             FCD.Viewer:PreviewAlert(current, nil)
@@ -549,7 +550,7 @@ local function build()
 
     local soundLabel = dialog:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     soundLabel:SetPoint("TOPLEFT", PAD + 18, offsetY - 4)
-    soundLabel:SetText("Ton")
+    soundLabel:SetText(L["Ton"])
     dialog.alertSound = FCD.Widgets.CreateDropdown(dialog, 132, function()
         local items = {}
         for _, choice in ipairs(FCD.Viewer:GetSoundChoices()) do
@@ -576,7 +577,7 @@ local function build()
     dialog.entryAlerts = CreateFrame("Button", nil, dialog, "UIPanelButtonTemplate")
     dialog.entryAlerts:SetSize(WIDTH - 2 * PAD - 18, 20)
     dialog.entryAlerts:SetPoint("TOPLEFT", PAD + 18, offsetY)
-    dialog.entryAlerts:SetText("Je Eintrag festlegen")
+    dialog.entryAlerts:SetText(L["Je Eintrag festlegen"])
     dialog.entryAlerts:SetScript("OnClick", function()
         if current then
             BarOptions:OpenEntries(current)
@@ -592,19 +593,19 @@ local function build()
 
     -- Die Belegung läuft über Blizzards sichere Vorlage; im Kampf ist sie
     -- nicht änderbar, also wird sie außerhalb gesetzt und bleibt dann stehen.
-    addCheck("Beim Anklicken benutzen", function()
+    addCheck(L["Beim Anklicken benutzen"], function()
         return current and current.clickToUse
     end, function(value)
         current.clickToUse = value
         if value and InCombatLockdown() then
-            FCD.Print("Im Kampf lässt sich die Belegung nicht setzen -"
-                .. " sie greift nach dem Kampf.")
+            FCD.Print(L["Im Kampf lässt sich die Belegung nicht setzen -"]
+                .. L[" sie greift nach dem Kampf."])
         end
     end)
 
     -- Derselbe Schalter, zwei Bedeutungen: bei Zaubern der Rang, bei
     -- Gegenständen die Stückzahl. Die Beschriftung wechselt mit der Leiste.
-    dialog.rankCheck = addCheck("Rang anzeigen", function()
+    dialog.rankCheck = addCheck(L["Rang anzeigen"], function()
         if isItemBar(current) then
             return current and current.showCount ~= false
         end
@@ -617,7 +618,7 @@ local function build()
         end
     end)
 
-    dialog.unknownCheck = addCheck("Nicht Gelerntes verbergen", function()
+    dialog.unknownCheck = addCheck(L["Nicht Gelerntes verbergen"], function()
         return current and (current.visibility or {}).hideUnknown
     end, function(value)
         current.visibility = current.visibility or {}
@@ -636,13 +637,13 @@ local function build()
         return button
     end
 
-    addButton("Änderungen verwerfen", function()
+    addButton(L["Änderungen verwerfen"], function()
         FCD.Profiles:Undo()
         applied()
         BarOptions:Refresh()
     end)
 
-    addButton("Auf Standardposition zurücksetzen", function()
+    addButton(L["Auf Standardposition zurücksetzen"], function()
         if not current then
             return
         end
@@ -653,7 +654,7 @@ local function build()
         applied()
     end)
 
-    addButton("Abklingzeitmanager-Optionen", function()
+    addButton(L["Abklingzeitmanager-Optionen"], function()
         dialog:Hide()
         FCD:OpenMainUI()
     end)
@@ -667,7 +668,7 @@ function BarOptions:Refresh()
         return
     end
     local items = isItemBar(current)
-    dialog.rankCheck.text:SetText(items and "Anzahl anzeigen" or "Rang anzeigen")
+    dialog.rankCheck.text:SetText(items and L["Anzahl anzeigen"] or L["Rang anzeigen"])
     -- Art und Ton hängen an der Meldung; ohne sie sind sie wirkungslos. Und
     -- der Ton hängt zusätzlich an der Art: bei "Nur Leuchten" gibt es keinen.
     local value = barAlertValue(current)
@@ -685,7 +686,7 @@ function BarOptions:Refresh()
     -- Gegenstände werden nicht gelernt; der Schalter hätte keine Wirkung.
     dialog.unknownCheck:SetShown(not items)
 
-    dialog.title:SetText(current.name or ("Leiste " .. tostring(current.id)))
+    dialog.title:SetText(current.name or (L["Leiste "] .. tostring(current.id)))
     dialog.orientation:SetText(orientationText(orientationOf(current.growth)))
     dialog.growth:SetText(growthText(current.growth))
     dialog.visibility:SetText(visibilityText(visibilityValue(current)))
@@ -769,11 +770,11 @@ end
 local INHERIT = "inherit"
 
 local ENTRY_ALERT_OPTIONS = {
-    { value = INHERIT, text = "Wie Leiste" },
-    { value = "off", text = "Aus" },
-    { value = "both", text = "Leuchten und Ton" },
-    { value = "glow", text = "Nur Leuchten" },
-    { value = "sound", text = "Nur Ton" },
+    { value = INHERIT, text = L["Wie Leiste"] },
+    { value = "off", text = L["Aus"] },
+    { value = "both", text = L["Leuchten und Ton"] },
+    { value = "glow", text = L["Nur Leuchten"] },
+    { value = "sound", text = L["Nur Ton"] },
 }
 
 local ENTRY_WIDTH = 460
@@ -892,7 +893,7 @@ local function acquireEntryRow(index)
     row.mode:SetPoint("LEFT", row.label, "RIGHT", 6, 0)
 
     row.sound = FCD.Widgets.CreateDropdown(row, 128, function()
-        local items = { { text = "Wie Leiste", value = INHERIT } }
+        local items = { { text = L["Wie Leiste"], value = INHERIT } }
         for _, choice in ipairs(FCD.Viewer:GetSoundChoices()) do
             items[#items + 1] = { text = choice.label, value = choice.id }
         end
@@ -976,15 +977,15 @@ function BarOptions:RefreshEntries()
     end
 
     local entries = entryBar.entries or {}
-    entryDialog.title:SetText("Fertig-Meldung: "
-        .. (entryBar.name or ("Leiste " .. tostring(entryBar.id))))
+    entryDialog.title:SetText(L["Fertig-Meldung: "]
+        .. (entryBar.name or (L["Leiste "] .. tostring(entryBar.id))))
     -- Schützt der Client die Abklingzeit-Werte, ist das Ende nicht zu
     -- erkennen und es meldet von selbst gar nichts. Das gehört hierhin und
     -- nicht nur als Chatzeile beim Einschalten - sonst sucht man den Fehler
     -- bei den Einstellungen.
     if Compat.caps.secretCooldown then
-        entryDialog.hint:SetText("|cffff6060Dieser Client schützt die"
-            .. " Abklingzeit-Werte - es meldet nichts von selbst.|r")
+        entryDialog.hint:SetText(L["|cffff6060Dieser Client schützt die"]
+            .. L[" Abklingzeit-Werte - es meldet nichts von selbst.|r"])
     else
         entryDialog.hint:SetText(barAlertSummary(entryBar))
     end

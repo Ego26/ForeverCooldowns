@@ -2,6 +2,7 @@ local ADDON = "../"
 
 -- Minimal-Stubs für das, was die reine Logik berührt
 wipe = function(t) for k in pairs(t) do t[k] = nil end return t end
+GetLocale = function() return "deDE" end
 GetBuildInfo = function() return "1.60.1", "69913", "Sep 17 2026", 16001 end
 UnitClass = function() return "Krieger", "WARRIOR" end
 UnitName = function() return "Testkrieger" end
@@ -252,6 +253,29 @@ check("Leere Leiste meldet nichts", on == false and mode == "both")
 on = Profiles:ResolveAlert(nil, nil)
 check("Ohne Leiste meldet nichts", on == false)
 
+
+
+-- ------------------------------------------------------------- Sprachen
+-- Der Rueckfall ist der Schluessel selbst: eine fehlende Uebersetzung darf
+-- nie nil oder einen Platzhalter liefern, sondern den deutschen Text.
+dofile(ADDON .. "Locale.lua")
+local L = FCD.L
+
+FCD.SetLanguage("deDE")
+check("Deutsch liefert den Schluessel", L["Ausrichtung"] == "Ausrichtung")
+check("Deutsch auch ohne Eintrag", L["Gibt es nicht"] == "Gibt es nicht")
+
+FCD.SetLanguage("enUS")
+check("Englisch uebersetzt", L["Ausrichtung"] == "Orientation", L["Ausrichtung"])
+check("Englisch faellt auf den Schluessel zurueck",
+    L["Gibt es nicht"] == "Gibt es nicht", L["Gibt es nicht"])
+
+FCD.AddTranslations("enUS", { ["Nachgetragen"] = "Added later" })
+check("Nachtragen wirkt sofort", L["Nachgetragen"] == "Added later", L["Nachgetragen"])
+
+check("auto bei deutschem Client", FCD.SetLanguage("auto") == "deDE", FCD.GetLanguage())
+check("unbekannter Code faellt auf Englisch", FCD.SetLanguage("frFR") == "enUS")
+FCD.SetLanguage("deDE")
 
 print(string.format("\n%d Prüfungen bestanden, %d fehlgeschlagen.", passed, failed))
 if failed > 0 then os.exit(1) end

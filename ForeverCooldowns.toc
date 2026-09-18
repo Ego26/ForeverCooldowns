@@ -11,6 +11,7 @@
 ## X-Website: https://github.com/Ego26/ForeverCooldowns
 ## X-FCD-Toc: v5
 
+Locale.lua
 Compat.lua
 Profiles.lua
 Ranks.lua
