@@ -1,5 +1,6 @@
 local FCD = ForeverCooldowns
 local Compat = FCD.Compat
+local L = FCD.L
 
 local Layout = {}
 FCD.Layout = Layout
@@ -116,14 +117,14 @@ end
 function Layout:SetCategoryNative(cooldownID, category)
     local provider = dataProvider()
     if not provider then
-        return false, "CooldownViewerDataProvider steht nicht zur Verfügung"
+        return false, L["CooldownViewerDataProvider steht nicht zur Verfügung"]
     end
 
     local manager = layoutManager()
     if manager and type(manager.AreChangesAllowed) == "function" then
         local ok, allowed = pcall(manager.AreChangesAllowed, manager)
         if ok and allowed == false then
-            return false, "Der Client erlaubt derzeit keine Änderungen (im Kampf?)"
+            return false, L["Der Client erlaubt derzeit keine Änderungen (im Kampf?)"]
         end
     end
 
@@ -131,7 +132,7 @@ function Layout:SetCategoryNative(cooldownID, category)
     if manager and type(manager.GetCooldownCategoryChangeStatus) == "function" then
         local ok, status = pcall(manager.GetCooldownCategoryChangeStatus, manager, cooldownID, category)
         if ok and status ~= nil and status ~= 0 then
-            return false, "Der Client lehnt die Änderung ab (Status " .. Compat.SafeToString(status) .. ")"
+            return false, L["Der Client lehnt die Änderung ab (Status "] .. Compat.SafeToString(status) .. ")"
         end
     end
 
@@ -145,9 +146,9 @@ function Layout:SetCategoryNative(cooldownID, category)
     -- Oberfläche ein Neuladen anbieten kann.
     if not self.taintedThisSession then
         self.taintedThisSession = true
-        FCD.Print("Sofortmodus: Änderung wirkt. Blizzards Viewer wirft ab jetzt bei")
-        FCD.Print("jedem Aurenereignis einen Fehler - ein /reload behebt das.")
-        FCD.Print("Dauerhaft vermeiden: Häkchen 'sofort wirksam' abschalten.")
+        FCD.Print(L["Sofortmodus: Änderung wirkt. Blizzards Viewer wirft ab jetzt bei"])
+        FCD.Print(L["jedem Aurenereignis einen Fehler - ein /reload behebt das."])
+        FCD.Print(L["Dauerhaft vermeiden: Häkchen 'sofort wirksam' abschalten."])
     end
 
     -- Dieselbe Kette, die Blizzards Fenster nach einer Änderung durchläuft:
@@ -187,7 +188,7 @@ function Layout:ResetToNativeRestorePoint()
         local ok, err = pcall(manager.ResetToRestorePoint, manager)
         return ok, not ok and Compat.SafeToString(err) or nil
     end
-    return false, "Kein Wiederherstellungspunkt verfügbar"
+    return false, L["Kein Wiederherstellungspunkt verfügbar"]
 end
 
 -- --------------------------------------------------------------- Blob-Ebene
@@ -224,7 +225,7 @@ function Layout:Read()
 
     local data, decodeErr, _, recipe = Compat.DecodeLayoutString(raw)
     if not data then
-        return nil, "Entschlüsseln fehlgeschlagen: " .. tostring(decodeErr)
+        return nil, L["Entschlüsseln fehlgeschlagen: "] .. tostring(decodeErr)
     end
 
     local sections = Compat.FindLayoutSections(data)
@@ -542,7 +543,7 @@ function Layout:ImportProfile(text)
     end
     local parsed, _, err = FCD.Profiles.Deserialize(text:sub(#PROFILE_PREFIX + 1), 1)
     if err or type(parsed) ~= "table" or type(parsed.assignments) ~= "table" then
-        return nil, "Profilstring beschädigt: " .. tostring(err or "kein Inhalt")
+        return nil, L["Profilstring beschädigt: "] .. tostring(err or "kein Inhalt")
     end
 
     local name = parsed.name or "Import"
@@ -564,7 +565,7 @@ function Layout:Backup(raw, label)
     local backups = FCD.db.layoutBackups
     backups[#backups + 1] = {
         raw = raw,
-        label = label or "Änderung",
+        label = label or L["Änderung"],
         taken = date("%Y-%m-%d %H:%M:%S"),
     }
     while #backups > MAX_BACKUPS do
@@ -654,7 +655,7 @@ function Layout:VerifyRoundTrip(state)
     local same, difference = Compat.DeepEqual(state.data, redecoded)
     if same then
         return true, nil, string.format(
-            "inhaltlich gleich, %d statt %d Zeichen (Schlüsselreihenfolge weicht ab)",
+            L["inhaltlich gleich, %d statt %d Zeichen (Schlüsselreihenfolge weicht ab)"],
             #rebuilt, #trimmed)
     end
 

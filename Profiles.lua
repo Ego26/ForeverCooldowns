@@ -1,4 +1,5 @@
 local FCD = ForeverCooldowns
+local L = FCD.L
 
 local Profiles = {}
 FCD.Profiles = Profiles
@@ -27,13 +28,13 @@ local SETTING_DEFAULTS = {
     -- Maske, deren Grafik ein Client nicht lädt, das Symbol ganz
     -- verschwinden ließe - dann hilft /fcd round off und ein Neuladen.
     roundIcons = true,
-    -- Blizzards Grafik abschauen: standardmaessig AUS. Jeder Anlauf dafuer hat
+    -- Blizzards Grafik abschauen: standardmäßig AUS. Jeder Anlauf dafür hat
     -- eine Nebenwirkung erzeugt - falsche Vorlagen, leere Balkenzeilen,
-    -- Tooltips ueber unsichtbaren Fenstern - und der Gewinn war Kosmetik.
+    -- Tooltips über unsichtbaren Fenstern - und der Gewinn war Kosmetik.
     -- Wer es will: /fcd art on.
     useBlizzardArt = false,
     -- FCD tritt an die Stelle von Blizzards Fenster: geht ihres auf, wird es
-    -- geschlossen und unseres erscheint. Erreichbar bleibt ihres ueber den
+    -- geschlossen und unseres erscheint. Erreichbar bleibt ihres über den
     -- Knopf in der Werkzeugspalte oder /fcd blizz.
     replaceBlizzardWindow = true,
     -- Auch ihr kleines Fenster im Bearbeitungsmodus durch unseres ersetzen.
@@ -54,8 +55,8 @@ local BAR_DEFAULTS = {
     alpha = 1,
     showRank = true,
     showTimer = true,
-    -- Fertig-Meldung ist aus: auf einer vollen Leiste blinkte sonst staendig
-    -- etwas. Der Ton haengt daran und ist an, sobald man sie einschaltet.
+    -- Fertig-Meldung ist aus: auf einer vollen Leiste blinkte sonst ständig
+    -- etwas. Der Ton hängt daran und ist an, sobald man sie einschaltet.
     alertReady = false,
     alertMode = "both",
     hideGCD = true,
@@ -534,7 +535,7 @@ function Profiles:Delete(name)
         remaining = remaining + 1
     end
     if remaining <= 1 then
-        return false, "Das letzte Profil kann nicht gelöscht werden."
+        return false, L["Das letzte Profil kann nicht gelöscht werden."]
     end
     FCD.db.profiles[name] = nil
     if FCD.charDB.active == name then
@@ -566,11 +567,11 @@ function Profiles:Import(text, overrideName)
     local body = text:sub(#EXPORT_PREFIX + 1)
     local parsed, _, err = parseValue(body, 1)
     if err or type(parsed) ~= "table" then
-        return nil, "Profilstring beschädigt: " .. tostring(err or "kein Tabelleninhalt")
+        return nil, L["Profilstring beschädigt: "] .. tostring(err or "kein Tabelleninhalt")
     end
     local profile = self:Sanitize(parsed)
     if not profile then
-        return nil, "Profilstring enthält kein gültiges Profil."
+        return nil, L["Profilstring enthält kein gültiges Profil."]
     end
     local name = overrideName or profile.name or "Import"
     local suffix = 1
@@ -663,7 +664,7 @@ function Profiles:Undo()
     if FCD.Viewer then
         FCD.Viewer:RebuildAll()
     end
-    return state.label or "Änderung"
+    return state.label or L["Änderung"]
 end
 
 function Profiles:UndoDepth()

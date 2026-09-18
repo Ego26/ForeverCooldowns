@@ -585,7 +585,7 @@ local function build()
     end)
     dialog.entryAlerts:SetScript("OnEnter", function(self)
         FCD.Widgets.ShowTooltip(self, "ANCHOR_RIGHT", "Fertig-Meldung je Eintrag",
-            "Einzelne Symbole dürfen von der Leiste abweichen -",
+            L["Einzelne Symbole dürfen von der Leiste abweichen -"],
             "melden, obwohl die Leiste stumm ist, oder umgekehrt.")
     end)
     dialog.entryAlerts:SetScript("OnLeave", FCD.Widgets.HideTooltip)

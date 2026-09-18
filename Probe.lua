@@ -1,5 +1,6 @@
 local FCD = ForeverCooldowns
 local Compat = FCD.Compat
+local L = FCD.L
 
 local Probe = {}
 FCD.Probe = Probe
@@ -7,30 +8,30 @@ FCD.Probe = Probe
 -- Jedes geplante Feature hängt an konkreten API-Funktionen. Die Matrix macht
 -- sichtbar, was dieser Client wirklich hergibt, statt es zu vermuten.
 local FEATURES = {
-    { name = "Eigene Leisten, Layout, Sichtbarkeit", needs = {} },
-    { name = "Mehrfachauswahl und Sammelaktionen", needs = {} },
-    { name = "Profile, Import/Export, Rückgängig", needs = {} },
-    { name = "Rang-Stapelung (immer bester Rang)", needs = { "spellbook", "spellSubtext" } },
-    { name = "Downranking (fester Rang)", needs = { "spellbook", "spellSubtext" } },
-    { name = "Rangzahl auf dem Icon", needs = { "spellSubtext" } },
-    { name = "Abklingzeit-Anzeige", needs = { "spellCooldown" } },
-    { name = "Aufladungen / Stapel", needs = { "spellCharges" }, optional = true },
-    { name = "Ressourcen-Abdunklung (zu wenig Wut)", needs = { "spellUsable" } },
-    { name = "Filter 'nur mit Abklingzeit'", needs = { "spellBaseCooldown" }, optional = true },
-    { name = "Item- und Schmuckstück-Abklingzeiten", needs = { "itemCooldown", "inventoryCooldown" } },
-    { name = "Aura-/Buff-Verfolgung", needs = { "aura" }, optional = true },
-    { name = "Abgleich mit dem Blizzard-Manager", needs = { "cooldownViewerRead", "cooldownViewerInfo" } },
+    { name = L["Eigene Leisten, Layout, Sichtbarkeit"], needs = {} },
+    { name = L["Mehrfachauswahl und Sammelaktionen"], needs = {} },
+    { name = L["Profile, Import/Export, Rückgängig"], needs = {} },
+    { name = L["Rang-Stapelung (immer bester Rang)"], needs = { "spellbook", "spellSubtext" } },
+    { name = L["Downranking (fester Rang)"], needs = { "spellbook", "spellSubtext" } },
+    { name = L["Rangzahl auf dem Icon"], needs = { "spellSubtext" } },
+    { name = L["Abklingzeit-Anzeige"], needs = { "spellCooldown" } },
+    { name = L["Aufladungen / Stapel"], needs = { "spellCharges" }, optional = true },
+    { name = L["Ressourcen-Abdunklung (zu wenig Wut)"], needs = { "spellUsable" } },
+    { name = L["Filter 'nur mit Abklingzeit'"], needs = { "spellBaseCooldown" }, optional = true },
+    { name = L["Item- und Schmuckstück-Abklingzeiten"], needs = { "itemCooldown", "inventoryCooldown" } },
+    { name = L["Aura-/Buff-Verfolgung"], needs = { "aura" }, optional = true },
+    { name = L["Abgleich mit dem Blizzard-Manager"], needs = { "cooldownViewerRead", "cooldownViewerInfo" } },
     -- Umsortieren geht über zwei Wege. Der Layout-Weg ist der tragende; die
     -- Zeile stand vorher auf "fehlt", obwohl das Umsortieren funktioniert -
     -- sie prüfte nur den zweiten, schnelleren Weg.
-    { name = "Blizzards Kategorien umsortieren", needs = { "layoutRead", "layoutWrite" } },
-    { name = "... ohne Neuladen wirksam", needs = { "cooldownViewerWrite" }, optional = true },
-    { name = "Fertig-Meldung (Leuchten und Ton)", forbids = { "secretCooldown" } },
-    { name = "Blizzards Leuchten für 'bereit'", needs = { "overlayGlow" }, optional = true },
-    { name = "Ihre Leisten im eigenen Fenster einstellen",
+    { name = L["Blizzards Kategorien umsortieren"], needs = { "layoutRead", "layoutWrite" } },
+    { name = L["... ohne Neuladen wirksam"], needs = { "cooldownViewerWrite" }, optional = true },
+    { name = L["Fertig-Meldung (Leuchten und Ton)"], forbids = { "secretCooldown" } },
+    { name = L["Blizzards Leuchten für 'bereit'"], needs = { "overlayGlow" }, optional = true },
+    { name = L["Ihre Leisten im eigenen Fenster einstellen"],
         needs = { "editModeSettings" }, optional = true },
-    { name = "Profilwechsel bei Haltung/Form", needs = { "shapeshift" }, optional = true },
-    { name = "Profilwechsel bei Spezialisierung", needs = { "specialization" }, optional = true },
+    { name = L["Profilwechsel bei Haltung/Form"], needs = { "shapeshift" }, optional = true },
+    { name = L["Profilwechsel bei Spezialisierung"], needs = { "specialization" }, optional = true },
 }
 
 local function statusFor(feature)
@@ -41,7 +42,7 @@ local function statusFor(feature)
     -- einer vorhandenen Einschränkung - geschützte Abklingzeit-Werte etwa.
     for _, key in ipairs(feature.forbids or {}) do
         if caps[key] then
-            return "fehlt", key .. " (Client-Einschränkung)"
+            return "fehlt", key .. L[" (Client-Einschränkung)"]
         end
     end
 
@@ -68,7 +69,7 @@ local STATUS_TEXT = {
 
 function Probe:PrintFeatureMatrix()
     Compat.Detect()
-    FCD.Print("Funktionsprüfung für Client-Build " .. tostring(FCD.build) .. ":")
+    FCD.Print(L["Funktionsprüfung für Client-Build "] .. tostring(FCD.build) .. ":")
     for _, feature in ipairs(FEATURES) do
         local status, missing = statusFor(feature)
         local line = (STATUS_TEXT[status] or "") .. " " .. feature.name
@@ -78,9 +79,9 @@ function Probe:PrintFeatureMatrix()
         FCD.Print(line)
     end
     if Compat.caps.secretCooldown then
-        FCD.Print("|cffffcc00Hinweis:|r Dieser Client schützt Abklingzeit-Werte. Wischer und Restzeit"
-            .. " zeichnet die Blizzard-Uhr; eigene Restzeit, GCD-Unterdrückung und das Abdunkeln"
-            .. " laufender Abklingzeiten entfallen.")
+        FCD.Print(L["|cffffcc00Hinweis:|r Dieser Client schützt Abklingzeit-Werte. Wischer und Restzeit"]
+            .. L[" zeichnet die Blizzard-Uhr; eigene Restzeit, GCD-Unterdrückung und das Abdunkeln"]
+            .. L[" laufender Abklingzeiten entfallen."])
     end
 end
 
@@ -164,10 +165,10 @@ function Probe:BuildLayoutReport()
         return table.concat(lines, "\n")
     end
 
-    lines[#lines + 1] = "== Werkzeuge zum Entschlüsseln =="
+    lines[#lines + 1] = L["== Werkzeuge zum Entschlüsseln =="]
     local encodingMembers = Compat.DumpNamespace(C_EncodingUtil)
     if #encodingMembers == 0 then
-        lines[#lines + 1] = "  C_EncodingUtil fehlt - der Blob lässt sich nicht öffnen."
+        lines[#lines + 1] = L["  C_EncodingUtil fehlt - der Blob lässt sich nicht öffnen."]
     end
     for _, member in ipairs(encodingMembers) do
         lines[#lines + 1] = string.format("  %-40s %s", member.name, member.kind)
@@ -232,7 +233,7 @@ function Probe:BuildLayoutReport()
     end
 
     lines[#lines + 1] = ""
-    lines[#lines + 1] = "== Entschlüsselt =="
+    lines[#lines + 1] = L["== Entschlüsselt =="]
     local decoded, decodeErr, steps = Compat.DecodeLayoutString(data)
     for _, step in ipairs(steps or {}) do
         lines[#lines + 1] = "  " .. step
@@ -257,7 +258,7 @@ function Probe:BuildLayoutReport()
             table.sort(keys)
             for _, key in ipairs(keys) do
                 local list = categories[key]
-                lines[#lines + 1] = string.format("  Schlüssel %s (%d Einträge):", tostring(key), #list)
+                lines[#lines + 1] = string.format(L["  Schlüssel %s (%d Einträge):"], tostring(key), #list)
                 for _, cooldownID in ipairs(list) do
                     local info = Compat.GetCooldownInfo(cooldownID)
                     local spellID = info and (info.spellID or info.overrideSpellID)
@@ -283,11 +284,11 @@ function Probe:BuildLayoutReport()
             end
         end
         lines[#lines + 1] = ""
-        lines[#lines + 1] = "Wenn hier die Zuordnung Kategorie -> Abklingzeit-IDs steht, lässt"
-        lines[#lines + 1] = "sich Blizzards Manager direkt bearbeiten: ändern, neu serialisieren,"
-        lines[#lines + 1] = "mit SetLayoutData zurückschreiben."
+        lines[#lines + 1] = L["Wenn hier die Zuordnung Kategorie -> Abklingzeit-IDs steht, lässt"]
+        lines[#lines + 1] = L["sich Blizzards Manager direkt bearbeiten: ändern, neu serialisieren,"]
+        lines[#lines + 1] = L["mit SetLayoutData zurückschreiben."]
     else
-        lines[#lines + 1] = "  Nicht entschlüsselbar: " .. tostring(decodeErr)
+        lines[#lines + 1] = L["  Nicht entschlüsselbar: "] .. tostring(decodeErr)
     end
 
     return table.concat(lines, "\n")
@@ -418,7 +419,7 @@ function Probe:BuildDumpReport(pathText)
             for _ in pairs(value) do
                 count = count + 1
             end
-            tables[#tables + 1] = string.format("  %s  (table, %d Einträge)", name, count)
+            tables[#tables + 1] = string.format(L["  %s  (table, %d Einträge)"], name, count)
         else
             values[#values + 1] = string.format("  %s = %s  (%s)", name, Compat.SafeToString(value), kind)
         end
@@ -509,15 +510,15 @@ end
 -- tiefer in allen Tabellen, deren Name auf den Abklingzeit-Manager deutet.
 function Probe:BuildInstanceReport()
     local SIGNATURES = {
-        { label = "Datenmodell", methods = { "SetCooldownToCategory", "GetOrderedCooldownIDs" } },
-        { label = "Layout-Verwaltung", methods = { "SaveLayouts", "GetActiveLayout" } },
+        { label = L["Datenmodell"], methods = { "SetCooldownToCategory", "GetOrderedCooldownIDs" } },
+        { label = L["Layout-Verwaltung"], methods = { "SaveLayouts", "GetActiveLayout" } },
     }
 
     local lines = {
         "Forever Cooldowns - Suche nach laufenden Objekten",
         "",
-        "Eine Vorlage trägt nur Funktionen. Erst ein Objekt mit Zustandsfeldern",
-        "kann Änderungen wirklich ausführen.",
+        L["Eine Vorlage trägt nur Funktionen. Erst ein Objekt mit Zustandsfeldern"],
+        L["kann Änderungen wirklich ausführen."],
         "",
     }
 
@@ -574,12 +575,12 @@ function Probe:BuildInstanceReport()
     end
 
     if blocked > 0 then
-        lines[#lines + 1] = string.format("%d Tabelle(n) waren für AddOn-Code gesperrt und wurden übersprungen.", blocked)
+        lines[#lines + 1] = string.format(L["%d Tabelle(n) waren für AddOn-Code gesperrt und wurden übersprungen."], blocked)
         lines[#lines + 1] = ""
     end
 
     -- Liefern die bekannten Einstiegspunkte ein Objekt zurück?
-    lines[#lines + 1] = "== Rückgabe bekannter Einstiegspunkte =="
+    lines[#lines + 1] = L["== Rückgabe bekannter Einstiegspunkte =="]
     local entryPoints = {
         { "CooldownViewerSettings", "GetDataProvider" },
         { "CooldownViewerSettings", "GetLayoutManager" },
@@ -620,13 +621,13 @@ function Probe:BuildCategoryComparison()
         "Forever Cooldowns - Abgleich der Kategorien",
         "",
         "Liest Blizzards Datenmodell direkt. Das markiert ihren Viewer als",
-        "tainted - ein /reload danach räumt das auf.",
+        L["tainted - ein /reload danach räumt das auf."],
         "",
     }
 
     local provider = FCD.Layout.GetDataProvider()
     if not provider then
-        lines[#lines + 1] = "Datenmodell nicht erreichbar. Blizzards Fenster einmal öffnen."
+        lines[#lines + 1] = L["Datenmodell nicht erreichbar. Blizzards Fenster einmal öffnen."]
         return table.concat(lines, "\n")
     end
     if type(provider.GetOrderedCooldownIDsForCategory) ~= "function" then
@@ -709,9 +710,9 @@ end
 -- passende Hälften teilt, ist der gesuchte Schalter.
 function Probe:BuildFieldAnalysis()
     local lines = {
-        "Forever Cooldowns - Felderanalyse der Cache-Einträge",
+        L["Forever Cooldowns - Felderanalyse der Cache-Einträge"],
         "",
-        "Gesucht ist ein Feld, dessen Werte die Einträge einer Kategorie so",
+        L["Gesucht ist ein Feld, dessen Werte die Einträge einer Kategorie so"],
         "aufteilen, wie Blizzards Fenster sie aufteilt.",
         "",
     }
@@ -737,7 +738,7 @@ function Probe:BuildFieldAnalysis()
 
     for _, category in ipairs(categories) do
         local entries = byCategory[category]
-        lines[#lines + 1] = string.format("== Kategorie %d: %d Einträge ==", category, #entries)
+        lines[#lines + 1] = string.format(L["== Kategorie %d: %d Einträge =="], category, #entries)
 
         -- Welche Felder gibt es, und wie verteilen sich ihre Werte?
         local fields = {}
@@ -929,12 +930,12 @@ end
 function Probe:SnapshotLayout()
     local data, err = Compat.GetLayoutData()
     if err or type(data) ~= "string" then
-        FCD.Print("GetLayoutData lieferte nichts (" .. tostring(err) .. ").")
+        FCD.Print(L["GetLayoutData lieferte nichts ("] .. tostring(err) .. ").")
         return false
     end
     FCD.db.layoutSnapshot = { raw = data, taken = date("%Y-%m-%d %H:%M:%S") }
-    FCD.Print("Momentaufnahme gespeichert (" .. #data .. " Zeichen). Jetzt im Blizzard-Fenster")
-    FCD.Print("etwas ändern, dann  /fcd diff  aufrufen.")
+    FCD.Print(L["Momentaufnahme gespeichert ("] .. #data .. L[" Zeichen). Jetzt im Blizzard-Fenster"])
+    FCD.Print(L["etwas ändern, dann  /fcd diff  aufrufen."])
     return true
 end
 
@@ -990,7 +991,7 @@ function Probe:BuildLayoutDiff()
     local snapshot = FCD.db.layoutSnapshot
     if not snapshot or not snapshot.raw then
         lines[#lines + 1] = "Keine Momentaufnahme vorhanden. Erst  /fcd snapshot  aufrufen,"
-        lines[#lines + 1] = "dann im Blizzard-Fenster etwas ändern, dann  /fcd diff."
+        lines[#lines + 1] = L["dann im Blizzard-Fenster etwas ändern, dann  /fcd diff."]
         return table.concat(lines, "\n")
     end
     lines[#lines + 1] = "Momentaufnahme von " .. tostring(snapshot.taken)
@@ -1003,8 +1004,8 @@ function Probe:BuildLayoutDiff()
 
     if current == snapshot.raw then
         lines[#lines + 1] = ""
-        lines[#lines + 1] = "Der Blob ist unverändert - im Blizzard-Fenster hat sich nichts bewegt,"
-        lines[#lines + 1] = "oder die Änderung wird erst beim Schließen des Fensters gespeichert."
+        lines[#lines + 1] = L["Der Blob ist unverändert - im Blizzard-Fenster hat sich nichts bewegt,"]
+        lines[#lines + 1] = L["oder die Änderung wird erst beim Schließen des Fensters gespeichert."]
         return table.concat(lines, "\n")
     end
 
@@ -1013,7 +1014,7 @@ function Probe:BuildLayoutDiff()
     local before = Compat.DecodeLayoutString(snapshot.raw)
     local after = Compat.DecodeLayoutString(current)
     if not before or not after then
-        lines[#lines + 1] = "Mindestens einer der beiden Blobs ließ sich nicht entschlüsseln."
+        lines[#lines + 1] = L["Mindestens einer der beiden Blobs ließ sich nicht entschlüsseln."]
         return table.concat(lines, "\n")
     end
 
@@ -1074,59 +1075,59 @@ end
 -- Rückgabe: erfolg
 function Probe:TestLayoutRoundTrip()
     if not Compat.HasLayoutData() then
-        FCD.Print("GetLayoutData gibt es in diesem Client nicht.")
+        FCD.Print(L["GetLayoutData gibt es in diesem Client nicht."])
         return false
     end
 
     local original, err = Compat.GetLayoutData()
     if err or type(original) ~= "string" then
-        FCD.Print("GetLayoutData lieferte nichts (" .. tostring(err) .. ").")
+        FCD.Print(L["GetLayoutData lieferte nichts ("] .. tostring(err) .. ").")
         return false
     end
 
     local decoded, decodeErr, _, recipe = Compat.DecodeLayoutString(original)
     if not decoded then
-        FCD.Print("|cffff4040Entschluesseln fehlgeschlagen:|r " .. tostring(decodeErr))
+        FCD.Print(L["|cffff4040Entschlüsseln fehlgeschlagen:|r "] .. tostring(decodeErr))
         return false
     end
-    FCD.Print("Entschlüsselt nach Rezept: " .. tostring(recipe and recipe.candidate)
-        .. " + " .. tostring(recipe and recipe.compressionName)
-        .. " + " .. tostring(recipe and recipe.deserializer))
+    FCD.Print(L["Entschlüsselt nach Rezept: "] .. tostring(recipe and recipe.candidate)
+        .. L[" + "] .. tostring(recipe and recipe.compressionName)
+        .. L[" + "] .. tostring(recipe and recipe.deserializer))
 
     local prefix, payload = Compat.SplitLayoutString(original)
     local rebuilt, encodeErr = Compat.EncodeLayoutString(prefix, decoded, recipe)
     if not rebuilt then
-        FCD.Print("|cffff4040Neu zusammensetzen fehlgeschlagen:|r " .. tostring(encodeErr))
+        FCD.Print(L["|cffff4040Neu zusammensetzen fehlgeschlagen:|r "] .. tostring(encodeErr))
         return false
     end
 
     local trimmed = string.gsub(original, "%s+$", "")
     if rebuilt == trimmed then
-        FCD.Print("|cff40dd40Rundlauf bitgleich.|r " .. #rebuilt .. " Zeichen, identisch zum Original.")
-        FCD.Print("Blizzards Kategorien können damit gefahrlos bearbeitet werden.")
+        FCD.Print(L["|cff40dd40Rundlauf bitgleich.|r "] .. #rebuilt .. L[" Zeichen, identisch zum Original."])
+        FCD.Print(L["Blizzards Kategorien können damit gefahrlos bearbeitet werden."])
         return true
     end
 
-    FCD.Print("Bytes weichen ab (" .. #rebuilt .. " statt " .. #trimmed .. " Zeichen), prüfe den Inhalt...")
-    FCD.Print("Präfix: " .. #(prefix or "") .. " Zeichen, Nutzlast: " .. #(payload or "") .. " Zeichen.")
+    FCD.Print(L["Bytes weichen ab ("] .. #rebuilt .. L[" statt "] .. #trimmed .. L[" Zeichen), prüfe den Inhalt..."])
+    FCD.Print(L["Präfix: "] .. #(prefix or "") .. L[" Zeichen, Nutzlast: "] .. #(payload or "") .. L[" Zeichen."])
 
     -- CBOR-Maps sind ungeordnet; entscheidend ist nicht die Bytefolge,
     -- sondern ob der neu erzeugte Blob denselben Inhalt ergibt.
     local redecoded, redecodeErr = Compat.DecodeLayoutString(rebuilt)
     if not redecoded then
-        FCD.Print("|cffff4040Neu erzeugter Blob ist nicht wieder lesbar:|r " .. tostring(redecodeErr))
+        FCD.Print(L["|cffff4040Neu erzeugter Blob ist nicht wieder lesbar:|r "] .. tostring(redecodeErr))
         return false
     end
 
     local same, difference = Compat.DeepEqual(decoded, redecoded)
     if same then
-        FCD.Print("|cff40dd40Inhaltlich gleich.|r Nur die Schlüsselreihenfolge unterscheidet sich,")
-        FCD.Print("was bei CBOR-Maps bedeutungslos ist. Bearbeiten ist damit sicher.")
+        FCD.Print(L["|cff40dd40Inhaltlich gleich.|r Nur die Schlüsselreihenfolge unterscheidet sich,"])
+        FCD.Print(L["was bei CBOR-Maps bedeutungslos ist. Bearbeiten ist damit sicher."])
         return true
     end
 
-    FCD.Print("|cffff4040Inhalt weicht ab:|r " .. tostring(difference))
-    FCD.Print("Solange das so ist, wird nichts geschrieben.")
+    FCD.Print(L["|cffff4040Inhalt weicht ab:|r "] .. tostring(difference))
+    FCD.Print(L["Solange das so ist, wird nichts geschrieben."])
     return false
 end
 
@@ -1134,21 +1135,21 @@ end
 -- Einstellungen, zeigt aber, ob der Client den Aufruf überhaupt zulässt.
 function Probe:TestLayoutWrite()
     if not Compat.CanWriteLayoutData() then
-        FCD.Print("SetLayoutData gibt es in diesem Client nicht - Blizzards Kategorien sind nicht beschreibbar.")
+        FCD.Print(L["SetLayoutData gibt es in diesem Client nicht - Blizzards Kategorien sind nicht beschreibbar."])
         return false
     end
     local data, err = Compat.GetLayoutData()
     if err or data == nil then
-        FCD.Print("GetLayoutData lieferte nichts (" .. tostring(err) .. ") - Schreibtest nicht möglich.")
+        FCD.Print(L["GetLayoutData lieferte nichts ("] .. tostring(err) .. L[") - Schreibtest nicht möglich."])
         return false
     end
 
     local ok, writeErr = Compat.SetLayoutData(data)
     if ok then
-        FCD.Print("|cff40dd40SetLayoutData wurde angenommen.|r Unverändert zurückgeschrieben, es hat sich nichts geändert.")
+        FCD.Print(L["|cff40dd40SetLayoutData wurde angenommen.|r Unverändert zurückgeschrieben, es hat sich nichts geändert."])
     else
-        FCD.Print("|cffff4040SetLayoutData abgelehnt:|r " .. tostring(writeErr))
-        FCD.Print("Die Funktion ist vermutlich geschützt und nur für Blizzard-Code aufrufbar.")
+        FCD.Print(L["|cffff4040SetLayoutData abgelehnt:|r "] .. tostring(writeErr))
+        FCD.Print(L["Die Funktion ist vermutlich geschützt und nur für Blizzard-Code aufrufbar."])
     end
     return ok
 end
@@ -1178,11 +1179,11 @@ function Probe:BuildReport()
     end
 
     lines[#lines + 1] = ""
-    lines[#lines + 1] = "== Geschützte Werte (secret values) =="
-    lines[#lines + 1] = "  Abklingzeiten geschützt: " .. tostring(Compat.caps.secretCooldown)
-    lines[#lines + 1] = "  Aufladungen geschützt:   " .. tostring(Compat.caps.secretCharges)
-    lines[#lines + 1] = "  Benutzbarkeit geschützt: " .. tostring(Compat.caps.secretUsable)
-    lines[#lines + 1] = "  Auren geschützt:         " .. tostring(Compat.caps.secretAura)
+    lines[#lines + 1] = L["== Geschützte Werte (secret values) =="]
+    lines[#lines + 1] = L["  Abklingzeiten geschützt: "] .. tostring(Compat.caps.secretCooldown)
+    lines[#lines + 1] = L["  Aufladungen geschützt:   "] .. tostring(Compat.caps.secretCharges)
+    lines[#lines + 1] = L["  Benutzbarkeit geschützt: "] .. tostring(Compat.caps.secretUsable)
+    lines[#lines + 1] = L["  Auren geschützt:         "] .. tostring(Compat.caps.secretAura)
     -- Gibt es eine offizielle Schnittstelle dafür? Globale Namen absuchen.
     local secretGlobals = {}
     for name, value in pairs(_G) do
@@ -1202,7 +1203,7 @@ function Probe:BuildReport()
         .. (#unknownEvents > 0 and table.concat(unknownEvents, ", ") or "keine")
 
     lines[#lines + 1] = ""
-    lines[#lines + 1] = "== Funktionsprüfung =="
+    lines[#lines + 1] = L["== Funktionsprüfung =="]
     for _, feature in ipairs(FEATURES) do
         local status, missing = statusFor(feature)
         lines[#lines + 1] = string.format("  %-14s %s%s", status, feature.name,
@@ -1224,7 +1225,7 @@ function Probe:BuildReport()
     lines[#lines + 1] = "== Abklingzeit-Manager =="
     if not Compat.HasCooldownInfo() then
         lines[#lines + 1] = "  Hinweis: Es gibt keine Funktion, die eine Abklingzeit-ID zu einem"
-        lines[#lines + 1] = "  Zauber auflöst. Die Kategorie-Listen sind lesbar, die Zuordnung"
+        lines[#lines + 1] = L["  Zauber auflöst. Die Kategorie-Listen sind lesbar, die Zuordnung"]
         lines[#lines + 1] = "  nicht. Der richtige Name steht vermutlich in der Liste oben."
     end
     local categories = Compat.GetCooldownViewerCategories()
@@ -1233,7 +1234,7 @@ function Probe:BuildReport()
     end
     for _, category in ipairs(categories) do
         local ids = Compat.GetCategorySet(category.value)
-        lines[#lines + 1] = string.format("  %s (%d): %s Einträge",
+        lines[#lines + 1] = string.format(L["  %s (%d): %s Einträge"],
             category.name, category.value, ids and #ids or "keine Antwort")
         if ids and #ids > 0 then
             local shown = {}
@@ -1263,14 +1264,14 @@ function Probe:BuildReport()
 
     lines[#lines + 1] = ""
     lines[#lines + 1] = "== Zauberbuch =="
-    lines[#lines + 1] = string.format("  Einträge gelesen: %d", FCD.Ranks.scanned or 0)
-    lines[#lines + 1] = string.format("  Fähigkeiten (Rangfamilien): %d", FCD.Ranks.familyCount or 0)
-    lines[#lines + 1] = string.format("  davon mit mehreren Rängen: %d", FCD.Ranks.rankedFamilyCount or 0)
+    lines[#lines + 1] = string.format(L["  Einträge gelesen: %d"], FCD.Ranks.scanned or 0)
+    lines[#lines + 1] = string.format(L["  Fähigkeiten (Rangfamilien): %d"], FCD.Ranks.familyCount or 0)
+    lines[#lines + 1] = string.format(L["  davon mit mehreren Rängen: %d"], FCD.Ranks.rankedFamilyCount or 0)
 
     -- Rohdaten: nur daran lässt sich sehen, ob die Untertitel überhaupt als
     -- "Rang N" geliefert werden - auch dann, wenn der Charakter noch zu
     -- niedrigstufig für mehrere Ränge ist.
-    lines[#lines + 1] = "  Einträge im Zauberbuch:"
+    lines[#lines + 1] = L["  Einträge im Zauberbuch:"]
     local listed = 0
     Compat.IterateSpellbook(function(spellID, name, subText, _, isPassive, known)
         listed = listed + 1
@@ -1308,14 +1309,14 @@ function Probe:BuildReport()
             family.name, table.concat(parts, " "), tostring(family.ranks[1].subText))
     end
     if #sample == 0 then
-        lines[#lines + 1] = "    Keine Fähigkeit mit mehreren Rängen gefunden."
+        lines[#lines + 1] = L["    Keine Fähigkeit mit mehreren Rängen gefunden."]
         lines[#lines + 1] = "    Entweder hat der Charakter noch keine, oder die Untertitel"
         lines[#lines + 1] = "    werden in diesem Client anders geliefert als 'Rang N'."
     end
 
     lines[#lines + 1] = ""
     lines[#lines + 1] = "== Items =="
-    lines[#lines + 1] = string.format("  Kandidaten (Ausrüstung + Taschen): %d", #(FCD.Items.candidates or {}))
+    lines[#lines + 1] = string.format(L["  Kandidaten (Ausrüstung + Taschen): %d"], #(FCD.Items.candidates or {}))
     for index = 1, math.min(10, #(FCD.Items.candidates or {})) do
         local candidate = FCD.Items.candidates[index]
         lines[#lines + 1] = string.format("    %s [%s]", candidate.name, candidate.subLabel or candidate.kind)
@@ -1388,7 +1389,7 @@ function Probe:BuildBlizzardLayoutReport()
         end
         if count >= 1 then
             found = found + 1
-            lines[#lines + 1] = string.format("%s  (%d Eintrag/Einträge)", path, count)
+            lines[#lines + 1] = string.format(L["%s  (%d Eintrag/Einträge)"], path, count)
             for key, value in pairs(node) do
                 if isLayoutEntry(value) then
                     lines[#lines + 1] = string.format("    [%s] name=%s  id=%s",
@@ -1553,7 +1554,7 @@ function Probe:BuildEditModeReport()
 
     if reported == 0 then
         lines[#lines + 1] = "  nichts offen."
-        lines[#lines + 1] = "  Bearbeitungsmodus öffnen, eine ihrer Leisten anklicken,"
+        lines[#lines + 1] = L["  Bearbeitungsmodus öffnen, eine ihrer Leisten anklicken,"]
         lines[#lines + 1] = "  dann diesen Befehl erneut absetzen."
     end
 
@@ -1588,7 +1589,7 @@ function Probe:BuildEditModeReport()
     -- sich die Felder nicht benennen - geratene Enum-Namen waren falsch.
     do
         lines[#lines + 1] = ""
-        lines[#lines + 1] = "-- Enums für Leisteneinstellungen --"
+        lines[#lines + 1] = L["-- Enums für Leisteneinstellungen --"]
         local enums = _G.Enum
         local names = {}
         if type(enums) == "table" then
@@ -1780,7 +1781,7 @@ function Probe:BuildEditModeSettingsReport()
 
     local map = rawget(system, "settingMap")
     if type(map) == "table" then
-        lines[#lines + 1] = "  system.settingMap vorhanden (" .. tostring(#map) .. " Einträge)"
+        lines[#lines + 1] = "  system.settingMap vorhanden (" .. tostring(#map) .. L[" Einträge)"]
     end
 
     lines[#lines + 1] = ""
@@ -1863,11 +1864,11 @@ function Probe:TryEditModeSetting(settingName, value)
         local ok, attemptErr = pcall(attempt.run)
         local after = currentValue()
         if ok and after ~= before then
-            return string.format("%s über %s: %s -> %s",
+            return string.format(L["%s über %s: %s -> %s"],
                 settingName, attempt.name, tostring(before), tostring(after))
         end
         tried[#tried + 1] = string.format("%s: %s", attempt.name,
-            ok and "kein Fehler, aber Wert unverändert" or tostring(attemptErr))
+            ok and L["kein Fehler, aber Wert unverändert"] or tostring(attemptErr))
     end
 
     return nil, "kein Weg hat gewirkt.\n  " .. table.concat(tried, "\n  ")

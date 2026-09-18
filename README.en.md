@@ -125,6 +125,7 @@ cd Tests
 npm install luaparse fengari
 node verify.js   # syntax, unknown globals, cross-module calls
 node run.js      # logic tests in a real Lua VM
+node i18n.js     # German text without L[...], keys without a translation
 ```
 
 `verify.js` catches exactly the errors that would otherwise first show up as a

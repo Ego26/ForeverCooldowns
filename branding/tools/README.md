@@ -13,18 +13,18 @@ Erzeugt:
 
 Die Wortmarke wird mit **Century Gothic** gesetzt, gelesen direkt aus
 `C:/Windows/Fonts/GOTHIC.TTF` und `GOTHICB.TTF`. `ttf.js` ist ein minimaler
-TrueType-Leser: Umrisse holen, quadratische Kurven aufloesen, nach der
-Umlaufregel fuellen.
+TrueType-Leser: Umrisse holen, quadratische Kurven auflösen, nach der
+Umlaufregel füllen.
 
-Der Vorgaenger zeichnete die Buchstaben selbst, aus Strichen mit runden Enden.
+Der Vorgänger zeichnete die Buchstaben selbst, aus Strichen mit runden Enden.
 Das sah nach Comic Sans aus, und zwar bauartbedingt - gleichbleibende
-Strichstaerke und runde Kappen sind genau ihre Merkmale. Sperrung, Groesse und
-Farbe zu aendern half nicht. Wer das Werkzeug auf einen Rechner ohne Century
+Strichstärke und runde Kappen sind genau ihre Merkmale. Sperrung, Größe und
+Farbe zu ändern half nicht. Wer das Werkzeug auf einen Rechner ohne Century
 Gothic bringt, tauscht die beiden Pfade in `brand.js` gegen eine andere
 geometrische Groteske - `bahnschrift.ttf` liegt ebenfalls auf jedem Windows.
 
 ## Emblem
 
-Das Emblem ist weiterhin gerechnet, nicht gesetzt: ein Faehigkeitssymbol mit
+Das Emblem ist weiterhin gerechnet, nicht gesetzt: ein Fähigkeitssymbol mit
 laufendem Abklingkeil, dahinter zwei versetzte Kacheln als Rangstapel. Es
 bleibt auch bei 16 Pixeln lesbar und braucht keine Schrift.

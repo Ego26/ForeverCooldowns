@@ -1,5 +1,6 @@
 local FCD = ForeverCooldowns
 local Compat = FCD.Compat
+local L = FCD.L
 
 local Store = {}
 FCD.Store = Store
@@ -110,7 +111,7 @@ function Store:Save(force)
     -- würde ein Fehler im Codec Blizzards Layout beschädigen.
     local ok, verifyErr = FCD.Layout:VerifyRoundTrip(state)
     if not ok then
-        self.status = "Nicht geschrieben, Blob übersteht die Kette nicht: "
+        self.status = L["Nicht geschrieben, Blob übersteht die Kette nicht: "]
             .. tostring(verifyErr)
         return false, verifyErr
     end

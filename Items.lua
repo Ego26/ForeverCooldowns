@@ -1,5 +1,6 @@
 local FCD = ForeverCooldowns
 local Compat = FCD.Compat
+local L = FCD.L
 
 local Items = {}
 FCD.Items = Items
@@ -7,16 +8,16 @@ FCD.Items = Items
 -- Slots, die in Classic regelmäßig eine benutzbare Wirkung tragen.
 -- Slot-Einträge folgen der Ausrüstung, statt eine feste Item-ID zu binden.
 local WATCHED_SLOTS = {
-    { slot = 13, label = "Schmuckstück 1" },
-    { slot = 14, label = "Schmuckstück 2" },
-    { slot = 10, label = "Handschuhe" },
-    { slot = 6,  label = "Gürtel" },
-    { slot = 1,  label = "Kopf" },
-    { slot = 8,  label = "Füße" },
-    { slot = 15, label = "Umhang" },
-    { slot = 2,  label = "Hals" },
-    { slot = 11, label = "Ring 1" },
-    { slot = 12, label = "Ring 2" },
+    { slot = 13, label = L["Schmuckstück 1"] },
+    { slot = 14, label = L["Schmuckstück 2"] },
+    { slot = 10, label = L["Handschuhe"] },
+    { slot = 6,  label = L["Gürtel"] },
+    { slot = 1,  label = L["Kopf"] },
+    { slot = 8,  label = L["Füße"] },
+    { slot = 15, label = L["Umhang"] },
+    { slot = 2,  label = L["Hals"] },
+    { slot = 11, label = L["Ring 1"] },
+    { slot = 12, label = L["Ring 2"] },
 }
 
 Items.WATCHED_SLOTS = WATCHED_SLOTS

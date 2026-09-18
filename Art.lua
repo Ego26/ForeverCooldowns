@@ -1,4 +1,5 @@
 local FCD = ForeverCooldowns
+local L = FCD.L
 
 local Art = {}
 FCD.Art = Art
@@ -505,7 +506,7 @@ function Art:Learn()
         if not entry then
             return "kein " .. label
         end
-        return string.format("%s %s (%d Grafiken, %d gleich große)",
+        return string.format(L["%s %s (%d Grafiken, %d gleich große)"],
             label, entry.sizeKey, entry.art, entry.siblings or 1)
     end
 
@@ -816,7 +817,7 @@ function Art:DecorateEditSelection(widget)
     end
 
     widget.editArt = textures
-    self.editStatus = string.format("Auswahlrahmen übernommen (%d Texturen).", #textures)
+    self.editStatus = string.format(L["Auswahlrahmen übernommen (%d Texturen)."], #textures)
     return true
 end
 
@@ -1031,14 +1032,14 @@ end
 
 function Art:Describe()
     local lines = {}
-    lines[#lines + 1] = "== Blizzards Einträge als Vorlage =="
+    lines[#lines + 1] = L["== Blizzards Einträge als Vorlage =="]
     lines[#lines + 1] = "Stand: " .. tostring(self.status)
     lines[#lines + 1] = ""
 
     local window = self:Source()
     if not window then
         lines[#lines + 1] = "Blizzards Abklingzeit-Fenster ist gerade nicht offen."
-        lines[#lines + 1] = "Öffne es und rufe den Befehl erneut auf."
+        lines[#lines + 1] = L["Öffne es und rufe den Befehl erneut auf."]
         return table.concat(lines, "\n")
     end
 
@@ -1108,7 +1109,7 @@ function Art:Describe()
         else
             local name = call(entry.frame, "GetName")
             lines[#lines + 1] = string.format("  Rahmen: %s", name or "ohne Namen")
-            lines[#lines + 1] = string.format("  Maße: %.0f x %.0f", entry.width, entry.height)
+            lines[#lines + 1] = string.format(L["  Maße: %.0f x %.0f"], entry.width, entry.height)
             lines[#lines + 1] = string.format("  Atlas-Texturen: %d", entry.art)
             local seen = {}
             local function list(frame, depth)

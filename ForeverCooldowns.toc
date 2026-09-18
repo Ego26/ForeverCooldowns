@@ -2,7 +2,7 @@
 ## Title: Forever Cooldowns
 ## Title-deDE: Forever Cooldowns
 ## Notes: Rank-aware cooldown manager. Track any spell or item, not just Blizzard's list. Type /fcd.
-## Notes-deDE: Rangbewusster Abklingzeit-Manager. Beliebige Zauber und Gegenstaende verfolgen, nicht nur Blizzards Liste. Tippe /fcd.
+## Notes-deDE: Rangbewusster Abklingzeit-Manager. Beliebige Zauber und Gegenstände verfolgen, nicht nur Blizzards Liste. Tippe /fcd.
 ## Author: Ego26
 ## Version: @project-version@
 ## SavedVariables: ForeverCooldownsDB
