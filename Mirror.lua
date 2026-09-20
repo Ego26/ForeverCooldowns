@@ -459,46 +459,27 @@ end
 -- Weg vermeidet. Ein :Hide() auf ihrem Viewer wäre die naheliegende Zeile
 -- und die falsche.
 --
--- Es gibt zwei Wege, die ihren Code gar nicht erst berühren:
+-- Der naheliegende Weg war die Einstellung, die der Spieler selbst in den
+-- Spieloptionen umlegen würde: das CVar cooldownViewerEnabled. Es ist der
+-- falsche, gemessen am lebenden Client:
 --
---   * Die Einstellung, die der Spieler selbst in den Spieloptionen umlegen
---     würde. Ist sie als CVar vorhanden, setzen wir sie - Blizzards eigener
---     Code räumt dann auf, und zwar sofort.
---   * Sonst das nachladbare AddOn abschalten, das ihre Anzeige mitbringt.
---     Wirkt erst beim Neuladen, dafür endgültig.
+--   In derselben Sitzung sieht alles gut aus - ihre Leisten verschwinden,
+--   unsere bleiben. Nach dem nächsten Neuladen ist der Bestand weg.
+--   GetCooldownViewerCacheInfo liefert dann zu keiner Kennung mehr etwas,
+--   und damit stehen nicht nur ihre Leisten leer, sondern auch unsere und
+--   das ganze Panel. Das CVar schaltet nicht die Anzeige ab, sondern die
+--   Funktion - samt der Daten, von denen wir leben.
 --
--- Welcher greift, entscheidet der Client. Beide sind umkehrbar.
-local VIEWER_CVARS = { "cooldownViewerEnabled", "cooldownManagerEnabled" }
+-- Deshalb bleibt nur der Weg über ihr nachladbares AddOn: das bringt die
+-- Rahmen mit, nicht die Daten. Er wirkt beim nächsten Neuladen, und falls
+-- auch er den Bestand mitnimmt, fängt die Prüfung beim Anmelden das ab und
+-- macht es rückgängig.
+--
+-- Gibt es kein solches AddOn, sagt /fcd solo das und nennt die Handgriffe
+-- in Blizzards eigenem Fenster. Ihr Haken "Sichtbar" blendet nur die Rahmen
+-- aus und lässt die Daten in Ruhe - das ist der sichere Weg, nur eben einer
+-- mit vier Schritten.
 local VIEWER_ADDON_HINTS = { "cooldownviewer", "cooldownmanager" }
-
-local function readCVar(name)
-    local getter = _G.GetCVar or (_G.C_CVar and _G.C_CVar.GetCVar)
-    if type(getter) ~= "function" then
-        return nil
-    end
-    local ok, value = pcall(getter, name)
-    if ok and type(value) == "string" and value ~= "" then
-        return value
-    end
-    return nil
-end
-
-local function writeCVar(name, value)
-    local setter = _G.SetCVar or (_G.C_CVar and _G.C_CVar.SetCVar)
-    if type(setter) ~= "function" then
-        return false
-    end
-    return pcall(setter, name, value) and true or false
-end
-
-function Mirror:FindViewerCVar()
-    for _, name in ipairs(VIEWER_CVARS) do
-        if readCVar(name) ~= nil then
-            return name
-        end
-    end
-    return nil
-end
 
 -- Der Name des AddOns ist zwischen den Builds nicht stabil, also wird die
 -- Liste durchsucht statt geraten.
@@ -526,12 +507,8 @@ function Mirror:FindViewerAddOn()
     return nil
 end
 
--- Rückgabe: "cvar", "addon" oder nil - und der zugehörige Name.
+-- Rückgabe: "addon" und der Name - oder nil, wenn es keinen Schalter gibt.
 function Mirror:GetViewerSwitch()
-    local cvar = self:FindViewerCVar()
-    if cvar then
-        return "cvar", cvar
-    end
     local addon = self:FindViewerAddOn()
     if addon then
         return "addon", addon
@@ -542,9 +519,6 @@ end
 -- Läuft Blizzards eigene Anzeige gerade? nil heißt: nicht feststellbar.
 function Mirror:IsViewerOn()
     local kind, name = self:GetViewerSwitch()
-    if kind == "cvar" then
-        return readCVar(name) ~= "0"
-    end
     if kind == "addon" then
         local addons = _G.C_AddOns
         if type(addons.GetAddOnEnableState) ~= "function" then
@@ -565,24 +539,59 @@ function Mirror:IsViewerOn()
     return nil
 end
 
+-- Wieviel Bestand sieht der Client gerade?
+--
+-- Der Grund für diese Zahl, teuer gelernt: Blizzards Abklingzeit-Anzeige
+-- abzuschalten schaltet in diesem Client auch die Daten dahinter ab.
+-- GetCooldownViewerCacheInfo liefert dann zu keiner Kennung mehr etwas, und
+-- damit steht nicht nur ihre Leiste leer, sondern auch unsere und das
+-- ganze Panel. Das Abschalten saegt also den Ast ab, auf dem wir sitzen -
+-- auf diesem Client. Auf einem anderen mag es gehen.
+--
+-- Deshalb wird nicht geglaubt, sondern nachgezaehlt: vorher, nachher, und
+-- bei einem Einbruch auf null macht SetViewer sich selbst rueckgaengig.
+function Mirror:CountCatalog()
+    local count = 0
+    for _, category in ipairs(Compat.GetCooldownViewerCategories()) do
+        for _, cooldownID in ipairs(Compat.GetCategorySet(category.value) or {}) do
+            if Compat.GetCooldownInfo(cooldownID) then
+                count = count + 1
+            end
+        end
+    end
+    return count
+end
+
+-- Der Notausgang.
+--
+-- Eine frühere Fassung hat cooldownViewerEnabled abgeschaltet, in der
+-- Annahme, das betreffe nur die Anzeige. Wer sie benutzt hat, sitzt beim
+-- nächsten Anmelden vor einem leeren Panel - und käme allein nicht mehr
+-- heraus, weil dieses AddOn das CVar nicht mehr schreibt. Es räumt deshalb
+-- auf, was es angerichtet hat: steht kein Bestand zur Verfügung und ist das
+-- CVar aus, wird es wieder eingeschaltet.
+function Mirror:RepairViewerCVar()
+    local getter = _G.GetCVar or (_G.C_CVar and _G.C_CVar.GetCVar)
+    local setter = _G.SetCVar or (_G.C_CVar and _G.C_CVar.SetCVar)
+    if type(getter) ~= "function" or type(setter) ~= "function" then
+        return false
+    end
+    local repaired = false
+    for _, name in ipairs({ "cooldownViewerEnabled", "cooldownManagerEnabled" }) do
+        local ok, value = pcall(getter, name)
+        if ok and value == "0" and pcall(setter, name, "1") then
+            repaired = true
+        end
+    end
+    return repaired
+end
+
 -- Rückgabe: erfolg, brauchtNeuladen, fehlertext
 function Mirror:SetViewer(on)
     local kind, name = self:GetViewerSwitch()
     if not kind then
         return false, false,
             L["Dieser Client hat keinen Schalter für Blizzards Abklingzeit-Anzeige."]
-    end
-
-    if kind == "cvar" then
-        if InCombatLockdown() then
-            return false, false, L["Im Kampf nicht - danach noch einmal."]
-        end
-        if not writeCVar(name, on and "1" or "0") then
-            return false, false, L["Die Einstellung ließ sich nicht setzen."]
-        end
-        -- Ihr eigener Code zieht auf die Einstellung hin nach; ein Neuladen
-        -- braucht es dafür nicht.
-        return true, false
     end
 
     local addons = _G.C_AddOns

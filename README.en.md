@@ -147,11 +147,17 @@ They would stand alongside and, until the next reload, even show something
 different. So FCD asks once on your first login whether it should switch them
 off – one click, reversible at any time with `/fcd solo off`.
 
-It switches them off through the same setting you would flip in the game
-options (a CVar); if the client has none, their loadable addon is disabled
-instead, which takes effect on the next reload. **FCD does not touch their
-frames.** That would be exactly the taint this whole route avoids: a
-`:Hide()` on their viewer is the obvious line and the wrong one.
+It disables their loadable addon – which brings the frames, not the data –
+and that takes effect on the next reload. **FCD does not touch their frames.**
+That would be exactly the taint this whole route avoids: a `:Hide()` on their
+viewer is the obvious line and the wrong one.
+
+The CVar `cooldownViewerEnabled` would be the more convenient switch and is
+the wrong one: it does not switch off the display but the whole feature –
+including `GetCooldownViewerCacheInfo`, which is where the panel and the bars
+get their data. Within the same session this goes unnoticed; only after a
+reload does everything stand empty. FCD no longer touches it, and switches it
+back on if it finds it off.
 
 ## Where settings live
 

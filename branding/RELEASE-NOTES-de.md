@@ -30,12 +30,12 @@ zeichnen die Kategorie selbst.**
 ### Geändert
 
 - **`/fcd solo` schaltet Blizzards eigene Leisten ab.** Sonst stünde alles
-  doppelt, sobald FCD ihre Kategorien zeigt. Umgelegt wird der Schalter, den
-  auch der Spieler in den Spieloptionen findet (CVar); kennt der Client
-  keinen, wird ihr nachladbares AddOn deaktiviert und es wirkt beim nächsten
-  Neuladen. Ihre Rahmen werden dabei nicht angefasst - genau das wäre der
-  Taint, den dieser Weg vermeidet. Beim ersten Anmelden fragt FCD einmal
-  danach; die Antwort ist ein Klick und jederzeit umkehrbar.
+  doppelt, sobald FCD ihre Kategorien zeigt. Abgeschaltet wird ihr
+  nachladbares AddOn - das bringt die Rahmen mit, nicht die Daten - und es
+  wirkt beim nächsten Neuladen. Ihre Rahmen werden dabei nicht angefasst,
+  denn genau das wäre der Taint, den dieser Weg vermeidet. Kennt ein Client
+  dieses AddOn nicht, sagt `/fcd solo` das und nennt die Handgriffe in
+  Blizzards eigenem Fenster.
 - **Die Vorgabeleisten spiegeln Blizzards Kategorien.** Vorher standen dort
   zwei leere Leisten, und sichtbar wurde eine Änderung erst, wenn jemand den
   Knopf "spiegeln" entdeckte. Das kann niemand vorher wissen, also ist es
@@ -50,6 +50,13 @@ zeichnen die Kategorie selbst.**
 
 ### Behoben
 
+- **Ein leeres Panel repariert sich selbst.** Kommt beim Anmelden kein
+  Bestand an und ist Blizzards Abklingzeit-Funktion abgeschaltet, schaltet
+  FCD sie wieder ein und sagt es. Grund: das CVar `cooldownViewerEnabled`
+  schaltet nicht die Anzeige ab, sondern die ganze Funktion - samt
+  `GetCooldownViewerCacheInfo`, aus dem Panel und Leisten ihre Daten holen.
+  In derselben Sitzung fällt das nicht auf, erst nach dem Neuladen. FCD
+  fasst dieses CVar deshalb nicht mehr an.
 - **Gespiegelte Leisten zeigten zu viel.** Der Katalog kennt zu jeder
   Abklingzeit eine Kategorie, auch zu Fähigkeiten, die Blizzards Leisten nie
   anzeigen - "Heldenhafter Stoß" steht unter "Strategisch" und taucht bei

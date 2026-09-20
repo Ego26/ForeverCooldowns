@@ -1229,6 +1229,13 @@ function FCD:SoloCommand(argument)
         return
     end
 
+    -- Festhalten, damit das nächste Anmelden prüfen kann, ob das Abschalten
+    -- den Bestand mitgenommen hat. Beim AddOn-Weg zeigt sich das erst dann.
+    FCD.db.settings.soloOn = not wantTheirs
+    FCD.Mirror:Invalidate()
+    FCD.Dock:LoadLayout()
+    FCD:RefreshData()
+
     if wantTheirs then
         printMessage(L["Blizzards eigene Leisten sind wieder an."])
     else
@@ -1500,6 +1507,24 @@ local function onEvent(_, event, ...)
         -- Einmal je Datenbank: dass die Leisten Blizzards Kategorien zeigen,
         -- und was das für ihre eigenen bedeutet. Danach nie wieder - eine
         -- Ansage, die bei jedem Anmelden kommt, liest bald niemand mehr.
+        -- Sicherheitsnetz. Beides, was Blizzards Anzeige abschalten kann,
+        -- nimmt in diesem Client womöglich die Daten mit - und das zeigt sich
+        -- erst nach dem Neuladen, wenn der Bestand gar nicht erst ankommt.
+        -- Ohne diese Prüfung säße man vor einem leeren Panel und wüsste
+        -- nicht, woher es kommt.
+        if FCD.Mirror:CountCatalog() == 0 then
+            local repaired = FCD.Mirror:RepairViewerCVar()
+            if FCD.db.settings.soloOn then
+                FCD.db.settings.soloOn = false
+                if FCD.Mirror:SetViewer(true) then
+                    repaired = true
+                end
+            end
+            if repaired then
+                printMessage(L["Blizzards Anzeige war abgeschaltet, und damit waren auch die Daten dahinter weg. Wieder eingeschaltet - nach einem /reload ist alles wie vorher."])
+            end
+        end
+
         -- Eigener Schlüssel, nicht der alte mirrorNoticeShown: wer die
         -- Vorgängerfassung schon einmal gestartet hat, hätte die Frage sonst
         -- nie zu sehen bekommen, weil dort nur eine Anleitung stand.

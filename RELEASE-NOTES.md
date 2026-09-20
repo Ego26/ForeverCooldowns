@@ -27,12 +27,11 @@ category ourselves.**
 ### Changed
 
 - **`/fcd solo` switches Blizzard's own bars off.** Otherwise everything
-  would be shown twice once FCD displays their categories. It flips the same
-  switch you would find in the game options (a CVar); if the client has none,
-  their loadable addon is disabled instead and it takes effect on the next
-  reload. Their frames are not touched - that would be exactly the taint this
-  route avoids. FCD asks once on your first login; answering is one click and
-  reversible at any time.
+  would be shown twice once FCD displays their categories. It disables their
+  loadable addon - which brings the frames, not the data - and takes effect
+  on the next reload. Their frames are not touched, because that would be
+  exactly the taint this route avoids. If a client does not have that addon,
+  `/fcd solo` says so and names the steps in Blizzard's own window.
 - **The default bars mirror Blizzard's categories.** There used to be two
   empty bars there, and a change became visible only once somebody found the
   "mirror" button. Nobody can know that in advance, so it is now the starting
@@ -46,6 +45,13 @@ category ourselves.**
 
 ### Fixed
 
+- **An empty panel repairs itself.** If no data arrives at login and
+  Blizzard's cooldown feature is switched off, FCD switches it back on and
+  says so. The reason: the CVar `cooldownViewerEnabled` does not switch off
+  the display but the whole feature - including
+  `GetCooldownViewerCacheInfo`, which is where the panel and the bars get
+  their data. Within the same session this goes unnoticed; it only shows
+  after a reload. FCD no longer touches that CVar.
 - **Mirrored bars showed too much.** The catalogue knows a category for
   every cooldown, including abilities Blizzard's bars never display - "Heroic
   Strike" sits under "Utility" and still appears nowhere in theirs. What is

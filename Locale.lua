@@ -1344,6 +1344,10 @@ FCD.AddTranslations("enUS", {
         "Blizzard's bars stay. /fcd solo on switches them off later.",
     ["Forever Cooldowns zeigt Blizzards Abklingzeiten jetzt auf eigenen Leisten.\n\nSollen Blizzards eigene Leisten dafür abgeschaltet werden? Sonst steht alles doppelt.\n\nJederzeit umkehrbar mit  /fcd solo off"] =
         "Forever Cooldowns now shows Blizzard's cooldowns on bars of your own.\n\nSwitch Blizzard's own bars off for that? Otherwise everything is shown twice.\n\nReversible at any time with  /fcd solo off",
+    ["Mit ihrer Anzeige verschwinden in diesem Client auch die Daten dahinter - wieder eingeschaltet."] =
+        "In this client, switching off their display takes the data behind it with it - switched back on.",
+    ["Blizzards Anzeige war abgeschaltet, und damit waren auch die Daten dahinter weg. Wieder eingeschaltet - nach einem /reload ist alles wie vorher."] =
+        "Blizzard's display was switched off, and the data behind it was gone with it. Switched back on - after a /reload everything is as before.",
 })
 
 FCD.SetLanguage("auto")

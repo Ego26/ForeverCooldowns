@@ -151,12 +151,17 @@ Die würden daneben stehen und bis zum nächsten Neuladen sogar etwas anderes
 zeigen. Deshalb fragt FCD beim ersten Anmelden einmal, ob es sie abschalten
 soll – ein Klick, jederzeit umkehrbar mit `/fcd solo off`.
 
-Abgeschaltet wird über den Schalter, den auch du in den Spieloptionen umlegen
-würdest (CVar); kennt der Client keinen, wird stattdessen ihr nachladbares
-AddOn deaktiviert – das wirkt dann beim nächsten Neuladen. **Ihre Rahmen fasst
-FCD dabei nicht an.** Genau das wäre der Taint, den dieser ganze Weg
-vermeidet: ein `:Hide()` auf ihrem Viewer wäre die naheliegende Zeile und die
-falsche.
+Abgeschaltet wird ihr nachladbares AddOn – das bringt die Rahmen mit, nicht
+die Daten – und es wirkt beim nächsten Neuladen. **Ihre Rahmen fasst FCD dabei
+nicht an.** Genau das wäre der Taint, den dieser ganze Weg vermeidet: ein
+`:Hide()` auf ihrem Viewer wäre die naheliegende Zeile und die falsche.
+
+Das CVar `cooldownViewerEnabled` wäre der bequemere Schalter und ist der
+falsche: es schaltet nicht die Anzeige ab, sondern die ganze Funktion – samt
+`GetCooldownViewerCacheInfo`, aus dem Panel und Leisten ihre Daten holen. In
+derselben Sitzung fällt das nicht auf, erst nach dem Neuladen steht alles
+leer. FCD fasst es nicht mehr an und schaltet es wieder ein, wenn es es
+ausgeschaltet vorfindet.
 
 ## Wo die Einstellungen liegen
 
