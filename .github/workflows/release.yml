@@ -1,0 +1,36 @@
+# Paket bauen und veröffentlichen, sobald ein Tag gepusht wird.
+#
+# Warum überhaupt: CurseForge bietet zwar eine eigene Paketierung an, die das
+# Repository beobachtet - die hat auf einen gesetzten Tag nicht reagiert. Der
+# BigWigs-Packager läuft stattdessen hier, liest dieselbe .pkgmeta und lädt
+# über die CurseForge-Schnittstelle hoch. Damit hängt die Veröffentlichung an
+# etwas, das wir selbst sehen und nachlesen können.
+#
+# Er erledigt dabei genau das, was tools/build.js lokal tut: @project-version@
+# durch den Tag-Namen ersetzen, die ignore-Liste anwenden, zippen.
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Quelltext holen
+        uses: actions/checkout@v4
+        with:
+          # Der Packager braucht die Historie, sonst findet er den Tag nicht,
+          # aus dem er die Version ableitet.
+          fetch-depth: 0
+
+      - name: Bauen und hochladen
+        uses: BigWigsMods/packager@v2
+        env:
+          # Aus dem CurseForge-Konto unter "API Tokens", hier als Secret
+          # hinterlegt. Ohne ihn baut der Packager zwar, lädt aber nichts hoch.
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          # Legt nebenbei das GitHub-Release an und hängt das ZIP daran.
+          GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}

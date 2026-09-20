@@ -10,6 +10,7 @@
 ## X-License: MIT
 ## X-Category: Combat
 ## X-Website: https://github.com/Ego26/ForeverCooldowns
+## X-Curse-Project-ID: 000000
 ## X-FCD-Toc: v5
 
 Locale.lua
