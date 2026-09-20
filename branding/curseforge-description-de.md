@@ -1,3 +1,5 @@
+![Forever Cooldowns](https://raw.githubusercontent.com/Ego26/ForeverCooldowns/main/branding/banner-1696-de.png)
+
 # Forever Cooldowns
 
 **Blizzards Abklingzeit-Manager zeigt nur, was auf seiner Liste steht.
@@ -9,6 +11,13 @@ Cooldowns tritt an die Stelle ihres Fensters und ersetzt im Bearbeitungsmodus
 auch die Einstellungen ihrer eigenen Leisten.
 
 Tippe `/fcd`.
+
+> **Gebaut für World of Warcraft: Forever.** Jede benötigte Funktion wird
+> einzeln geprüft, damit es auch dort läuft, wo ein Client weniger hergibt –
+> `/fcd check` zeigt, was deiner kann.
+>
+> **Auf Deutsch und Englisch.** Die Oberfläche folgt der Sprache deines
+> Clients; `/fcd lang de|en|auto` überschreibt das.
 
 ---
 
@@ -89,12 +98,16 @@ Wechsel bei Haltung, Form oder Spezialisierung.
 | `/fcd` | Panel öffnen |
 | `/fcd wide` | schmale oder breite Ansicht |
 | `/fcd spell <ID>` | beliebigen Zauber aufnehmen |
+| `/fcd lang de\|en\|auto` | Sprache der Oberfläche |
 | `/fcd replace on\|off` | ob FCD an die Stelle ihres Fensters tritt |
 | `/fcd editui on\|off` | eigenes Fenster im Bearbeitungsmodus |
 | `/fcd blizz` | Blizzards Fenster holen (dort wird das Layout gewechselt) |
 | `/fcd log` | alle Ausgaben zum Kopieren |
 | `/fcd check` | was dieser Client an API hergibt |
 | `/fcd help` | vollständige Liste |
+
+Jede Ausgabe, die länger als eine Zeile ist, erscheint in einem Fenster zum
+Kopieren statt im Chat.
 
 ---
 
@@ -126,3 +139,10 @@ demselben Layout mit wie Blizzards eigene Einstellungen.
 **Vor jedem Schreibvorgang** wird geprüft, ob der Layout-Blob unsere
 Kodierkette verlustfrei übersteht, und eine Sicherung angelegt.
 `/fcd restore` nimmt den letzten zurück.
+
+---
+
+## Links
+
+- Quelltext, Fehlermeldungen und vollständige Dokumentation: <https://github.com/Ego26/ForeverCooldowns>
+- Keine Abhängigkeiten, keine Bibliotheken – ausschließlich Blizzard-API.

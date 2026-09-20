@@ -1,3 +1,5 @@
+![Forever Cooldowns](https://raw.githubusercontent.com/Ego26/ForeverCooldowns/main/branding/banner-1696-en.png)
+
 # Forever Cooldowns
 
 **Blizzard's Cooldown Manager only shows what is on its list. Forever
@@ -10,9 +12,12 @@ own bars.
 
 Type `/fcd`.
 
-> **Note on language:** the in-game interface is currently **German only**.
-> Everything you read here applies, but the panel, the option windows and the
-> chat output are in German. English is planned.
+> **Built for World of Warcraft: Forever.** Every function it needs is probed
+> individually, so it also runs where a client offers less — `/fcd check`
+> lists what yours supports.
+>
+> **Available in English and German.** It follows your client's language;
+> `/fcd lang de|en|auto` overrides that.
 
 ---
 
@@ -44,7 +49,7 @@ When something becomes ready it lights up — using Blizzard's own spell alert
 glow where the client has it — and stays marked for as long as it is ready.
 Optionally with a sound, chosen from the sounds this client actually has.
 
-Configurable per bar and, via **set per entry**, differently for individual
+Configurable per bar and, via **Set per entry**, differently for individual
 icons. A silent bar with exactly one alerting spell is possible — and the
 other way round, exactly one of twenty left out.
 
@@ -54,9 +59,9 @@ Forever Cooldowns takes over Blizzard's cooldown window and, in Edit Mode, the
 settings dialogs of **their** bars as well: orientation, icon size, spacing,
 opacity, visibility.
 
-The values stay theirs. Reading and writing goes through their own path —
-their interface updates by itself, their "Save changes" saves ours along with
-it, and it survives a reload. If you would rather keep their windows:
+The values stay theirs. Reading and writing goes through their own path — their
+interface updates by itself, their "Save changes" saves ours along with it, and
+it survives a reload. If you would rather keep their windows:
 `/fcd replace off` and `/fcd editui off`.
 
 ### Edit Blizzard's categories
@@ -91,12 +96,16 @@ switching on stance, form or specialisation.
 | `/fcd` | open the panel |
 | `/fcd wide` | narrow or wide view |
 | `/fcd spell <ID>` | add any spell |
+| `/fcd lang de\|en\|auto` | interface language |
 | `/fcd replace on\|off` | whether FCD takes the place of their window |
 | `/fcd editui on\|off` | our own window in Edit Mode |
 | `/fcd blizz` | fetch Blizzard's window (layout switching lives there) |
 | `/fcd log` | all output, copyable |
 | `/fcd check` | what this client's API actually offers |
 | `/fcd help` | full list |
+
+Any output longer than one line opens in a window you can copy from, rather
+than going to chat.
 
 ---
 
@@ -127,3 +136,10 @@ settings.
 
 **Before every write** the addon checks that the layout blob survives our
 encoding chain intact, and takes a backup. `/fcd restore` undoes the last one.
+
+---
+
+## Links
+
+- Source, issues and full documentation: <https://github.com/Ego26/ForeverCooldowns>
+- No dependencies, no libraries — Blizzard API only.
