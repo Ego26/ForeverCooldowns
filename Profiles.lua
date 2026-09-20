@@ -28,6 +28,9 @@ local SETTING_DEFAULTS = {
     -- Maske, deren Grafik ein Client nicht lädt, das Symbol ganz
     -- verschwinden ließe - dann hilft /fcd round off und ein Neuladen.
     roundIcons = true,
+        -- Woher die Liste der Abklingzeiten kommt. "blizzard" nimmt ihre
+        -- klassengefilterten 172, "scan" den eigenen Durchlauf über alle 880.
+        catalogSource = "blizzard",
     -- Blizzards Grafik abschauen: standardmäßig AUS. Jeder Anlauf dafür hat
     -- eine Nebenwirkung erzeugt - falsche Vorlagen, leere Balkenzeilen,
     -- Tooltips über unsichtbaren Fenstern - und der Gewinn war Kosmetik.
@@ -721,6 +724,42 @@ function Profiles:EvaluateRules()
         end
     end
     return nil
+end
+
+-- Die Zweitablage beim Abmelden füllen.
+--
+-- Dieser Client gibt die kontoweite Datei nicht zuverlässig zurück: sie
+-- liegt gültig auf der Platte, kommt beim Anmelden aber leer an - und dann
+-- legt das AddOn Vorgaben an und schreibt sie beim nächsten Abmelden über
+-- die guten Daten. Genau so ist ein Profil mit allen Leisten verlorengegangen.
+--
+-- Initialize liest diese Kopie seit jeher und stellt daraus wieder her. Nur
+-- geschrieben hat sie nie jemand, und in der .toc war ForeverCooldownsCharDB
+-- gar nicht angemeldet - das Netz war gespannt, aber an keiner Seite
+-- befestigt. Beides ist jetzt behoben.
+function Profiles:WriteMirror()
+    if type(FCD.db) ~= "table" then
+        return false
+    end
+    local out = {}
+    local ok = pcall(serialize, FCD.db, out)
+    if not ok then
+        return false
+    end
+    ForeverCooldownsCharDB = type(ForeverCooldownsCharDB) == "table"
+        and ForeverCooldownsCharDB or {}
+    ForeverCooldownsCharDB.mirror = table.concat(out)
+    ForeverCooldownsCharDB.taken = date("%Y-%m-%d %H:%M:%S")
+    return true, #ForeverCooldownsCharDB.mirror
+end
+
+-- Profiles.lua laeuft auch in der Testumgebung, die keine Rahmen kennt.
+if type(CreateFrame) == "function" then
+    local mirrorDriver = CreateFrame("Frame")
+    mirrorDriver:RegisterEvent("PLAYER_LOGOUT")
+    mirrorDriver:SetScript("OnEvent", function()
+        pcall(Profiles.WriteMirror, Profiles)
+    end)
 end
 
 Profiles.Serialize = serialize

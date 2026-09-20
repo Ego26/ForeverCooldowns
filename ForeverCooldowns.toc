@@ -6,6 +6,7 @@
 ## Author: Ego26
 ## Version: @project-version@
 ## SavedVariables: ForeverCooldownsDB
+## SavedVariablesPerCharacter: ForeverCooldownsCharDB
 ## IconTexture: Interface\AddOns\ForeverCooldowns\Media\Textures\logo
 ## X-License: MIT
 ## X-Category: Combat
