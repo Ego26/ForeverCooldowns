@@ -1505,8 +1505,7 @@ local function onEvent(_, event, ...)
         -- nie zu sehen bekommen, weil dort nur eine Anleitung stand.
         if FCD.Mirror:HasAny() and not FCD.db.settings.soloAsked then
             FCD.db.settings.soloAsked = true
-            printMessage(L["Deine Leisten zeigen Blizzards Kategorien. Was du im Panel"])
-            printMessage(L["verschiebst, steht dort sofort - ohne Neuladen und ohne Fehler."])
+            printMessage(L["Deine Leisten zeigen Blizzards Kategorien. Was du im Panel verschiebst, steht dort sofort - ohne Neuladen und ohne Fehler."])
             -- Eine Frage mit einem Klick statt einer Anleitung mit vier
             -- Schritten. Gefragt wird nur, wo sich die Frage beantworten
             -- lässt und ihre Anzeige überhaupt noch läuft.

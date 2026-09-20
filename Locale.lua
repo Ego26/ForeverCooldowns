@@ -1300,10 +1300,8 @@ FCD.AddTranslations("enUS", {
         "The Blizzard cooldown widget draws swipe and remaining time; our own timer,",
     ["GCD-Unterdrückung und das Abdunkeln laufender Abklingzeiten entfallen."] =
         "GCD suppression and dimming of running cooldowns fall away.",
-    ["Deine Leisten zeigen Blizzards Kategorien. Was du im Panel"] =
-        "Your bars show Blizzard's categories. Whatever you move in the panel",
-    ["verschiebst, steht dort sofort - ohne Neuladen und ohne Fehler."] =
-        "appears there right away - no reload, no errors.",
+    ["Deine Leisten zeigen Blizzards Kategorien. Was du im Panel verschiebst, steht dort sofort - ohne Neuladen und ohne Fehler."] =
+        "Your bars show Blizzard's categories. Whatever you move in the panel appears there right away - no reload, no errors.",
     ["Blizzards eigene Leisten bleiben daneben stehen, bis du sie"] =
         "Blizzard's own bars stay alongside until you hide them - in their",
     ["ausblendest - in ihrem Fenster, damit nichts getaintet wird:"] =
