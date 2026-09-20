@@ -34,13 +34,14 @@ function arg(name, fallback) {
 const version = arg('version', readVersion());
 const sync = process.argv.includes('--sync');
 
-// Die Version steht in Compat.lua; die .toc traegt nur den Platzhalter.
-// Eine Quelle statt zweier, die auseinanderlaufen koennen.
+// Die Version steht in Compat.lua als Rueckfall; die .toc traegt den
+// Platzhalter, den der Packager fuellt. Eine Quelle statt zweier, die
+// auseinanderlaufen koennen.
 function readVersion() {
     const compat = fs.readFileSync(path.join(ROOT, 'Compat.lua'), 'utf8');
-    const m = compat.match(/FCD\.version\s*=\s*"([^"]+)"/);
+    const m = compat.match(/FCD\.FALLBACK_VERSION\s*=\s*"([^"]+)"/);
     if (!m) {
-        console.error('Keine Version in Compat.lua gefunden (FCD.version).');
+        console.error('Keine Version in Compat.lua gefunden (FCD.FALLBACK_VERSION).');
         process.exit(1);
     }
     return m[1];

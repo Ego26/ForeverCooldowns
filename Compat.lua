@@ -4,7 +4,12 @@ local FCD = ForeverCooldowns
 local L = FCD.L
 
 FCD.name = ADDON_NAME
-FCD.version = "0.1.0-beta"
+
+-- Steht die Version nicht in der .toc - ungepackte Arbeitskopie, in der noch
+-- der Platzhalter steht -, gilt diese hier. Sie ist der einzige Ort, an dem
+-- die Zahl im Quelltext gepflegt wird.
+FCD.FALLBACK_VERSION = "0.1.0-beta"
+FCD.version = FCD.FALLBACK_VERSION
 
 -- GetBuildInfo liefert Version, Buildnummer, Datum und Interface-Nummer.
 -- Die vierte Rückgabe ist nicht der Build, sondern genau der Wert, der in
@@ -1068,6 +1073,16 @@ function Compat.GetAddOnMetadata(name, key)
         return nil, safeToString(value)
     end
     return value
+end
+
+-- Jetzt, wo der Metadaten-Zugriff steht: die echte Version aus der .toc
+-- holen. Der Packager hat den Platzhalter dort beim Bauen ersetzt; steht er
+-- noch drin, arbeiten wir aus dem Quelltext und behalten den Rückfall.
+do
+    local value = Compat.GetAddOnMetadata(ADDON_NAME, "Version")
+    if type(value) == "string" and value ~= "" and not value:find("@", 1, true) then
+        FCD.version = value
+    end
 end
 
 local addOnInfo = method(C_AddOns, "GetAddOnInfo") or globalFunction("GetAddOnInfo")
