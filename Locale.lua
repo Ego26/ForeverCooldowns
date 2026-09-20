@@ -114,7 +114,6 @@ FCD.AddTranslations("enUS", {
     ["Diese Leiste meldet nichts."] = "This bar alerts for nothing.",
     ["Fertig-Meldung: "] = "Ready alert: ",
     ["Leiste "] = "Bar ",
-    ["Zauber "] = "Spell ",
     ["Gegenstand "] = "Item ",
 
     -- Töne
@@ -239,6 +238,8 @@ FCD.AddTranslations("enUS", {
     ["Das steht nicht in der eigenen Liste - es kommt aus Tasche"] =
         "This is not on your own list - it comes from your bags",
     [" oder Ausrüstung."] = " or equipment.",
+    ["Neu laden - Änderungen in Blizzards Fenster übernehmen"] =
+        "Reload - carry the changes into Blizzard's window",
     ["Neu laden - behebt Blizzards Fehlermeldungen"] =
         "Reload - clears Blizzard's error messages",
     ["Änderungen anwenden (Neuladen)"] = "Apply changes (reload)",
@@ -355,6 +356,10 @@ FCD.AddTranslations("enUS", {
         "/fcd editsettings - settings of the bar you clicked",
     ["/fcd editset <Name> <Wert> - eine davon probeweise setzen"] =
         "/fcd editset <name> <value> - set one of them as a test",
+    ["/fcd scan - den Nummernraum der Abklingzeiten durchzählen"] =
+        "/fcd scan - count through the cooldown ID range",
+    ["/fcd provider - Blizzards Datenmodell lesen (taintet möglicherweise)"] =
+        "/fcd provider - read Blizzard's data model (may taint)",
     ["/fcd instances - laufende Objekte des Managers suchen"] =
         "/fcd instances - look for live objects of the manager",
     ["/fcd compare - unsere Kategorien gegen Blizzards halten (taintet)"] =
@@ -1208,20 +1213,145 @@ FCD.AddTranslations("enUS", {
     ["Der Verwalter führt keine Layouts."] = "The manager lists no layouts.",
 ["Bestand"] = "Data",
 -- Sperre gegen ärmeres Überschreiben
-    ["Nicht geschrieben: im Layout liegen %d Einträge, hier nur %d."] =
-        "Not written: the layout holds %d entries, this session only %d.",
-    ["Im Layout liegt mehr als hier - es wird nichts überschrieben."] =
-        "The layout holds more than this session - nothing was overwritten.",
-    ["Mit  /fcd store  trotzdem schreiben, /fcd log zeigt Einzelheiten."] =
-        "Use  /fcd store  to write anyway; /fcd log has the details.",
-    ["würde Daten verlieren"] = "would lose data",
+    ["Nicht geschrieben: im Layout steht ein fremder Bestand (%d Zeichen)."] =
+        "Not written: the layout holds data from elsewhere (%d characters).",
+    ["Im Layout steht ein Bestand, der nicht von dieser Sitzung stammt."] =
+        "The layout holds data that did not come from this session.",
+    ["Ein /reload gleicht ab, /fcd store schreibt trotzdem."] =
+        "A /reload reconciles it; /fcd store writes anyway.",
+    ["fremder Bestand im Layout"] = "foreign data in the layout",
 -- Sofortmodus, der nichts bewirkt
+    [" ohne Wirkung"] = " had no effect",
+    ["Sofortmodus wirkt über "] = "Instant mode works through ",
+    ["kein aktives Layout lesbar"] = "no active layout readable",
+    ["Sofortmodus, alle Versuche für Abklingzeit "] =
+        "Instant mode, every attempt for cooldown ",
+    [" (/fcd log zeigt jeden Versuch)"] = " (/fcd log shows every attempt)",
     ["Der Client nimmt die Änderung an, führt sie aber nicht aus"] =
         "The client accepts the change but does not carry it out",
     ["Sofortmodus wirkt in diesem Client nicht - schreibe sicher."] =
         "Instant mode has no effect in this client - writing the safe way.",
     ["Das Häkchen 'sofort wirksam' bleibt ohne Wirkung und kann weg."] =
         "The 'apply immediately' checkbox does nothing here and can be turned off.",
+-- Zaehlung des Nummernraums
+    ["Nummernraum der Abklingzeiten"] = "Cooldown ID range",
+    ["Ohne Auflösung von Abklingzeit-IDs ist keine Zählung möglich."] =
+        "Without a way to resolve cooldown IDs there is nothing to count.",
+    ["== Nummernraum der Abklingzeiten, %d bis %d =="] =
+        "== Cooldown ID range, %d to %d ==",
+    ["Bekannte IDs liegen zwischen %d und %d."] =
+        "Known IDs lie between %d and %d.",
+    ["Keine einzige bekannte Abklingzeit-ID - ohne Anhaltspunkt lässt sich nicht zählen."] =
+        "Not a single known cooldown ID - there is nothing to start from.",
+    ["Auflösbare IDs: %d  (davon gelernt: %d, ausgeblendet: %d)"] =
+        "Resolvable IDs: %d  (known: %d, hidden: %d)",
+    ["Nichts gefunden - der Nummernraum liegt vermutlich höher."] =
+        "Nothing found - the IDs probably start higher up.",
+    ["Kleinste ID: %d, größte ID: %d"] = "Lowest ID: %d, highest ID: %d",
+    ["Die Zählung stößt an den Rand des Fensters - mit größerem Wert erneut laufen lassen."] =
+        "The count reaches the edge of the window - run it again with a larger value.",
+    ["Verteilung auf die Kategorien:"] = "Spread across the categories:",
+    ["  %-28s %4d  (gelernt: %d, IDs %d bis %d)"] =
+        "  %-28s %4d  (known: %d, IDs %d to %d)",
+    ["Die gelernten liegen zwischen %d und %d."] =
+        "The known ones lie between %d and %d.",
+    ["Stichprobe quer durch den Bereich:"] = "Sample taken across the range:",
+    ["gelernt "] = "known   ",
+    ["ohne Kategorie"] = "no category",
+    ["Zum Vergleich: Kategorieabfragen nennen %d, die Reihenfolgeliste des Layouts %d."] =
+        "For comparison: the category queries name %d, the layout order list %d.",
+    ["Der Katalog kommt aus Blizzards Liste im Layout (nach Klasse gefiltert)."] =
+        "The catalogue comes from Blizzard's list in the layout (filtered by class).",
+    ["Der Katalog kommt aus dem Durchlauf - Blizzards Liste im Layout ist leer."] =
+        "The catalogue comes from the scan - Blizzard's list in the layout is empty.",
+    ["Felder eines Eintrags (ID %d):"] = "Fields of one entry (ID %d):",
+-- Blizzards Datenmodell, lesend
+    ["Blizzards Datenmodell"] = "Blizzard's data model",
+    ["== Blizzards Datenmodell, lesend =="] = "== Blizzard's data model, read only ==",
+    ["Achtung: Dieser Bericht ruft Blizzards eigene Objekte auf. Ob das"] =
+        "Careful: this report calls Blizzard's own objects. Whether that",
+    ["schon beim Lesen taintet, soll er gerade herausfinden. Tritt danach"] =
+        "taints them on a mere read is what it is meant to find out. If",
+    ["'Auras cannot be accessed' auf, dann ja - ein /reload behebt es."] =
+        "'Auras cannot be accessed' shows up afterwards, it does - /reload fixes it.",
+    ["Das Datenmodell ist nicht erreichbar - Blizzards Fenster einmal öffnen."] =
+        "The data model is out of reach - open Blizzard's window once.",
+    ["Angebotene Methoden:"] = "Methods on offer:",
+    ["GetOrderedCooldownIDsForCategory fehlt - kein Weg an ihre Liste."] =
+        "GetOrderedCooldownIDsForCategory is missing - no way to their list.",
+    ["  %s (%d): wirft %s"] = "  %s (%d): throws %s",
+    ["  %s (%d): liefert %s"] = "  %s (%d): returns %s",
+    ["  %s (%d): %d Einträge"] = "  %s (%d): %d entries",
+    ["== Layoutverwalter =="] = "== Layout manager ==",
+    ["Über den Getter nicht erreichbar. Felder von CooldownViewerSettings:"] =
+        "Not reachable through the getter. Fields of CooldownViewerSettings:",
+    ["  CooldownViewerSettings gibt es nicht."] = "  CooldownViewerSettings does not exist.",
+    ["Unser Lesen über die Felder: %d Layouts, aktiv: %s"] =
+        "Our read through the fields: %d layouts, active: %s",
+    ["Über ihre Methoden:"] = "Through their own methods:",
+    ["  GetActiveLayoutID: %s"] = "  GetActiveLayoutID: %s",
+    ["  EnumerateLayouts liefert nichts."] = "  EnumerateLayouts returns nothing.",
+    ["  EnumerateLayouts wirft: "] = "  EnumerateLayouts throws: ",
+    ["== Woraus ihr Fenster zeichnet =="] = "== What their window draws from ==",
+    ["  GetDisplayData: %d Einträge (Liste: %d)"] = "  GetDisplayData: %d entries (list: %d)",
+    ["        Liste: %d, Schlüssel gesamt: %d"] =
+        "        List: %d, keys in total: %d",
+    ["Datenblöcke für Abklingzeit %d:"] = "Data blocks for cooldown %d:",
+    ["Weitere Listen desselben Objekts:"] = "Further lists on the same object:",
+    [" - gibt es nicht"] = " - does not exist",
+    ["  %s%s - %d Einträge"] = "  %s%s - %d entries",
+    ["Zusammen: %d Einträge (der Durchlauf über die IDs findet 880)."] =
+        "Together: %d entries (the ID scan finds 880).",
+-- Quelle des Katalogs
+    ["Blizzards eigener Katalog: %d Einträge (nach Klasse gefiltert) - diese gelten."] =
+        "Blizzard's own catalogue: %d entries (filtered by class) - these apply.",
+    ["Blizzards Katalog ist abgeschaltet (/fcd catalog blizz) - es gilt der Durchlauf."] =
+        "Blizzard's catalogue is switched off (/fcd catalog blizz) - the scan applies.",
+    ["Blizzards Katalog nicht erreichbar - es gilt der Durchlauf über alle Klassen."] =
+        "Blizzard's catalogue is out of reach - the scan over every class applies.",
+    ["Ihr Einstellungsfenster einmal öffnen, dann erneut."] =
+        "Open their settings window once, then try again.",
+    ["Der Katalog kommt aus Blizzards Datenmodell (nach Klasse gefiltert)."] =
+        "The catalogue comes from Blizzard's data model (filtered by class).",
+    ["Der Katalog kommt aus dem Durchlauf über alle IDs - alle Klassen."] =
+        "The catalogue comes from the scan over all IDs - every class.",
+    ["Katalog: der Durchlauf über alle IDs. Zeigt alle Klassen,"] =
+        "Catalogue: the scan over all IDs. Shows every class,",
+    ["fasst dafür nichts von Blizzard an."] = "but touches nothing of Blizzard's.",
+    ["Katalog: Blizzards eigene Liste, nach Klasse gefiltert."] =
+        "Catalogue: Blizzard's own list, filtered by class.",
+    ["Format: /fcd catalog blizz|voll. Derzeit: "] =
+        "Format: /fcd catalog blizz|full. Currently: ",
+    ["/fcd catalog blizz|voll - woher die Liste der Abklingzeiten kommt"] =
+        "/fcd catalog blizz|full - where the cooldown list comes from",
+-- Zweitablage
+    ["Zweitablage geschrieben: %d Zeichen."] = "Second copy written: %d characters.",
+    ["Zweitablage konnte nicht geschrieben werden."] = "The second copy could not be written.",
+    ["Beim Anmelden kam an: Datei %s, Zweitablage %d Zeichen."] =
+        "On login there arrived: file %s, second copy %d characters.",
+    ["Der Bestand kam aus der Zweitablage."] = "The data came from the second copy.",
+    ["/fcd mirror - Zweitablage schreiben und prüfen"] =
+        "/fcd mirror - write and check the second copy",
+-- Zusammensetzung eines Reiters
+    ["Was den Reiter füllt"] = "What fills the tab",
+    ["== Was den Reiter füllt =="] = "== What fills the tab ==",
+    ["Das Panel war in dieser Sitzung noch nicht offen - einmal /fcd öffnen."] =
+        "The panel has not been open this session - open it once with /fcd.",
+    ["Katalog: %d Einträge (Quelle: %s)"] = "Catalogue: %d entries (source: %s)",
+    ["Wirksame Einordnung:"] = "Effective placement:",
+    ["Blizzards Listen (wer dort steht, wird angezeigt):"] =
+        "Blizzard's lists (whoever is in them is shown):",
+    ["Blizzards Modell ist nicht erreichbar."] = "Blizzard's model is out of reach.",
+    ["Standardeinordnung (bestimmt den Reiter):"] =
+        "Default placement (decides the tab):",
+    ["  (gelernt: %d)"] = "  (known: %d)",
+    ["Ohne Anzeigedaten: %d"] = "Without display data: %d",
+    ["an"] = "on",
+    ["aus"] = "off",
+    ["Filter: Ränge stapeln=%s, nur gelernte=%s, nur mit Abklingzeit=%s, Passive=%s"] =
+        "Filters: stack ranks=%s, known only=%s, with cooldown only=%s, passives=%s",
+    ["/fcd tab - was den Reiter füllt und was herausfällt"] =
+        "/fcd tab - what fills the tab and what drops out",
 })
 
 FCD.SetLanguage("auto")

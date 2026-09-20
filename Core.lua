@@ -90,6 +90,11 @@ local function printHelp()
     printMessage(L["/fcd editsettings - Einstellungen der angeklickten Leiste"])
     printMessage(L["/fcd editset <Name> <Wert> - eine davon probeweise setzen"])
     printMessage(L["/fcd instances - laufende Objekte des Managers suchen"])
+    printMessage(L["/fcd tab - was den Reiter füllt und was herausfällt"])
+    printMessage(L["/fcd mirror - Zweitablage schreiben und prüfen"])
+    printMessage(L["/fcd catalog blizz|voll - woher die Liste der Abklingzeiten kommt"])
+    printMessage(L["/fcd scan - den Nummernraum der Abklingzeiten durchzählen"])
+    printMessage(L["/fcd provider - Blizzards Datenmodell lesen (taintet möglicherweise)"])
     printMessage(L["/fcd compare - unsere Kategorien gegen Blizzards halten (taintet)"])
     printMessage(L["/fcd fields - Felderverteilung der Cache-Einträge je Kategorie"])
     printMessage(L["/fcd art on - Blizzards Grafik abschauen (aus, kosmetisch)"])
@@ -323,6 +328,47 @@ local function dispatch(command, argument)
         outputWindow(L["Laufende Objekte"], FCD.Probe:BuildInstanceReport())
     elseif command == "dump" then
         outputWindow(L["Inhalt eines Objekts"], FCD.Probe:BuildDumpReport(argument))
+    elseif command == "catalog" then
+        if argument == "voll" or argument == "full" or argument == "scan" then
+            FCD.db.settings.catalogSource = "scan"
+            printMessage(L["Katalog: der Durchlauf über alle IDs. Zeigt alle Klassen,"])
+            printMessage(L["fasst dafür nichts von Blizzard an."])
+        elseif argument == "blizz" or argument == "blizzard" or argument == "auto" then
+            FCD.db.settings.catalogSource = "blizzard"
+            printMessage(L["Katalog: Blizzards eigene Liste, nach Klasse gefiltert."])
+        else
+            printMessage(L["Format: /fcd catalog blizz|voll. Derzeit: "]
+                .. tostring(FCD.db.settings.catalogSource or "blizzard"))
+        end
+        FCD.Compat.InvalidateCooldownScan()
+        if FCD.Dock.layout then
+            FCD.Dock:LoadLayout()
+            FCD.Dock:Refresh()
+        end
+    elseif command == "tab" then
+        outputWindow(L["Was den Reiter füllt"], FCD.Probe:BuildTabReport())
+    elseif command == "mirror" then
+        -- Die Zweitablage ist der Schutz gegen genau den Fall, der hier
+        -- mehrfach zugeschlagen hat: die kontoweite Datei kommt beim
+        -- Anmelden leer an, das AddOn legt Vorgaben an, und beim Abmelden
+        -- wird der gute Stand überschrieben. Dass sie wirklich beschrieben
+        -- wird, soll nachprüfbar sein und nicht behauptet.
+        local ok, size = FCD.Profiles:WriteMirror()
+        if ok then
+            printMessage(string.format(L["Zweitablage geschrieben: %d Zeichen."], size or 0))
+        else
+            printMessage(L["Zweitablage konnte nicht geschrieben werden."])
+        end
+        local info = FCD.dbLoadInfo or {}
+        printMessage(string.format(L["Beim Anmelden kam an: Datei %s, Zweitablage %d Zeichen."],
+            info.present and "da" or "leer", info.mirror or 0))
+        if info.restoredFromMirror then
+            printMessage(L["Der Bestand kam aus der Zweitablage."])
+        end
+    elseif command == "provider" then
+        outputWindow(L["Blizzards Datenmodell"], FCD.Probe:BuildDataProviderReport())
+    elseif command == "scan" then
+        outputWindow(L["Nummernraum der Abklingzeiten"], FCD.Probe:BuildIDScanReport(argument))
     elseif command == "state" then
         outputWindow(L["Zustand einer Abklingzeit"], FCD.Probe:BuildCooldownStateReport(tonumber(argument)))
     elseif command == "restore" then
@@ -438,6 +484,12 @@ local function dispatch(command, argument)
         printMessage(string.format(L["FormID: %s, Index: %s, Formen: %s"],
             tostring(FCD.Compat.GetFormID()), tostring(FCD.Compat.GetFormIndex()), tostring(FCD.Compat.GetNumForms())))
     elseif command == "rescan" then
+        -- Auch den abgetasteten Nummernraum verwerfen: sonst bliebe ein
+        -- unvollständiger Durchlauf die ganze Sitzung bestehen.
+        FCD.Compat.InvalidateCooldownScan()
+        if FCD.Dock.layout then
+            FCD.Dock:LoadLayout()
+        end
         FCD:RefreshData()
         printMessage(string.format(L["Neu eingelesen: %d Fähigkeiten, %d mit mehreren Rängen, %d Katalogeinträge."],
             FCD.Ranks.familyCount or 0, FCD.Ranks.rankedFamilyCount or 0, #FCD.Catalog.entries))

@@ -423,6 +423,40 @@ local function itemKey(kind, id)
     return tostring(kind) .. ":" .. tostring(id)
 end
 
+-- Die vier Filterhaken über dem Katalog.
+--
+-- Sie standen nur im Sitzungszustand und waren nach jedem /reload wieder
+-- weg. Wer "nur gelernte" anhakt, will das nicht bei jeder Anmeldung erneut
+-- tun - es ist eine Einstellung, keine Laune. Also liegen sie in den
+-- Einstellungen und werden von dort gelesen.
+local VIEW_FILTERS = {
+    stackRanks = true,
+    onlyKnown = false,
+    onlyWithCooldown = false,
+    showPassive = false,
+}
+
+local function viewFilter(name)
+    local stored = settings()[name]
+    if stored == nil then
+        return VIEW_FILTERS[name]
+    end
+    return stored and true or false
+end
+
+local function setViewFilter(name, value)
+    value = value and true or false
+    settings()[name] = value
+    state[name] = value
+end
+
+-- Beim Öffnen einmal aus den Einstellungen übernehmen.
+function Dock:LoadViewFilters()
+    for name in pairs(VIEW_FILTERS) do
+        state[name] = viewFilter(name)
+    end
+end
+
 local function tabOfDefault(defaultCategory)
     if type(defaultCategory) == "number" and defaultCategory >= 2 then
         return "buffs"
@@ -446,14 +480,34 @@ local function categoryName(value)
         or (L["Kategorie "] .. tostring(value))
 end
 
--- Standard-Einordnung je Abklingzeit.
+-- Standard-Einordnung je Abklingzeit, samt allem, was zum Anzeigen nötig ist.
 --
--- GetCooldownViewerCategorySet liefert nur eine Handvoll IDs - offenbar die
--- beim Laden aktiven, nicht den Katalog. Der vollständige Bestand steht in der
--- Reihenfolgeliste des Layouts (bei einem Krieger rund 170 Einträge), und die
--- Standardkategorie jedes Eintrags im Cache-Eintrag unter "category".
+-- Die Quelle hat sich geändert, und das war die Ursache der Entgleisung:
+-- Früher kam der Katalog aus der Reihenfolgeliste des Layouts. Die steht in
+-- einem gewachsenen Layout voll und in einem frisch angelegten leer - und
+-- dann schrumpfte dieses Fenster auf die fünfzehn IDs der Kategorieabfragen,
+-- während Blizzards eigenes daneben unverändert Hunderte zeigte. Der Katalog
+-- hing also an einer Datei, die ihn gar nicht führt.
+--
+-- Jetzt wird der Nummernraum des Clients abgetastet (siehe /fcd scan). Das
+-- ist dieselbe Menge, die Blizzards Fenster zeigt, und sie hängt an nichts.
+--
+-- Die Anzeigedaten entstehen gleich mit. Bei knapp 900 Einträgen wären sechs
+-- API-Abfragen je Eintrag bei jedem Neuzeichnen mehrere tausend Aufrufe pro
+-- Tastendruck im Suchfeld; hier fallen sie einmal je Ladevorgang an.
+-- Führt der Client diese Abklingzeit als gelernt? Ihre Angabe hat Vorrang.
+local function knownOf(cooldownID, spellID)
+    if Dock.providerKnown then
+        local value = Dock.providerKnown[cooldownID]
+        if value ~= nil then
+            return value
+        end
+    end
+    return (spellID and Compat.IsSpellKnown(spellID)) or false
+end
+
 local function buildStaticMap()
-    local map, order, seen, hidden = {}, {}, {}, {}
+    local map, order, seen, hidden, display = {}, {}, {}, {}, {}
 
     local function add(cooldownID)
         if seen[cooldownID] then
@@ -462,52 +516,193 @@ local function buildStaticMap()
         seen[cooldownID] = true
         local info = Compat.GetCooldownInfo(cooldownID)
         local category = info and info.category or nil
-        if category ~= nil then
-            map[cooldownID] = category
-            -- Bit 2 der flags bedeutet "standardmäßig nicht angezeigt".
-            -- Am lebenden Client ausgezählt: es trennt die Kategorien genau
-            -- so, wie Blizzards Fenster sie aufteilt.
-            hidden[cooldownID] = ((info.flags or 0) % 4) >= 2
-            order[#order + 1] = cooldownID
+        if category == nil then
+            return
         end
+        map[cooldownID] = category
+        -- Der Client sagt selbst, ob ein Eintrag ausgeblendet ist. Vorher
+        -- wurde das aus Bit 2 der flags gelesen - ein Ersatz aus der Zeit,
+        -- als isInvisible noch nicht bekannt war.
+        if info.isInvisible ~= nil then
+            hidden[cooldownID] = info.isInvisible and true or false
+        else
+            hidden[cooldownID] = ((info.flags or 0) % 4) >= 2
+        end
+        order[#order + 1] = cooldownID
+
+        local spellID = info.spellID or info.overrideSpellID
+        local name, icon = Compat.GetSpellInfo(spellID)
+        local subText = spellID and Compat.GetSpellSubtext(spellID)
+        local family = spellID and FCD.Ranks:GetFamilyBySpell(spellID)
+        display[cooldownID] = {
+            spellID = spellID,
+            name = name,
+            icon = icon,
+            rank = FCD.Ranks:ParseRank(subText),
+            -- Gelernt oder nicht sagt Blizzard selbst.
+            --
+            -- Vorher stand hier IsSpellKnown für die Zauber-ID. Bei einer
+            -- Rangkette antwortet die zu großzügig: mehrere Ränge von
+            -- "Rüstung zerreißen" galten als gelernt, obwohl nur Rang 1 da
+            -- ist - und standen dann farbig statt grau. isKnown aus ihren
+            -- Anzeigedaten ist dieselbe Angabe, nach der auch ihr Fenster
+            -- ausgraut.
+            known = knownOf(cooldownID, spellID),
+            isPassive = (family and family.isPassive) or false,
+            familyKey = family and family.key or nil,
+            baseCooldown = spellID and Compat.GetSpellBaseCooldown(spellID) or nil,
+        }
     end
 
-    if Dock.layout and Dock.layout.order then
-        for _, cooldownID in ipairs(Dock.layout.order) do
-            add(cooldownID)
-        end
-    end
-    -- Was die Kategorieabfragen zusätzlich kennen, ergänzen
+    -- Der Durchlauf braucht einen Anhaltspunkt, wo die Nummern liegen. Den
+    -- geben die Kategorieabfragen und, falls vorhanden, das Layout.
+    local seeds = {}
     for _, category in ipairs(Compat.GetCooldownViewerCategories()) do
         for _, cooldownID in ipairs(Compat.GetCategorySet(category.value) or {}) do
-            add(cooldownID)
+            seeds[#seeds + 1] = cooldownID
+        end
+    end
+    if Dock.layout and Dock.layout.order then
+        for _, cooldownID in ipairs(Dock.layout.order) do
+            seeds[#seeds + 1] = cooldownID
         end
     end
 
-    return map, order, hidden
+    -- Welche Quelle gilt?
+    --
+    -- Der Durchlauf findet alles, aber er findet auch zu viel: die Datenbank
+    -- führt alle Klassen, knapp 900 Einträge, und Blizzards Fenster zeigt
+    -- davon rund hundert. Nach welchem Merkmal sie filtern, ist aus Lua nicht
+    -- zu erfahren - eine Abfrage "zu welcher Klasse gehört dieser Zauber"
+    -- gibt es nicht.
+    --
+    -- Ihre gefilterte Liste steht aber in der Reihenfolgeliste des Layouts,
+    -- sobald ihr Fenster das Layout einmal gespeichert hat. Genau daher kamen
+    -- die rund 170 Einträge des alten Profils. Steht dort mehr, als die
+    -- Kategorieabfragen nennen, ist das ihre Auswahl - und die hat Vorrang.
+    -- Ist die Liste leer, weil das Layout frisch ist, zeigen wir lieber zu
+    -- viel als zu wenig.
+    -- Drei Quellen, in dieser Reihenfolge:
+    --
+    --   1. Blizzards eigener Katalog. Der einzige, der nach Klasse gefiltert
+    --      ist - bei diesem Krieger 172 Einträge gegen 880 in der Datenbank.
+    --      Ein Aufruf auf ihr Objekt, deshalb abschaltbar.
+    --   2. Die Reihenfolgeliste des Layouts. Dieselbe Menge, sofern ihr
+    --      Fenster sie je geschrieben hat - in einem frischen Layout leer.
+    --   3. Der Durchlauf über alle IDs. Fasst nichts an und findet alles,
+    --      aber eben auch die anderen Klassen.
+    local catalog = FCD.Layout:GetBlizzardCatalog()
+    local layoutList = (Dock.layout and Dock.layout.order) or {}
+    if catalog and #catalog > #seeds then
+        Dock.catalogSource = "blizzard"
+    elseif #layoutList > #seeds then
+        Dock.catalogSource = "layout"
+        catalog = layoutList
+    elseif settings().catalogSource == "scan" then
+        -- Nur noch auf ausdrücklichen Wunsch: /fcd catalog voll.
+        Dock.catalogSource = "scan"
+        catalog = Compat.ScanCooldownIDs(seeds)
+    else
+        -- Lieber wenig als falsch.
+        --
+        -- Früher sprang hier der Durchlauf über alle IDs ein. Der findet
+        -- zwar alles, aber eben aller Klassen - und dann standen Feuerbälle
+        -- und Verjüngungen im Fenster eines Kriegers. Ein leerer Katalog ist
+        -- zwar unbrauchbar, aber ehrlich, und er verschwindet von selbst,
+        -- sobald ihr Datenmodell erreichbar ist.
+        Dock.catalogSource = "keine"
+        catalog = seeds
+    end
+
+    for _, cooldownID in ipairs(catalog) do
+        add(cooldownID)
+    end
+    -- Was die bekannten Quellen darüber hinaus nennen, geht so nicht verloren.
+    for _, cooldownID in ipairs(seeds) do
+        add(cooldownID)
+    end
+
+    return map, order, hidden, display
 end
 
 -- Für den Abgleich von außen zugänglich
 Dock.TabOfDefault = tabOfDefault
 
 function Dock:LoadLayout()
+    -- Die Filterhaken stehen in den Einstellungen; sie kommen erst nach dem
+    -- Anmelden an und müssen deshalb hier übernommen werden, nicht beim Laden
+    -- der Datei.
+    self:LoadViewFilters()
     local layout, err = FCD.Layout:Read()
     self.lastSeenRaw = layout and layout.raw or nil
     self.layout = layout
     self.layoutError = err
-    self.staticMap, self.staticOrder, self.staticHidden = buildStaticMap()
+    -- Ihre wirksame Einordnung zuerst: sie weiß als Einzige, was gerade
+    -- ausgeblendet ist.
+    self.providerCategory, self.providerSignature, self.providerKnown =
+        FCD.Layout:GetProviderCategoryMap()
+    -- Was Blizzards Modell inzwischen selbst führt, braucht keine Vormerkung
+    -- mehr. So räumt sich die Liste nach einem Neuladen von allein auf.
+    if self.providerCategory then
+        for cooldownID, category in pairs(self.pending) do
+            if self.providerCategory[cooldownID] == category then
+                self.pending[cooldownID] = nil
+            end
+        end
+    end
+    self.staticMap, self.staticOrder, self.staticHidden, self.staticDisplay = buildStaticMap()
     return layout
 end
 
+-- Wo eine Abklingzeit für uns liegt - und zwar dort, wo sie auch in
+-- Blizzards Fenster liegt.
+--
+-- Die Reihenfolge ist entscheidend und stand vorher falsch herum: zuerst die
+-- Zuweisung aus dem Blob, dann ihr Datenmodell. Der Blob ist aber der
+-- gespeicherte Stand, das Modell der laufende. Solange in ihrem Fenster
+-- etwas verschoben, aber noch nicht gespeichert ist, gehen die beiden
+-- auseinander - und wir zeigten dann den alten Stand. Bei diesem Krieger
+-- hieß das: alle sieben in "Strategisch", während ihr Fenster 3/2/2 zeigte.
+--
+-- Das laufende Modell gewinnt. Es ist dieselbe Quelle, aus der auch ihr
+-- Fenster zeichnet, und damit sind beide zwangsläufig einig.
+-- Änderungen, die geschrieben, aber noch nicht übernommen sind.
+--
+-- Wirkt der Sofortmodus nicht, geht die Änderung über das Layout und greift
+-- erst beim Neuladen. Bis dahin zeigte unser Fenster den alten Stand, und es
+-- sah aus, als sei nichts passiert. Hier stehen diese Änderungen, bis ein
+-- Neuladen sie in Blizzards Modell bringt.
+Dock.pending = {}
+
 local function effectiveCategory(cooldownID)
+    local waiting = Dock.pending[cooldownID]
+    if waiting ~= nil then
+        return waiting
+    end
+    -- Blizzards Regel, endlich richtig gelesen.
+    --
+    -- Ihr Layout führt je Kategorie eine Liste. Steht ein Eintrag darin, wird
+    -- er in dieser Kategorie angezeigt - steht er in keiner, ist er schlicht
+    -- nicht angezeigt. Die Standardkategorie sagt nur, wohin er gehört, wenn
+    -- man ihn einblendet, nicht dass er eingeblendet wäre.
+    --
+    -- Der Zahlenbeleg: auf dem Buff-Reiter führt der Katalog 69 Einträge.
+    -- Blizzards Fenster zeigt davon 14 unter "Verfolgte Stärkungseffekte"
+    -- und die übrigen 55 unter "Nicht angezeigt". Wir hatten alle 69 als
+    -- verfolgt gezeigt, weil wir die Standardkategorie für die Anzeige
+    -- gehalten haben.
+    if Dock.providerCategory then
+        return Dock.providerCategory[cooldownID] or HIDDEN_CATEGORY
+    end
+
+    -- Ohne laufendes Modell - ihr Fenster war nie offen - bleibt die alte
+    -- Näherung über Blob und Standardkategorie.
     if Dock.layout then
         local assigned = FCD.Layout:GetAssignedCategory(Dock.layout, cooldownID)
         if assigned ~= nil then
             return assigned
         end
     end
-    -- Ohne eigene Zuweisung entscheiden die flags: standardmäßig verborgene
-    -- Einträge gehören in "Nicht angezeigt", nicht in ihre Kategorie.
     if Dock.staticHidden and Dock.staticHidden[cooldownID] then
         return HIDDEN_CATEGORY
     end
@@ -773,6 +968,10 @@ local function buildSections()
 
     local activeSet = buildActiveSet()
     local buckets = {}
+    -- Gestapelte Fähigkeiten werden erst gesammelt und danach einsortiert:
+    -- welcher Abschnitt es wird, steht erst fest, wenn alle Ränge gesehen
+    -- sind. Die Begründung steht weiter unten bei der Sammlung.
+    local stacked = {}
     local orderIndex = {}
     if Dock.layout and Dock.layout.order then
         for position, id in ipairs(Dock.layout.order) do
@@ -782,19 +981,33 @@ local function buildSections()
 
     for _, cooldownID in ipairs(Dock.staticOrder or {}) do
         local category = effectiveCategory(cooldownID)
-        -- Der Reiter richtet sich nach der Standardkategorie, nicht nach der
-        -- aktuellen: ein ausgeblendeter Buff bleibt beim Buff-Reiter.
-        local belongsHere = tabOfDefault(Dock.staticMap and Dock.staticMap[cooldownID]) == state.tab
+        -- Welcher Reiter?
+        --
+        -- Die wirksame Kategorie entscheidet, denn genau so teilt auch ihr
+        -- Fenster auf: was sie unter "Verfolgte Stärkungseffekte" führen,
+        -- gehört zu den Stärkungseffekten, egal was die Standardkategorie
+        -- des Eintrags sagt. Vorher stand hier die Standardkategorie, und
+        -- deshalb lagen ihre beiden verfolgten Effekte bei uns auf dem
+        -- Zauberreiter.
+        --
+        -- Nur für Ausgeblendetes gibt die wirksame Kategorie nichts her -
+        -- "nicht angezeigt" gibt es auf beiden Reitern. Dort entscheidet
+        -- weiterhin die Standardkategorie, damit ein verborgener Buff beim
+        -- Buff-Reiter bleibt.
+        local forTab = category
+        if forTab == nil or forTab < 0 then
+            forTab = Dock.staticMap and Dock.staticMap[cooldownID]
+        end
+        local belongsHere = tabOfDefault(forTab) == state.tab
         if category ~= nil and belongsHere then
-            local spellID = spellOf(cooldownID)
-            local name, icon = Compat.GetSpellInfo(spellID)
-            local subText = spellID and Compat.GetSpellSubtext(spellID)
-            local rank = FCD.Ranks:ParseRank(subText)
-            local known = spellID and Compat.IsSpellKnown(spellID) or false
-
-            local family = spellID and FCD.Ranks:GetFamilyBySpell(spellID)
-            local isPassive = family and family.isPassive or false
-            local baseCooldown = spellID and Compat.GetSpellBaseCooldown(spellID)
+            -- Alles Nötige steht schon bereit: beim Laden einmal ermittelt,
+            -- statt bei jedem Neuzeichnen erneut. Bei knapp 900 Einträgen ist
+            -- das der Unterschied zwischen flüssig und hakelig.
+            local shown = (Dock.staticDisplay and Dock.staticDisplay[cooldownID]) or {}
+            local name, icon = shown.name, shown.icon
+            local rank, known = shown.rank, shown.known
+            local isPassive = shown.isPassive
+            local baseCooldown = shown.baseCooldown
 
             local keep = matchesSearch(name)
                 and (not state.onlyKnown or known)
@@ -806,15 +1019,26 @@ local function buildSections()
             end
 
             if keep then
-                buckets[category] = buckets[category] or {}
-                local bucket = buckets[category]
-
                 if state.stackRanks then
-                    local groupKey = family and family.key or ("id:" .. cooldownID)
-                    local group = bucket[groupKey]
+                    -- Eine Fähigkeit, eine Kachel - auch wenn ihre Ränge
+                    -- verteilt liegen.
+                    --
+                    -- Blizzards Modell führt die Ränge einer Fähigkeit
+                    -- durchaus in verschiedenen Kategorien: "Verwunden" steht
+                    -- dort gleichzeitig unter Essenziell und unter verborgen.
+                    -- In ihrem Fenster fällt das nicht auf, weil es jeden
+                    -- Rang einzeln zeigt - bei uns erschien die Fähigkeit
+                    -- dadurch zweimal.
+                    --
+                    -- Deshalb wird erst gesammelt und die Kategorie danach
+                    -- bestimmt: die des Vertreters, also des höchsten
+                    -- gelernten Rangs. Ein Zug auf die Kachel nimmt ohnehin
+                    -- alle Ränge mit und räumt die Aufteilung damit auf.
+                    local groupKey = shown.familyKey or ("id:" .. cooldownID)
+                    local group = stacked[groupKey]
                     if not group then
                         group = {
-                            key = "c" .. category .. ":" .. groupKey,
+                            key = "g:" .. groupKey,
                             label = name or (L["Abklingzeit "] .. cooldownID),
                             icon = icon,
                             cooldownIDs = {},
@@ -822,21 +1046,25 @@ local function buildSections()
                             sort = orderIndex[cooldownID] or cooldownID,
                             known = false,
                         }
-                        bucket[groupKey] = group
-                        bucket[#bucket + 1] = group
+                        stacked[groupKey] = group
+                        stacked[#stacked + 1] = group
                     end
                     group.cooldownIDs[#group.cooldownIDs + 1] = cooldownID
                     group.active = group.active or activeSet[cooldownID] or false
-                    -- Als Vertreter den höchsten gelernten Rang zeigen
+                    -- Der Vertreter bestimmt Symbol, Rangzahl und Abschnitt.
                     if known and (not group.known or (rank or 0) >= (group.rank or 0)) then
                         group.known = true
                         group.rank = rank
                         group.icon = icon or group.icon
+                        group.category = category
                     elseif not group.known and (rank or 0) >= (group.rank or 0) then
                         group.rank = rank
                         group.icon = icon or group.icon
+                        group.category = category
                     end
                 else
+                    buckets[category] = buckets[category] or {}
+                    local bucket = buckets[category]
                     bucket[#bucket + 1] = {
                         key = "c" .. category .. ":" .. cooldownID,
                         label = name or (L["Abklingzeit "] .. cooldownID),
@@ -851,6 +1079,15 @@ local function buildSections()
                 end
             end
         end
+    end
+
+    -- Die gestapelten Fähigkeiten jetzt einsortieren, nachdem für jede
+    -- feststeht, wo ihr Vertreter liegt.
+    for _, group in ipairs(stacked) do
+        local target = group.category
+        buckets[target] = buckets[target] or {}
+        local bucket = buckets[target]
+        bucket[#bucket + 1] = group
     end
 
     local sections = {}
@@ -1064,15 +1301,31 @@ function Dock:AssignSelection(category)
     if FCD.Layout:CanWriteNativeNow() then
         local changed = 0
         FCD.Layout:CreateNativeRestorePoint()
+        -- Sobald feststeht, dass der Sofortmodus nicht wirkt, wird die
+        -- Reihe abgebrochen. Vorher lief sie für jede Abklingzeit weiter und
+        -- meldete vierzig Mal dieselbe Ablehnung.
+        local refused
         for _, item in pairs(state.selection) do
             for _, cooldownID in ipairs(item.cooldownIDs) do
+                if FCD.Layout.nativeIneffective then
+                    break
+                end
                 local ok, err = FCD.Layout:SetCategoryNative(cooldownID, category)
                 if ok then
                     changed = changed + 1
                 else
-                    FCD.Print(L["Abgelehnt: "] .. tostring(err))
+                    refused = err
                 end
             end
+            if FCD.Layout.nativeIneffective then
+                break
+            end
+        end
+        if refused and changed == 0 then
+            FCD.Print(L["Abgelehnt: "] .. tostring(refused))
+        end
+        if changed > 0 then
+            FCD.Layout:FinishNativeBatch()
         end
         if changed > 0 then
             wipe(state.selection)
@@ -1115,6 +1368,14 @@ function Dock:AssignSelection(category)
     if not written then
         FCD.Print(L["Schreiben fehlgeschlagen: "] .. tostring(writeErr))
         return
+    end
+
+    -- Vormerken, damit die Änderung sofort zu sehen ist, obwohl sie erst
+    -- nach dem Neuladen in Blizzards Modell steht.
+    for _, item in pairs(state.selection) do
+        for _, cooldownID in ipairs(item.cooldownIDs) do
+            self.pending[cooldownID] = category
+        end
     end
 
     self.needsReload = true
@@ -1672,8 +1933,12 @@ local function refreshProfileMenu()
         for _, layout in ipairs(blizzardLayouts) do
             local current = (activeBlizzard ~= nil and layout.id == activeBlizzard)
                 or (#blizzardLayouts == 1)
+            -- Kein Auswahlpunkt: diese Zeilen sind Auskunft darüber, worauf
+            -- unsere Zuweisungen gerade wirken, nicht eine zweite Wahl. Mit
+            -- Punkt sah das Menü aus, als wäre in einer Liste zweimal etwas
+            -- ausgewählt - umschalten lässt sich hier ohnehin nichts.
             addRow({
-                radio = current,
+                mark = current and ">" or nil,
                 text = layout.name,
                 hint = current and L["(Blizzard, aktiv)"] or L["(Blizzard)"],
             })
@@ -2133,18 +2398,18 @@ function Dock:Build()
 
     -- Zeile 3: Filter
     local stackCheck = FCD.Widgets.CreateCheck(panel, L["Ränge stapeln"], function()
-        return state.stackRanks
+        return viewFilter("stackRanks")
     end, function(value)
-        state.stackRanks = value
+        setViewFilter("stackRanks", value)
         wipe(state.selection)
         Dock:Refresh()
     end)
     stackCheck:SetPoint("TOPLEFT", PAD, -102)
 
     local knownCheck = FCD.Widgets.CreateCheck(panel, L["nur gelernte"], function()
-        return state.onlyKnown
+        return viewFilter("onlyKnown")
     end, function(value)
-        state.onlyKnown = value
+        setViewFilter("onlyKnown", value)
         Dock:Refresh()
     end)
     knownCheck:SetPoint("TOPLEFT", PAD + 150, -102)
@@ -2276,18 +2541,18 @@ function Dock:Build()
     offsetY = offsetY - 28
 
     local cooldownCheck = FCD.Widgets.CreateCheck(sidebar, L["nur mit Abklingzeit"], function()
-        return state.onlyWithCooldown
+        return viewFilter("onlyWithCooldown")
     end, function(value)
-        state.onlyWithCooldown = value
+        setViewFilter("onlyWithCooldown", value)
         Dock:Refresh()
     end)
     cooldownCheck:SetPoint("TOPLEFT", 0, offsetY)
     offsetY = offsetY - 24
 
     local passiveCheck = FCD.Widgets.CreateCheck(sidebar, L["Passive zeigen"], function()
-        return state.showPassive
+        return viewFilter("showPassive")
     end, function(value)
-        state.showPassive = value
+        setViewFilter("showPassive", value)
         Dock:Refresh()
     end)
     passiveCheck:SetPoint("TOPLEFT", 0, offsetY)
@@ -2653,33 +2918,28 @@ function Dock:Refresh()
         end
     end
 
-    -- Zwei Gründe für den Neuladen-Knopf, mit verschiedenem Anlass:
-    -- im sicheren Modus, weil die Änderung sonst nicht greift; im
-    -- Sofortmodus, weil Blizzards Viewer seit dem Schreibvorgang Fehler wirft.
-    local instant = FCD.Layout:NativeWritesAllowed()
+    -- Der Neuladen-Knopf erscheint nur, wenn ein Neuladen wirklich etwas
+    -- bewirkt.
+    --
+    -- Vorher hing er am Sofortmodus: bei eingeschaltetem Häkchen stand er da,
+    -- sobald in der Sitzung einmal auf Blizzards Objekte geschrieben wurde -
+    -- auch wenn längst nichts mehr anstand. Das verwirrt mehr, als es hilft.
+    -- Jetzt zählen zwei Tatsachen, und die Beschriftung sagt welche.
+    local waiting = next(self.pending) ~= nil or self.needsReload
     local tainted = FCD.Layout.taintedThisSession
     -- In die Zeile kommt nur, was man sonst nirgends sieht. Der Modus steht
     -- als Häkchen daneben, die Zahl der ausgewählten Symbole sieht man an
     -- deren Rahmen - beides hier zu wiederholen füllt nur Platz.
     local parts = {}
 
-    if instant then
-        self.needsReload = false
-        if tainted then
-            panel.reloadButton:SetText(L["Neu laden - behebt Blizzards Fehlermeldungen"])
-            panel.reloadButton:Show()
-            parts[#parts + 1] = "Blizzards Viewer wirft Fehler"
-        else
-            panel.reloadButton:Hide()
-        end
+    if waiting then
+        panel.reloadButton:SetText(L["Neu laden - Änderungen in Blizzards Fenster übernehmen"])
+        panel.reloadButton:Show()
+    elseif tainted then
+        panel.reloadButton:SetText(L["Neu laden - behebt Blizzards Fehlermeldungen"])
+        panel.reloadButton:Show()
     else
-        if self.needsReload then
-            panel.reloadButton:SetText(L["Änderungen anwenden (Neuladen)"])
-            panel.reloadButton:Show()
-            parts[#parts + 1] = L["Änderungen stehen aus"]
-        else
-            panel.reloadButton:Hide()
-        end
+        panel.reloadButton:Hide()
     end
 
     if self.layoutError then
@@ -2746,10 +3006,21 @@ driver:SetScript("OnUpdate", function(_, elapsed)
         return
     end
 
-    -- Solange beide offen sind: mitziehen, wenn im Blizzard-Fenster etwas
-    -- geändert wurde. Der rohe Blob wird dafür nur verglichen, entschlüsselt
-    -- wird erst bei einer echten Abweichung - und das über die C-Funktion,
-    -- also ohne Taint.
+    -- Ihr Fenster ändert beim Verschieben nur ihr Datenmodell; in den Blob
+    -- schreibt es erst beim Speichern. Wer dort etwas verschob, sah bei uns
+    -- deshalb nichts - der Blobvergleich unten schlug nie an. Also wird das
+    -- Modell selbst beobachtet, und zwar immer wenn unser Fenster offen ist.
+    if panel and panel:IsShown() then
+        local _, signature = FCD.Layout:GetProviderCategoryMap()
+        if signature and signature ~= Dock.providerSignature then
+            Dock:LoadLayout()
+            Dock:Refresh()
+        end
+    end
+
+    -- Und zusätzlich der Blob, für alles, was am Modell vorbei geschrieben
+    -- wird. Verglichen wird nur roh; entschlüsselt erst bei einer echten
+    -- Abweichung, und das über die C-Funktion, also ohne Taint.
     if shown and Dock.blizzardWasShown and panel and panel:IsShown() then
         local raw = Compat.GetLayoutData()
         if type(raw) == "string" and raw ~= Dock.lastSeenRaw then

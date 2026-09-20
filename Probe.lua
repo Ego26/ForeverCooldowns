@@ -1992,3 +1992,591 @@ function Probe:BuildShownFrameReport()
     end
     return table.concat(lines, "\n")
 end
+
+-- Der vollständige Katalog, ohne Umweg über das Layout.
+--
+-- Nötig geworden, weil unser Katalog seine Einträge bisher aus der
+-- Reihenfolgeliste des Layouts bezog. Die steht in einem gewachsenen Layout
+-- voll (bei einem Krieger rund 170 Einträge) und in einem frisch angelegten
+-- fast leer - und genau dann schrumpfte unser Fenster auf die Handvoll IDs
+-- der Kategorieabfragen, während Blizzards eigenes Fenster unverändert
+-- Hunderte zeigte. Der Fehler war also nie im Client, sondern in der Quelle.
+--
+-- Diese Zählung geht rein lesend über die C-Funktion: kein Taint, keine
+-- Abhängigkeit vom Layout. Sie beantwortet drei Fragen auf einmal - wie groß
+-- der Nummernraum ist, ob er schon nach Klasse gefiltert ankommt, und wie
+-- sich die Einträge auf die Kategorien verteilen.
+function Probe:BuildIDScanReport(limitText)
+    local limit = tonumber(limitText) or 4000
+    if not Compat.HasCooldownInfo() then
+        return L["Ohne Auflösung von Abklingzeit-IDs ist keine Zählung möglich."]
+    end
+
+    -- Wo der Nummernraum liegt, ist nicht vorhersagbar: in diesem Client
+    -- stehen sechsstellige IDs. Blind bei 1 zu beginnen fände nichts, und
+    -- bis 200000 zu zählen ließe den Client stehen. Deshalb geben die
+    -- bekannten IDs die Gegend vor, und gezählt wird nur ein Fenster darum.
+    local seedLow, seedHigh
+    local function seed(cooldownID)
+        if type(cooldownID) ~= "number" then
+            return
+        end
+        seedLow = (seedLow and math.min(seedLow, cooldownID)) or cooldownID
+        seedHigh = (seedHigh and math.max(seedHigh, cooldownID)) or cooldownID
+    end
+    for _, category in ipairs(Compat.GetCooldownViewerCategories()) do
+        for _, cooldownID in ipairs(Compat.GetCategorySet(category.value) or {}) do
+            seed(cooldownID)
+        end
+    end
+    if FCD.Dock and FCD.Dock.layout and FCD.Dock.layout.order then
+        for _, cooldownID in ipairs(FCD.Dock.layout.order) do
+            seed(cooldownID)
+        end
+    end
+    if not seedLow then
+        return L["Keine einzige bekannte Abklingzeit-ID - ohne Anhaltspunkt lässt sich nicht zählen."]
+    end
+
+    local from = math.max(1, seedLow - math.floor(limit / 2))
+    local to = seedHigh + math.floor(limit / 2)
+
+    local lines = {
+        string.format(L["== Nummernraum der Abklingzeiten, %d bis %d =="], from, to),
+        string.format(L["Bekannte IDs liegen zwischen %d und %d."], seedLow, seedHigh),
+        "",
+    }
+
+    local found, known, lowest, highest = 0, 0, nil, nil
+    local perCategory, perCategoryKnown = {}, {}
+    local perCategoryLow, perCategoryHigh = {}, {}
+    local knownLow, knownHigh
+    local hits = {}
+    local invisible = 0
+    local firstInfo, firstID
+    for cooldownID = from, to do
+        local info = Compat.GetCooldownInfo(cooldownID)
+        if type(info) == "table" then
+            found = found + 1
+            lowest = lowest or cooldownID
+            highest = cooldownID
+            if not firstInfo then
+                firstInfo, firstID = info, cooldownID
+            end
+            hits[#hits + 1] = { id = cooldownID, info = info }
+            local category = info.category
+            local key = tostring(category)
+            perCategory[key] = (perCategory[key] or 0) + 1
+            perCategoryLow[key] = perCategoryLow[key] or cooldownID
+            perCategoryHigh[key] = cooldownID
+            if info.isKnown then
+                known = known + 1
+                perCategoryKnown[key] = (perCategoryKnown[key] or 0) + 1
+                knownLow = knownLow or cooldownID
+                knownHigh = cooldownID
+            end
+            if info.isInvisible then
+                invisible = invisible + 1
+            end
+        end
+    end
+
+    lines[#lines + 1] = string.format(L["Auflösbare IDs: %d  (davon gelernt: %d, ausgeblendet: %d)"],
+        found, known, invisible)
+    if found == 0 then
+        lines[#lines + 1] = L["Nichts gefunden - der Nummernraum liegt vermutlich höher."]
+        return table.concat(lines, "\n")
+    end
+    lines[#lines + 1] = string.format(L["Kleinste ID: %d, größte ID: %d"], lowest, highest)
+    if lowest == from or highest == to then
+        lines[#lines + 1] = L["Die Zählung stößt an den Rand des Fensters - mit größerem Wert erneut laufen lassen."]
+    end
+    lines[#lines + 1] = ""
+
+    -- Nach Kategorie, mit Namen wo das Enum einen hergibt
+    local names = {}
+    for _, category in ipairs(Compat.GetCooldownViewerCategories()) do
+        names[tostring(category.value)] = category.name
+    end
+    local keys = {}
+    for key in pairs(perCategory) do
+        keys[#keys + 1] = key
+    end
+    table.sort(keys, function(a, b)
+        return (tonumber(a) or math.huge) < (tonumber(b) or math.huge)
+    end)
+    lines[#lines + 1] = L["Verteilung auf die Kategorien:"]
+    for _, key in ipairs(keys) do
+        lines[#lines + 1] = string.format(L["  %-28s %4d  (gelernt: %d, IDs %d bis %d)"],
+            (names[key] or L["ohne Kategorie"]) .. " (" .. key .. ")",
+            perCategory[key], perCategoryKnown[key] or 0,
+            perCategoryLow[key], perCategoryHigh[key])
+    end
+    lines[#lines + 1] = ""
+
+    -- Zum Vergleich: was die beiden bisherigen Quellen hergeben
+    local setTotal = 0
+    for _, category in ipairs(Compat.GetCooldownViewerCategories()) do
+        local ids = Compat.GetCategorySet(category.value)
+        setTotal = setTotal + (ids and #ids or 0)
+    end
+    lines[#lines + 1] = string.format(L["Zum Vergleich: Kategorieabfragen nennen %d, die Reihenfolgeliste des Layouts %d."],
+        setTotal, (FCD.Dock and FCD.Dock.layout and FCD.Dock.layout.order and #FCD.Dock.layout.order) or 0)
+    -- Welche Quelle den Katalog füllt.
+    --
+    -- Vorher stand hier eine Abfrage auf Dock.catalogSource - und die ist
+    -- leer, solange unser Fenster in der Sitzung nicht offen war. Der Bericht
+    -- schwieg dann genau zu der Frage, für die man ihn aufruft. Jetzt fragt
+    -- er selbst nach, statt auf ein geöffnetes Fenster zu warten.
+    local catalog = FCD.Layout:GetBlizzardCatalog()
+    if catalog then
+        lines[#lines + 1] = string.format(
+            L["Blizzards eigener Katalog: %d Einträge (nach Klasse gefiltert) - diese gelten."],
+            #catalog)
+    elseif (FCD.db and FCD.db.settings and FCD.db.settings.catalogSource) == "scan" then
+        lines[#lines + 1] = L["Blizzards Katalog ist abgeschaltet (/fcd catalog blizz) - es gilt der Durchlauf."]
+    else
+        lines[#lines + 1] = L["Blizzards Katalog nicht erreichbar - es gilt der Durchlauf über alle Klassen."]
+        lines[#lines + 1] = L["Ihr Einstellungsfenster einmal öffnen, dann erneut."]
+    end
+    lines[#lines + 1] = ""
+
+    if knownLow then
+        lines[#lines + 1] = string.format(L["Die gelernten liegen zwischen %d und %d."], knownLow, knownHigh)
+        lines[#lines + 1] = ""
+    end
+
+    -- Die eigentliche Frage: Steht hier nur die eigene Klasse, oder alle?
+    -- Namen beantworten das in einem Blick, Zahlen nicht. Deshalb eine
+    -- Stichprobe quer durch den ganzen Bereich statt einer Häufung am Rand.
+    lines[#lines + 1] = L["Stichprobe quer durch den Bereich:"]
+    local step = math.max(1, math.floor(#hits / 28))
+    for index = 1, #hits, step do
+        local hit = hits[index]
+        local spellID = hit.info.spellID or hit.info.overrideSpellID
+        local name = spellID and Compat.GetSpellInfo(spellID) or nil
+        lines[#lines + 1] = string.format("  %d  K%s %s  %s",
+            hit.id, tostring(hit.info.category),
+            hit.info.isKnown and L["gelernt "] or "        ",
+            name or (L["Zauber "] .. tostring(spellID)))
+    end
+    lines[#lines + 1] = ""
+
+    -- Die Felder eines Eintrags: nur so ist zu sehen, ob ein Merkmal für
+    -- Klasse oder Spezialisierung dabei ist, an dem sich filtern ließe.
+    lines[#lines + 1] = string.format(L["Felder eines Eintrags (ID %d):"], firstID)
+    local fields = {}
+    for field in pairs(firstInfo) do
+        fields[#fields + 1] = tostring(field)
+    end
+    table.sort(fields)
+    for _, field in ipairs(fields) do
+        lines[#lines + 1] = string.format("  %-22s %s", field, describeValue(firstInfo[field]))
+    end
+
+    return table.concat(lines, "\n")
+end
+
+-- Blizzards eigenes Datenmodell, nur lesend.
+--
+-- Der letzte verbliebene Weg an ihre nach Klasse gefilterte Liste. Die
+-- Datenbank führt alle Klassen (rund 880 Einträge), ihr Fenster zeigt davon
+-- etwa hundert, und nach welchem Merkmal sie aussieben, verrät Lua nicht:
+-- weder der Cache-Eintrag noch die Kategorieabfragen noch das Layout tragen
+-- ein Klassenmerkmal.
+--
+-- Der Preis steht im Kopf des Berichts. Schreibende Aufrufe auf diese Objekte
+-- markieren sie nachweislich als tainted, und danach scheitert Blizzards
+-- eigener Viewer beim Lesen von Auren. Ob reines Lesen dasselbe auslöst, ist
+-- unbewiesen - genau deshalb dieser Bericht: erst messen, dann entscheiden.
+function Probe:BuildDataProviderReport()
+    local lines = {
+        L["== Blizzards Datenmodell, lesend =="],
+        "",
+        L["Achtung: Dieser Bericht ruft Blizzards eigene Objekte auf. Ob das"],
+        L["schon beim Lesen taintet, soll er gerade herausfinden. Tritt danach"],
+        L["'Auras cannot be accessed' auf, dann ja - ein /reload behebt es."],
+        "",
+    }
+
+    local provider = FCD.Layout.GetDataProvider()
+    if not provider then
+        lines[#lines + 1] = L["Das Datenmodell ist nicht erreichbar - Blizzards Fenster einmal öffnen."]
+        return table.concat(lines, "\n")
+    end
+
+    -- Erst nachsehen, was es überhaupt anbietet. Geraten wurde hier schon
+    -- genug; die Namen dieses Builds stehen nirgends geschrieben.
+    lines[#lines + 1] = L["Angebotene Methoden:"]
+    local members = Compat.DumpNamespace(provider)
+    for _, member in ipairs(members) do
+        if member.kind == "function" then
+            lines[#lines + 1] = "  " .. member.name
+        end
+    end
+    lines[#lines + 1] = ""
+
+    if type(provider.GetOrderedCooldownIDsForCategory) ~= "function" then
+        lines[#lines + 1] = L["GetOrderedCooldownIDsForCategory fehlt - kein Weg an ihre Liste."]
+        return table.concat(lines, "\n")
+    end
+
+    local total = 0
+    for _, category in ipairs(Compat.GetCooldownViewerCategories()) do
+        local ok, ids = pcall(provider.GetOrderedCooldownIDsForCategory, provider, category.value)
+        if not ok then
+            lines[#lines + 1] = string.format(L["  %s (%d): wirft %s"],
+                category.name, category.value, Compat.SafeToString(ids))
+        elseif type(ids) ~= "table" then
+            lines[#lines + 1] = string.format(L["  %s (%d): liefert %s"],
+                category.name, category.value, Compat.SafeToString(ids))
+        else
+            total = total + #ids
+            lines[#lines + 1] = string.format(L["  %s (%d): %d Einträge"],
+                category.name, category.value, #ids)
+            -- Ein paar Namen: nur daran ist zu sehen, ob wirklich nur die
+            -- eigene Klasse darin steht.
+            local shown = {}
+            for index = 1, math.min(#ids, 6) do
+                local info = Compat.GetCooldownInfo(ids[index])
+                local spellID = info and (info.spellID or info.overrideSpellID)
+                shown[#shown + 1] = (spellID and Compat.GetSpellInfo(spellID))
+                    or tostring(ids[index])
+            end
+            if #shown > 0 then
+                lines[#lines + 1] = "      " .. table.concat(shown, ", ")
+                    .. (#ids > 6 and " ..." or "")
+            end
+        end
+    end
+
+    lines[#lines + 1] = ""
+    lines[#lines + 1] = string.format(L["Zusammen: %d Einträge (der Durchlauf über die IDs findet 880)."], total)
+
+    -- Ihre Anzeigeliste führt nur die 15 aktiven. Ihr Einstellungsfenster
+    -- zeigt aber Hunderte, und zwar nur die eigene Klasse - die Liste muss
+    -- also woanders herkommen. Diese beiden Namen klingen danach.
+    lines[#lines + 1] = ""
+    -- Woraus zeichnet ihr Fenster?
+    --
+    -- Nicht aus GetOrderedCooldownIDsForCategory: die nennt zwei verfolgte
+    -- Stärkungseffekte, ihr Fenster zeigt vierzehn. Es muss also eine dritte
+    -- Darstellung geben. GetDisplayData und die Datenblöcke des Layouts sind
+    -- die Kandidaten - hier wird nachgesehen statt geraten.
+    lines[#lines + 1] = ""
+    lines[#lines + 1] = L["== Woraus ihr Fenster zeichnet =="]
+    if type(provider.GetDisplayData) == "function" then
+        local ok, data = pcall(provider.GetDisplayData, provider)
+        if not ok then
+            lines[#lines + 1] = "  GetDisplayData wirft: " .. Compat.SafeToString(data)
+        elseif type(data) ~= "table" then
+            lines[#lines + 1] = "  GetDisplayData liefert " .. Compat.SafeToString(data)
+        else
+            local count = 0
+            for _ in pairs(data) do count = count + 1 end
+            lines[#lines + 1] = string.format(L["  GetDisplayData: %d Einträge (Liste: %d)"],
+                count, #data)
+            -- Alle Schlüssel, nicht nur den ersten.
+            --
+            -- Beim ersten Versuch stand hier ein break nach dem ersten
+            -- Eintrag - und damit fehlten genau die drei, um die es geht.
+            -- Von den Untertabellen interessiert die Größe und eine Handvoll
+            -- Werte, nicht jeder einzelne Index; 172 Zeilen "number" sagen
+            -- nichts und verdecken den Rest.
+            local keys = {}
+            for key in pairs(data) do
+                keys[#keys + 1] = tostring(key)
+            end
+            table.sort(keys)
+            for _, key in ipairs(keys) do
+                local value = data[key]
+                lines[#lines + 1] = string.format("    [%s] %s", key, describeValue(value))
+                if type(value) == "table" then
+                    local arrayLength = #value
+                    local total = 0
+                    for _ in pairs(value) do
+                        total = total + 1
+                    end
+                    lines[#lines + 1] = string.format(
+                        L["        Liste: %d, Schlüssel gesamt: %d"], arrayLength, total)
+                    -- Bei einer Zuordnung Kategorie -> Liste sind die
+                    -- Schlüssel das Interessante.
+                    if arrayLength < total then
+                        local inner = {}
+                        for innerKey, innerValue in pairs(value) do
+                            inner[#inner + 1] = string.format("%s=%s",
+                                tostring(innerKey),
+                                type(innerValue) == "table"
+                                    and ("#" .. #innerValue)
+                                    or Compat.SafeToString(innerValue))
+                        end
+                        table.sort(inner)
+                        lines[#lines + 1] = "        " .. table.concat(inner, ", ")
+                    end
+                end
+            end
+        end
+    end
+
+    -- Und der Datenblock, den das Layout je Abklingzeit führt. Zwei Proben:
+    -- eine, die ihr Fenster anzeigt, und eine aus dem Katalog dahinter.
+    local manager0 = FCD.Layout.GetLayoutManager()
+    local samples = {}
+    for _, category in ipairs(Compat.GetCooldownViewerCategories()) do
+        local ok, ids = pcall(provider.GetOrderedCooldownIDsForCategory, provider, category.value)
+        if ok and type(ids) == "table" and ids[1] then
+            samples[#samples + 1] = ids[1]
+            break
+        end
+    end
+    for _, cooldownID in ipairs(FCD.Layout:GetBlizzardCatalog() or {}) do
+        if cooldownID ~= samples[1] then
+            samples[#samples + 1] = cooldownID
+            break
+        end
+    end
+    for _, cooldownID in ipairs(samples) do
+        lines[#lines + 1] = ""
+        lines[#lines + 1] = string.format(L["Datenblöcke für Abklingzeit %d:"], cooldownID)
+        -- GetCooldownInfoDataBlock warf "attempt to index local 'cooldownInfo'
+        -- (a number value)" - es will die Info-Tabelle, nicht die Nummer.
+        local info = Compat.GetCooldownInfo(cooldownID)
+        local probes = {
+            { object = manager0, name = "GetCooldownInfoDataBlock", args = { info } },
+            { object = manager0, name = "GetCooldownIDDataBlock", args = { cooldownID } },
+            { object = manager0, name = "GetCooldownIDDataBlockForLayout",
+              args = { cooldownID }, second = FCD.Layout.GetLayoutManager()
+                  and select(2, pcall(function()
+                      return FCD.Layout.GetLayoutManager():GetActiveLayout()
+                  end)) or nil },
+        }
+        for _, probe in ipairs(probes) do
+            local object = probe.object
+            if object and type(object[probe.name]) == "function" then
+                local ok, value
+                if probe.second ~= nil then
+                    ok, value = pcall(object[probe.name], object, probe.second, probe.args[1])
+                else
+                    ok, value = pcall(object[probe.name], object, probe.args[1])
+                end
+                lines[#lines + 1] = string.format("  %-28s %s", probe.name,
+                    ok and describeValue(value) or ("wirft " .. Compat.SafeToString(value)))
+                if ok and type(value) == "table" then
+                    for _, member in ipairs(Compat.DumpNamespace(value)) do
+                        lines[#lines + 1] = string.format("      .%-22s %s",
+                            member.name, member.kind)
+                    end
+                end
+            end
+        end
+    end
+    lines[#lines + 1] = L["Weitere Listen desselben Objekts:"]
+    local function tryList(name, argument, label)
+        if type(provider[name]) ~= "function" then
+            lines[#lines + 1] = "  " .. name .. L[" - gibt es nicht"]
+            return
+        end
+        local ok, ids = pcall(provider[name], provider, argument)
+        if not ok then
+            lines[#lines + 1] = string.format("  %s%s - wirft %s", name, label or "",
+                Compat.SafeToString(ids))
+            return
+        end
+        if type(ids) ~= "table" then
+            lines[#lines + 1] = string.format("  %s%s - liefert %s", name, label or "",
+                Compat.SafeToString(ids))
+            return
+        end
+        lines[#lines + 1] = string.format(L["  %s%s - %d Einträge"], name, label or "", #ids)
+        local shown = {}
+        for index = 1, math.min(#ids, 8) do
+            local info = Compat.GetCooldownInfo(ids[index])
+            local spellID = info and (info.spellID or info.overrideSpellID)
+            shown[#shown + 1] = (spellID and Compat.GetSpellInfo(spellID)) or tostring(ids[index])
+        end
+        if #shown > 0 then
+            lines[#lines + 1] = "      " .. table.concat(shown, ", ") .. (#ids > 8 and " ..." or "")
+        end
+    end
+    tryList("GetDefaultOrderedCooldownIDs")
+    tryList("GetOrderedCooldownIDs")
+    -- Falls sie eine Kategorie erwarten, einmal mit der ersten probieren.
+    tryList("GetDefaultOrderedCooldownIDs", 0, " (0)")
+    tryList("GetOrderedCooldownIDs", 0, " (0)")
+
+    -- Die zweite offene Frage im selben Durchgang: warum unser Auswahlfeld
+    -- Blizzards Layouts nicht auflistet, obwohl es eine Zeile dafür hat. Der
+    -- Pfad zu ihrem Layoutverwalter ist nirgends dokumentiert, und geraten
+    -- wurde in dieser Sache schon genug.
+    lines[#lines + 1] = ""
+    lines[#lines + 1] = L["== Layoutverwalter =="]
+    local manager = FCD.Layout.GetLayoutManager()
+    if not manager then
+        lines[#lines + 1] = L["Über den Getter nicht erreichbar. Felder von CooldownViewerSettings:"]
+        local frame = _G.CooldownViewerSettings
+        if type(frame) ~= "table" then
+            lines[#lines + 1] = L["  CooldownViewerSettings gibt es nicht."]
+        else
+            for _, member in ipairs(Compat.DumpNamespace(frame)) do
+                if member.kind == "table" or member.kind == "function" then
+                    lines[#lines + 1] = string.format("  %-40s %s", member.name, member.kind)
+                end
+            end
+        end
+    else
+        lines[#lines + 1] = L["Angebotene Methoden:"]
+        for _, member in ipairs(Compat.DumpNamespace(manager)) do
+            lines[#lines + 1] = string.format("  %-40s %s", member.name, member.kind)
+        end
+        lines[#lines + 1] = ""
+        local layouts, activeID = FCD.Layout:GetBlizzardLayouts()
+        lines[#lines + 1] = string.format(L["Unser Lesen über die Felder: %d Layouts, aktiv: %s"],
+            #layouts, tostring(activeID))
+        for _, layout in ipairs(layouts) do
+            lines[#lines + 1] = string.format("  [%s] %s", tostring(layout.id), tostring(layout.name))
+        end
+
+        -- Und jetzt über ihre eigenen Methoden. Das Feld "layouts" ist eine
+        -- Tabelle, unsere Feldnamen darin waren geraten - EnumerateLayouts
+        -- und GetLayoutName sind die Namen, die dieser Build wirklich trägt.
+        lines[#lines + 1] = ""
+        lines[#lines + 1] = L["Über ihre Methoden:"]
+        if type(manager.GetActiveLayoutID) == "function" then
+            local ok, id = pcall(manager.GetActiveLayoutID, manager)
+            lines[#lines + 1] = string.format(L["  GetActiveLayoutID: %s"],
+                ok and Compat.SafeToString(id) or ("wirft " .. Compat.SafeToString(id)))
+        end
+        if type(manager.EnumerateLayouts) == "function" then
+            local ok, err = pcall(function()
+                local count = 0
+                for key, layout in manager:EnumerateLayouts() do
+                    count = count + 1
+                    local name
+                    if type(layout) == "table" then
+                        name = rawget(layout, "name") or rawget(layout, "layoutName")
+                    end
+                    lines[#lines + 1] = string.format("  [%s] %s (%s)",
+                        tostring(key), tostring(name), type(layout))
+                    -- Beim ersten einmal auflisten, welche Felder es trägt.
+                    if count == 1 and type(layout) == "table" then
+                        for _, member in ipairs(Compat.DumpNamespace(layout)) do
+                            lines[#lines + 1] = string.format("      .%-24s %s",
+                                member.name, member.kind)
+                        end
+                    end
+                end
+                if count == 0 then
+                    lines[#lines + 1] = L["  EnumerateLayouts liefert nichts."]
+                end
+            end)
+            if not ok then
+                lines[#lines + 1] = L["  EnumerateLayouts wirft: "] .. Compat.SafeToString(err)
+            end
+        end
+    end
+    return table.concat(lines, "\n")
+end
+
+-- Was auf dem Reiter ankommt - und was unterwegs herausfällt.
+--
+-- Gebraucht, weil Blizzards Fenster unter "Verfolgte Stärkungseffekte" ein
+-- Dutzend nicht gelernter Einträge zeigt und unseres einen. Die Ursache kann
+-- an vier Stellen liegen: im Katalog, in der Einordnung, in der Reiterwahl
+-- oder in den Filtern. Dieser Bericht trennt sie auseinander, statt sie zu
+-- vermuten.
+function Probe:BuildTabReport()
+    local Dock = FCD.Dock
+    if not Dock.staticOrder then
+        return L["Das Panel war in dieser Sitzung noch nicht offen - einmal /fcd öffnen."]
+    end
+
+    local lines = {
+        L["== Was den Reiter füllt =="],
+        "",
+        string.format(L["Katalog: %d Einträge (Quelle: %s)"],
+            #Dock.staticOrder, tostring(Dock.catalogSource)),
+        "",
+    }
+
+    -- Nach wirksamer Kategorie, und getrennt danach, ob gelernt.
+    local byCategory, knownByCategory = {}, {}
+    local byDefault = {}
+    local noInfo = 0
+    for _, cooldownID in ipairs(Dock.staticOrder) do
+        local category = Dock:EffectiveCategory(cooldownID)
+        local key = tostring(category)
+        byCategory[key] = (byCategory[key] or 0) + 1
+        local shown = Dock.staticDisplay and Dock.staticDisplay[cooldownID]
+        if not shown then
+            noInfo = noInfo + 1
+        elseif shown.known then
+            knownByCategory[key] = (knownByCategory[key] or 0) + 1
+        end
+        local default = tostring(Dock.staticMap and Dock.staticMap[cooldownID])
+        byDefault[default] = (byDefault[default] or 0) + 1
+    end
+
+    local names = {}
+    for _, category in ipairs(Compat.GetCooldownViewerCategories()) do
+        names[tostring(category.value)] = category.name
+    end
+    local function dump(title, counts, known)
+        lines[#lines + 1] = title
+        local keys = {}
+        for key in pairs(counts) do
+            keys[#keys + 1] = key
+        end
+        table.sort(keys, function(a, b)
+            return (tonumber(a) or math.huge) < (tonumber(b) or math.huge)
+        end)
+        for _, key in ipairs(keys) do
+            lines[#lines + 1] = string.format("  %-28s %4d%s",
+                (names[key] or L["ohne Kategorie"]) .. " (" .. key .. ")",
+                counts[key],
+                known and string.format(L["  (gelernt: %d)"], known[key] or 0) or "")
+        end
+        lines[#lines + 1] = ""
+    end
+    dump(L["Wirksame Einordnung:"], byCategory, knownByCategory)
+
+    -- Und daneben, woher sie stammt: die Listen aus Blizzards Modell. Wer
+    -- dort steht, wird angezeigt; wer nirgends steht, ist ausgeblendet.
+    -- Diese beiden Blöcke müssen sich decken.
+    local map = FCD.Layout:GetProviderCategoryMap()
+    if map then
+        local listed = {}
+        for _, category in pairs(map) do
+            local key = tostring(category)
+            listed[key] = (listed[key] or 0) + 1
+        end
+        dump(L["Blizzards Listen (wer dort steht, wird angezeigt):"], listed)
+    else
+        lines[#lines + 1] = L["Blizzards Modell ist nicht erreichbar."]
+        lines[#lines + 1] = ""
+    end
+
+    dump(L["Standardeinordnung (bestimmt den Reiter):"], byDefault)
+
+    if noInfo > 0 then
+        lines[#lines + 1] = string.format(L["Ohne Anzeigedaten: %d"], noInfo)
+        lines[#lines + 1] = ""
+    end
+
+    -- Und die Filter, die danach noch greifen.
+    -- Ein noch nie angefasster Haken steht gar nicht in den Einstellungen.
+    -- "nil" im Bericht sieht aus wie ein Fehler, ist aber nur die Vorgabe -
+    -- also wird die Vorgabe gezeigt.
+    local function filterState(name, fallback)
+        local value = FCD.db.settings[name]
+        if value == nil then
+            value = fallback
+        end
+        return value and L["an"] or L["aus"]
+    end
+    lines[#lines + 1] = string.format(
+        L["Filter: Ränge stapeln=%s, nur gelernte=%s, nur mit Abklingzeit=%s, Passive=%s"],
+        filterState("stackRanks", true), filterState("onlyKnown", false),
+        filterState("onlyWithCooldown", false), filterState("showPassive", false))
+
+    return table.concat(lines, "\n")
+end

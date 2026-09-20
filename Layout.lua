@@ -30,6 +30,13 @@ local function settingsFrame()
     if type(frame) == "table" then
         return frame
     end
+    -- Ihr Addon lädt erst bei Bedarf. Anstoßen statt aufgeben.
+    if Compat.EnsureCooldownViewerLoaded() then
+        frame = _G.CooldownViewerSettings
+        if type(frame) == "table" then
+            return frame
+        end
+    end
     return nil
 end
 
@@ -66,6 +73,34 @@ end
 
 Layout.GetDataProvider = dataProvider
 Layout.GetLayoutManager = layoutManager
+
+-- Die Anzeigedaten des laufenden Modells.
+--
+-- Die Schicht, aus der ihr Einstellungsfenster zeichnet, und die letzte, die
+-- wir gefunden haben. Sie enthält vier Tabellen:
+--   orderedCooldownIDs        die 172 Einträge der Klasse, in ihrer Reihenfolge
+--   defaultOrderedCooldownIDs dieselben in der Vorgabereihenfolge
+--   cooldownInfoByID          je Eintrag die Angaben FÜR DAS AKTIVE LAYOUT
+--   cooldownDefaultsByID      je Eintrag die Vorgaben
+--
+-- cooldownInfoByID ist der Unterschied, an dem alles hing: die C-Funktion
+-- GetCooldownViewerCooldownInfo liefert die globale Vorgabe, in der
+-- isInvisible immer false ist und die Kategorie die Standardkategorie. Erst
+-- hier steht, was im aktiven Layout tatsächlich gilt.
+local function displayData()
+    local provider = dataProvider()
+    if not provider or type(provider.GetDisplayData) ~= "function" then
+        return nil
+    end
+    local ok, data = pcall(provider.GetDisplayData, provider)
+    if ok and type(data) == "table" then
+        return data
+    end
+    return nil
+end
+
+Layout.GetDisplayData = displayData
+
 
 -- WARNUNG, empirisch belegt: Ruft AddOn-Code diese Objekte auf, bleiben sie
 -- für die restliche Sitzung als "tainted" markiert. Danach scheitert
@@ -123,18 +158,73 @@ function Layout:GetDefaultCategory(cooldownID)
     return nil
 end
 
--- Rückgabe: erfolg, fehlertext
--- Der Zustand, auf den es ankommt: was der Client tatsaechlich fuehrt,
--- nicht was im Blob steht. Wird vor und nach dem Schreiben verglichen.
-local function effectiveState(cooldownID)
-    local info = Compat.GetCooldownInfo(cooldownID)
-    if type(info) ~= "table" then
-        return nil
+-- Wo eine Abklingzeit wirklich liegt.
+--
+-- Das hier war der teuerste Irrtum dieser Sitzung: Vorher stand hier
+-- info.category aus dem Cache-Eintrag - und das ist die Standardkategorie,
+-- die sich nie ändert. Die Prüfung "hat sich etwas bewegt?" konnte einen
+-- Erfolg deshalb gar nicht sehen, hat jeden Schreibversuch für wirkungslos
+-- erklärt und den Sofortmodus für die restliche Sitzung abgeschaltet.
+-- Die wirksame Einordnung steht ausschließlich in ihren Listen.
+local function effectiveCategoryOf(provider, cooldownID)
+    -- Geprüft wird an derselben Stelle, die auch ihr Fenster zeichnet.
+    --
+    -- Vorher wurde an GetOrderedCooldownIDsForCategory geprüft. Die nennt
+    -- nur die fünfzehn Einträge, die gerade auf den Leisten liegen - eine
+    -- Änderung an einem der anderen 157 konnte dort gar nicht auftauchen.
+    -- Jeder Schreibversuch galt deshalb als "ohne Wirkung", auch wenn er
+    -- gewirkt hat. Das ist derselbe Fehler wie zuvor bei info.category, nur
+    -- eine Schicht weiter oben.
+    local data = displayData()
+    local infoByID = data and data.cooldownInfoByID
+    local info = type(infoByID) == "table" and infoByID[cooldownID] or nil
+    if type(info) == "table" then
+        if info.isInvisible then
+            return HIDDEN_CATEGORY
+        end
+        return info.category
     end
-    return tostring(info.category) .. "/" .. tostring(info.isInvisible)
+    return false
 end
 
+-- Die Kette, die ihr Fenster nach einer Änderung durchläuft.
+-- Die Kette, die ihr Fenster nach einer Änderung durchläuft - in zwei Teilen.
+--
+-- Beim Suchen der richtigen Methode wird sie nach JEDEM Versuch gebraucht,
+-- sonst sieht man die Wirkung nicht. SaveLayouts serialisiert dabei aber das
+-- ganze Layout, und bei vierzig ausgewählten Abklingzeiten mal vierundzwanzig
+-- Versuchen stand das Spiel. Zum Prüfen genügen die beiden billigen Schritte;
+-- gespeichert wird einmal am Ende.
+local function applyChain(provider, manager, full)
+    local steps = {
+        { object = provider, name = "MarkDirty" },
+        { object = provider, name = "CheckBuildDisplayData" },
+    }
+    if full then
+        steps[#steps + 1] = { object = manager, name = "SaveLayouts" }
+        steps[#steps + 1] = { object = manager, name = "NotifyListeners" }
+    end
+    local applied = {}
+    for _, step in ipairs(steps) do
+        local object = step.object
+        if object and type(object[step.name]) == "function" then
+            local ok, err = pcall(object[step.name], object)
+            applied[#applied + 1] = step.name
+                .. (ok and "" or (" (Fehler: " .. Compat.SafeToString(err) .. ")"))
+        end
+    end
+    return table.concat(applied, ", ")
+end
+
+-- Rückgabe: erfolg, fehlertext, angewandte Schritte
 function Layout:SetCategoryNative(cooldownID, category)
+    -- Hat sich in dieser Sitzung schon gezeigt, dass keine der Methoden
+    -- wirkt, wird die Suche nicht für jede weitere Abklingzeit wiederholt.
+    -- Ohne das lief sie vierzig Mal - mit vierundzwanzig Aufrufen und ebenso
+    -- vielen Neuaufbauten der Anzeigedaten je Durchlauf.
+    if self.nativeIneffective then
+        return false, L["Der Client nimmt die Änderung an, führt sie aber nicht aus"]
+    end
     local provider = dataProvider()
     if not provider then
         return false, L["CooldownViewerDataProvider steht nicht zur Verfügung"]
@@ -148,63 +238,135 @@ function Layout:SetCategoryNative(cooldownID, category)
         end
     end
 
-    -- Falls der Client die Änderung vorab bewertet, erst fragen
-    if manager and type(manager.GetCooldownCategoryChangeStatus) == "function" then
-        local ok, status = pcall(manager.GetCooldownCategoryChangeStatus, manager, cooldownID, category)
-        if ok and status ~= nil and status ~= 0 then
-            return false, L["Der Client lehnt die Änderung ab (Status "] .. Compat.SafeToString(status) .. ")"
+    local before = effectiveCategoryOf(provider, cooldownID)
+
+    -- Welcher Aufruf in diesem Build wirkt, ist nicht vorhersagbar, und
+    -- geraten wurde in dieser Sache genug. Also der Reihe nach probieren und
+    -- nach jedem nachsehen, ob sich etwas bewegt hat. Der erste, der wirkt,
+    -- wird für die restliche Sitzung gemerkt.
+    -- Das aktive Layout, falls eine der Methoden es als erstes Argument
+    -- erwartet. Genau daran ist WriteCooldownCategoryToLayout gescheitert:
+    -- "bad argument #1 to 'pairs' (table expected, got nil)" - der Aufruf
+    -- bekam die Abklingzeit-ID, wo das Layout hingehört.
+    local activeLayout, activeLayoutID
+    if manager and type(manager.GetActiveLayout) == "function" then
+        local ok, value = pcall(manager.GetActiveLayout, manager)
+        if ok and type(value) == "table" then
+            activeLayout = value
+        end
+    end
+    if manager and type(manager.GetActiveLayoutID) == "function" then
+        local ok, value = pcall(manager.GetActiveLayoutID, manager)
+        if ok and type(value) == "number" then
+            activeLayoutID = value
         end
     end
 
-    local before = effectiveState(cooldownID)
-
-    local ok, err = pcall(provider.SetCooldownToCategory, provider, cooldownID, category)
-    if not ok then
-        return false, Compat.SafeToString(err)
-    end
-
-    -- Dieselbe Kette, die Blizzards Fenster nach einer Änderung durchläuft:
-    -- als verändert markieren, Anzeigedaten neu bauen, speichern, Zuhörer
-    -- benachrichtigen. Jeder Schritt ist optional, falls er fehlt.
-    local steps = {
-        { object = provider, name = "MarkDirty" },
-        { object = provider, name = "CheckBuildDisplayData" },
-        { object = manager, name = "SaveLayouts" },
-        { object = manager, name = "NotifyListeners" },
-    }
-    local applied = {}
-    for _, step in ipairs(steps) do
-        local object = step.object
-        if object and type(object[step.name]) == "function" then
-            local stepOk, stepErr = pcall(object[step.name], object)
-            applied[#applied + 1] = step.name .. (stepOk and "" or (" (Fehler: " .. Compat.SafeToString(stepErr) .. ")"))
-        end
-    end
-
-    -- Und jetzt nachsehen, ob sich etwas bewegt hat.
+    -- Vier Methoden, drei mögliche Argumentformen.
     --
-    -- Vorher galt der Aufruf als erfolgreich, sobald er nicht geworfen hat.
-    -- In einem Client, der SetCooldownToCategory annimmt und ignoriert, hieß
-    -- das: "4 Abklingzeiten verschoben - sofort wirksam", und nichts bewegte
-    -- sich. Der Benutzer sucht den Fehler dann bei sich.
-    local after = effectiveState(cooldownID)
-    if before and after and before == after then
-        -- Einmal reicht: klappt es bei einer Abklingzeit nicht, klappt es in
-        -- diesem Client bei keiner. Der Rest der Sitzung nimmt den sicheren
-        -- Weg, ohne es jedes Mal erneut zu versuchen.
-        self.nativeIneffective = true
-        return false, L["Der Client nimmt die Änderung an, führt sie aber nicht aus"]
+    -- Die Fehlermeldungen des Clients sagen, dass jede von ihnen etwas
+    -- anderes erwartet: WriteCooldownInfo_Category reicht das erste Argument
+    -- an GetCooldownViewerCooldownInfo weiter, will also die Abklingzeit-ID;
+    -- WriteCooldownCategoryToLayout ruft darauf pairs() auf, will also eine
+    -- Tabelle. Statt das weiter zu erraten, werden die Formen durchprobiert
+    -- und nach jedem Versuch nachgesehen, ob sich etwas bewegt hat. Die
+    -- Kombination, die wirkt, gilt für den Rest der Sitzung - danach ist es
+    -- ein einziger Aufruf je Abklingzeit.
+    local shapes = {
+        { name = "id" },
+        { name = "layout", value = activeLayout },
+        { name = "layoutID", value = activeLayoutID },
+    }
+    local methods = {
+        { object = provider, name = "ChangeCooldownInfoCategoryByID" },
+        { object = provider, name = "SetCooldownToCategory" },
+        { object = manager, name = "WriteCooldownInfo_Category" },
+        { object = manager, name = "WriteCooldownCategoryToLayout" },
+    }
+    local candidates = {}
+    for _, method in ipairs(methods) do
+        for _, shape in ipairs(shapes) do
+            if shape.name == "id" or shape.value ~= nil then
+                candidates[#candidates + 1] = {
+                    object = method.object,
+                    name = method.name,
+                    shape = shape.name,
+                    prefix = shape.value,
+                }
+            end
+        end
+    end
+    -- Was schon einmal gewirkt hat, zuerst.
+    if self.workingWrite then
+        table.insert(candidates, 1, self.workingWrite)
     end
 
-    -- Erst wenn nachgewiesen ist, dass es wirkt: der Hinweis auf den Taint.
-    if not self.taintedThisSession then
-        self.taintedThisSession = true
-        FCD.Print(L["Sofortmodus: Änderung wirkt. Blizzards Viewer wirft ab jetzt bei"])
-        FCD.Print(L["jedem Aurenereignis einen Fehler - ein /reload behebt das."])
-        FCD.Print(L["Dauerhaft vermeiden: Häkchen 'sofort wirksam' abschalten."])
+    -- "Nicht angezeigt" ist bei Blizzard nicht eine Kategorie, sondern zwei:
+    -- HiddenActive (-1) und HiddenPassive (-2). Unser Fenster hat dafür
+    -- einen Abschnitt, also muss beim Schreiben die richtige der beiden
+    -- getroffen werden - welche, hängt am Eintrag. Statt das zu bestimmen,
+    -- werden beide probiert; die falsche bleibt wirkungslos.
+    local targets = { category }
+    if category == HIDDEN_CATEGORY then
+        targets[#targets + 1] = -2
     end
 
-    return true, nil, table.concat(applied, ", ")
+    local tried = {}
+    for _, target in ipairs(targets) do
+        for _, candidate in ipairs(candidates) do
+            local object = candidate.object
+            if object and type(object[candidate.name]) == "function" then
+                local ok, err
+                if candidate.prefix ~= nil then
+                    ok, err = pcall(object[candidate.name], object,
+                        candidate.prefix, cooldownID, target)
+                else
+                    ok, err = pcall(object[candidate.name], object, cooldownID, target)
+                end
+                local label = candidate.name .. "[" .. tostring(candidate.shape or "id")
+                    .. "](" .. target .. ")"
+                if not ok then
+                    tried[#tried + 1] = label .. " wirft: " .. Compat.SafeToString(err)
+                else
+                    local steps = applyChain(provider, manager, false)
+                    local after = effectiveCategoryOf(provider, cooldownID)
+                    if after ~= before then
+                        self.workingWrite = candidate
+                        self.nativeIneffective = nil
+                        if not self.taintedThisSession then
+                            self.taintedThisSession = true
+                            FCD.LogOnly(L["Sofortmodus wirkt über "] .. label)
+                        end
+                        return true, nil, label .. " -> " .. steps
+                    end
+                    tried[#tried + 1] = label .. L[" ohne Wirkung"]
+                end
+            end
+        end
+    end
+
+    -- Keiner hat gewirkt. Einmal reicht: der Rest der Sitzung nimmt den
+    -- sicheren Weg, statt es jedes Mal erneut zu versuchen.
+    -- Die ganze Kette gehört ins Protokoll, nicht in den Chat: dort wird sie
+    -- abgeschnitten, und gerade das abgeschnittene Ende enthielt beim letzten
+    -- Mal die Begründung.
+    self.nativeIneffective = true
+    FCD.LogOnly(L["Sofortmodus, alle Versuche für Abklingzeit "] .. cooldownID
+        .. ": " .. table.concat(tried, "; "))
+    return false, L["Der Client nimmt die Änderung an, führt sie aber nicht aus"]
+        .. L[" (/fcd log zeigt jeden Versuch)"]
+end
+
+-- Nach einer Reihe von Änderungen einmal speichern und die Zuhörer wecken.
+-- Während der Reihe wäre das je Eintrag ein vollständiges Serialisieren des
+-- Layouts.
+function Layout:FinishNativeBatch()
+    local provider = dataProvider()
+    if not provider then
+        return false
+    end
+    applyChain(provider, layoutManager(), true)
+    return true
 end
 
 -- Legt einen Wiederherstellungspunkt an, falls der Client das anbietet.
@@ -368,17 +530,32 @@ end
 local PROFILE_PREFIX = "FCDL1:"
 
 -- Statische Einordnung aller Abklingzeiten: cooldownID -> Kategorie
+-- Die Standardeinordnung je Abklingzeit: wohin ein Eintrag gehört, wenn
+-- niemand ihn verschoben hat.
+--
+-- Vorher kamen Menge und Wert aus GetCooldownViewerCategorySet. Beides war
+-- falsch: die Abfragen nennen nur die gerade aktiven, und sie nennen deren
+-- Ist-Zustand, nicht die Vorgabe. Wer eine Zuweisung zurücknahm, bekam
+-- damit den Zustand zurückgeschrieben, den er gerade loswerden wollte.
+-- Die Vorgabe steht im Cache-Eintrag unter "category".
 function Layout:GetStaticMap()
     local map, order = {}, {}
+    local function add(cooldownID)
+        if map[cooldownID] ~= nil then
+            return
+        end
+        local info = Compat.GetCooldownInfo(cooldownID)
+        if info and info.category ~= nil then
+            map[cooldownID] = info.category
+            order[#order + 1] = cooldownID
+        end
+    end
+    for _, cooldownID in ipairs(self:GetBlizzardCatalog() or {}) do
+        add(cooldownID)
+    end
     for _, category in ipairs(Compat.GetCooldownViewerCategories()) do
-        local ids = Compat.GetCategorySet(category.value)
-        if ids then
-            for _, id in ipairs(ids) do
-                if map[id] == nil then
-                    map[id] = category.value
-                    order[#order + 1] = id
-                end
-            end
+        for _, cooldownID in ipairs(Compat.GetCategorySet(category.value) or {}) do
+            add(cooldownID)
         end
     end
     return map, order
@@ -415,7 +592,11 @@ function Layout:GetBlizzardLayouts()
     pcall(function()
         for _, entry in pairs(manager.layouts or {}) do
             if type(entry) == "table" then
-                local name = rawget(entry, "name")
+                -- Die Feldnamen sind gemessen, nicht geraten (/fcd provider):
+                -- layoutName und layoutID. Vorher stand hier "name", und
+                -- deshalb blieb die Liste in unserem Auswahlfeld leer,
+                -- obwohl der Verwalter zwei Layouts führte.
+                local name = rawget(entry, "layoutName") or rawget(entry, "name")
                 local id = rawget(entry, "layoutID") or rawget(entry, "ID")
                     or rawget(entry, "id")
                 if type(name) == "string" and name ~= "" then
@@ -435,6 +616,127 @@ function Layout:GetBlizzardLayouts()
         active = rawget(active, "layoutID") or rawget(active, "id")
     end
     return list, active
+end
+
+-- Blizzards vollständiger, nach Klasse gefilterter Katalog.
+--
+-- Die lange Suche danach, festgehalten damit sie sich nicht wiederholt:
+--   * GetCooldownViewerCategorySet nennt nur die aktiven (hier 15)
+--   * GetCooldownViewerCooldownInfo kennt alle 880 - aber aller Klassen,
+--     und ein Klassenmerkmal trägt der Eintrag nicht
+--   * die Reihenfolgeliste im Layout ist in einem frischen Layout leer
+--   * GetOrderedCooldownIDsForCategory nennt ebenfalls nur die aktiven
+-- Erst GetOrderedCooldownIDs liefert die 172, die ein Krieger hat - genau
+-- die Menge, die auch in einem gewachsenen Layout stand.
+--
+-- Das ist ein Aufruf auf Blizzards Objekt. Schreibende Aufrufe dort taintet
+-- der Client nachweislich; ob reines Lesen dasselbe tut, ist nicht belegt.
+-- Deshalb abschaltbar: /fcd catalog voll nimmt stattdessen den Durchlauf
+-- über alle IDs, der nichts anfasst, dafür alle Klassen zeigt.
+-- Rückgabe: liste von AbklingzeitIDs, oder nil
+function Layout:GetBlizzardCatalog()
+    if FCD.db and FCD.db.settings and FCD.db.settings.catalogSource == "scan" then
+        return nil
+    end
+    local provider = dataProvider()
+    if not provider then
+        return nil
+    end
+    -- Aus den Anzeigedaten, denn die führen dieselbe Reihenfolge wie ihr
+    -- Fenster.
+    local data = displayData()
+    if data and type(data.orderedCooldownIDs) == "table" and #data.orderedCooldownIDs > 0 then
+        return data.orderedCooldownIDs
+    end
+
+    -- Die aktuelle Reihenfolge zuerst, die Vorgabe als Rückfall: beide
+    -- liefern dieselbe Menge, die erste aber in der Reihenfolge, die der
+    -- Spieler in ihrem Fenster hergestellt hat.
+    for _, name in ipairs({ "GetOrderedCooldownIDs", "GetDefaultOrderedCooldownIDs" }) do
+        if type(provider[name]) == "function" then
+            local ok, ids = pcall(provider[name], provider)
+            if ok and type(ids) == "table" and #ids > 0 then
+                return ids
+            end
+        end
+    end
+    return nil
+end
+
+-- Die wirksame Einordnung, wie ihr Datenmodell sie führt.
+--
+-- Nötig für den Abschnitt "Nicht angezeigt". Der Cache-Eintrag meldet
+-- isInvisible = false für alle 880, ihr Modell führt aber sechs passive und
+-- eine aktive Abklingzeit als ausgeblendet - der Zustand steht also nicht im
+-- Eintrag, sondern in ihren Listen. Ohne das blieb unser Abschnitt leer,
+-- während in ihrem Fenster etwas darin stand.
+--
+-- Beide verborgenen Kategorien landen auf einer: Blizzards Fenster hat auch
+-- nur einen Abschnitt dafür.
+-- Rückgabe: tabelle AbklingzeitID -> Kategorie, oder nil
+function Layout:GetProviderCategoryMap()
+    if FCD.db and FCD.db.settings and FCD.db.settings.catalogSource == "scan" then
+        return nil
+    end
+
+    -- Die Einordnung steht in cooldownInfoByID, nicht in den Kategorielisten.
+    --
+    -- GetOrderedCooldownIDsForCategory nennt nur, was gerade auf den Leisten
+    -- liegt - bei diesem Krieger fünfzehn Einträge. Ihr Einstellungsfenster
+    -- zeigt aber alle 172 verteilt auf die Abschnitte, und woher es das
+    -- nimmt, stand lange nicht fest. Es nimmt es von hier: je Eintrag eine
+    -- Kategorie und ein isInvisible, gültig für das aktive Layout.
+    local data = displayData()
+    local infoByID = data and data.cooldownInfoByID
+    if type(infoByID) == "table" then
+        local map, any, signature, knownMap = {}, false, {}, {}
+        for _, cooldownID in ipairs(data.orderedCooldownIDs or {}) do
+            local info = infoByID[cooldownID]
+            if type(info) == "table" then
+                knownMap[cooldownID] = info.isKnown and true or false
+                -- Blizzard trennt verborgen-passiv (-2) von verborgen-aktiv
+                -- (-1); ihr Fenster zeigt beides in einem Abschnitt, unseres
+                -- auch. Ohne diese Zusammenfassung landeten 61 Einträge in
+                -- einem Eimer, den kein Reiter zeichnet - sie wären
+                -- verschwunden.
+                local category = info.category
+                if info.isInvisible or (type(category) == "number" and category < 0) then
+                    category = HIDDEN_CATEGORY
+                end
+                if category ~= nil then
+                    map[cooldownID] = category
+                    signature[#signature + 1] = cooldownID .. "=" .. category .. ","
+                    any = true
+                end
+            end
+        end
+        if any then
+            return map, table.concat(signature), knownMap
+        end
+    end
+
+    -- Rückfall auf die Kategorielisten, falls es die Anzeigedaten nicht gibt.
+    local provider = dataProvider()
+    if not provider or type(provider.GetOrderedCooldownIDsForCategory) ~= "function" then
+        return nil
+    end
+    local map, any, signature = {}, false, {}
+    for _, category in ipairs(Compat.GetCooldownViewerCategories()) do
+        local ok, ids = pcall(provider.GetOrderedCooldownIDsForCategory, provider, category.value)
+        if ok and type(ids) == "table" then
+            local value = (category.value < 0) and HIDDEN_CATEGORY or category.value
+            signature[#signature + 1] = category.value .. "="
+            for _, cooldownID in ipairs(ids) do
+                map[cooldownID] = value
+                signature[#signature + 1] = cooldownID .. ","
+                any = true
+            end
+        end
+    end
+    if not any then
+        return nil
+    end
+    return map, table.concat(signature)
 end
 
 function Layout:GetProfiles()
@@ -500,7 +802,32 @@ function Layout:ApplyAssignments(assignments, label)
     end
 
     local staticMap = self:GetStaticMap()
-    local current = assignmentsOf(state)
+
+    -- Wogegen wird verglichen?
+    --
+    -- Gegen das, worauf auch geschrieben wird - sonst geht beides
+    -- auseinander. Genau das war der Fehler: verglichen wurde immer gegen
+    -- den Blob, geschrieben im Sofortmodus aber ins laufende Modell. Nach
+    -- dem ersten Profilwechsel stand im Blob noch der alte Stand, und beim
+    -- Zurückschalten sah der Vergleich deshalb keinen Unterschied - das
+    -- Umschalten tat dann schlicht nichts.
+    local native = self:NativeWritesAllowed() and self:NativeAPIExists()
+    local current
+    local live = native and self:GetProviderCategoryMap() or nil
+    if live then
+        -- Das Modell nennt die wirksame Kategorie jedes Eintrags. Eine
+        -- Zuweisung ist nur, was von der Vorgabe abweicht - dieselbe
+        -- Bedeutung, die assignmentsOf für den Blob hat.
+        current = {}
+        for cooldownID, category in pairs(live) do
+            if staticMap[cooldownID] ~= category then
+                current[cooldownID] = category
+            end
+        end
+    else
+        current = assignmentsOf(state)
+    end
+
     local changes = {}
 
     for cooldownID, category in pairs(assignments) do
@@ -518,7 +845,7 @@ function Layout:ApplyAssignments(assignments, label)
         return true, nil, 0
     end
 
-    if self:NativeWritesAllowed() and self:NativeAPIExists() then
+    if native then
         self:CreateNativeRestorePoint()
         for _, change in ipairs(changes) do
             if change.category ~= nil then

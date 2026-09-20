@@ -8,7 +8,7 @@ FCD.name = ADDON_NAME
 -- Steht die Version nicht in der .toc - ungepackte Arbeitskopie, in der noch
 -- der Platzhalter steht -, gilt diese hier. Sie ist der einzige Ort, an dem
 -- die Zahl im Quelltext gepflegt wird.
-FCD.FALLBACK_VERSION = "0.1.0-beta"
+FCD.FALLBACK_VERSION = "0.1.1-beta"
 FCD.version = FCD.FALLBACK_VERSION
 
 -- GetBuildInfo liefert Version, Buildnummer, Datum und Interface-Nummer.
@@ -640,6 +640,27 @@ function Compat.DumpNamespace(namespace)
     return members
 end
 
+-- Blizzards Abklingzeit-Fenster gehört zu einem Addon, das erst bei Bedarf
+-- lädt. Solange es nicht geladen ist, gibt es kein Datenmodell - und ohne das
+-- fehlt uns ihre klassengefilterte Liste, und unser Katalog fiel auf den
+-- Durchlauf über alle 880 IDs zurück. Der enthält jede Klasse, und genau
+-- daher kamen die fremden Zauber in unserem Fenster.
+--
+-- Also wird es angestoßen, sobald wir es brauchen, statt darauf zu warten,
+-- dass der Spieler ihr Fenster einmal öffnet.
+local loadAddOn = method(C_AddOns, "LoadAddOn") or globalFunction("LoadAddOn")
+
+function Compat.EnsureCooldownViewerLoaded()
+    if type(_G.CooldownViewerSettings) == "table" then
+        return true
+    end
+    if not loadAddOn then
+        return false
+    end
+    pcall(loadAddOn, "Blizzard_CooldownViewer")
+    return type(_G.CooldownViewerSettings) == "table"
+end
+
 function Compat.GetCooldownViewerCategories()
     local categories = {}
     if type(Enum) == "table" and type(Enum.CooldownViewerCategory) == "table" then
@@ -673,6 +694,87 @@ function Compat.GetCooldownInfo(cooldownID)
         return result
     end
     return nil
+end
+
+-- Der vollständige Katalog der Abklingzeiten.
+--
+-- Weder GetCooldownViewerCategorySet noch das Layout taugen als Quelle: die
+-- Kategorieabfragen nennen nur die gerade aktiven (bei einem Krieger auf
+-- Stufe 10 ganze 15), und die Reihenfolgeliste im Layout ist in einem frisch
+-- angelegten Layout leer. Genau daran ist unser Katalog zusammengebrochen,
+-- während Blizzards eigenes Fenster unverändert alles zeigte.
+--
+-- Der Client führt die Einträge unter zusammenhängenden IDs - in diesem Build
+-- rund 880 zwischen 199184 und 200136. Die Nummern sind nicht vorhersagbar,
+-- deshalb geben bekannte IDs die Gegend vor, und von dort wird nach beiden
+-- Seiten ausgedehnt, bis lange genug nichts mehr kommt.
+local SCAN_GAP = 400      -- so viele Fehlgriffe am Stück beenden eine Seite
+local SCAN_LIMIT = 40000  -- harte Grenze, damit nie endlos gezählt wird
+
+local scannedIDs
+
+function Compat.InvalidateCooldownScan()
+    scannedIDs = nil
+end
+
+-- Rückgabe: aufsteigende Liste aller auflösbaren Abklingzeit-IDs
+function Compat.ScanCooldownIDs(seeds)
+    if scannedIDs then
+        return scannedIDs
+    end
+    if not cvCacheInfo then
+        return {}
+    end
+
+    local low, high
+    for _, cooldownID in ipairs(seeds or {}) do
+        if type(cooldownID) == "number" then
+            low = (low and math.min(low, cooldownID)) or cooldownID
+            high = (high and math.max(high, cooldownID)) or cooldownID
+        end
+    end
+    if not low then
+        return {}
+    end
+
+    local found = {}
+    local function resolves(cooldownID)
+        local ok, info = pcall(cvCacheInfo, cooldownID)
+        return ok and type(info) == "table"
+    end
+
+    -- Erst der bekannte Bereich, dann nach unten und nach oben ausdehnen.
+    for cooldownID = low, high do
+        if resolves(cooldownID) then
+            found[#found + 1] = cooldownID
+        end
+    end
+
+    local miss, cooldownID = 0, low - 1
+    while miss < SCAN_GAP and cooldownID > 0 and (low - cooldownID) < SCAN_LIMIT do
+        if resolves(cooldownID) then
+            found[#found + 1] = cooldownID
+            miss = 0
+        else
+            miss = miss + 1
+        end
+        cooldownID = cooldownID - 1
+    end
+
+    miss, cooldownID = 0, high + 1
+    while miss < SCAN_GAP and (cooldownID - high) < SCAN_LIMIT do
+        if resolves(cooldownID) then
+            found[#found + 1] = cooldownID
+            miss = 0
+        else
+            miss = miss + 1
+        end
+        cooldownID = cooldownID + 1
+    end
+
+    table.sort(found)
+    scannedIDs = found
+    return found
 end
 
 function Compat.CanWriteCategorySet()
