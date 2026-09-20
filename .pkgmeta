@@ -11,6 +11,9 @@ manual-changelog:
   filename: RELEASE-NOTES.md
   markup-type: markdown
 
+# LICENSE geht bewusst mit ins Paket: wer das AddOn herunterlädt, soll
+# die Lizenz darin finden und nicht erst im Repository suchen müssen.
+
 # Nicht ins Release-Paket
 ignore:
   - branding

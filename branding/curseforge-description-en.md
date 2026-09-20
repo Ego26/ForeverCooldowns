@@ -143,3 +143,4 @@ encoding chain intact, and takes a backup. `/fcd restore` undoes the last one.
 
 - Source, issues and full documentation: <https://github.com/Ego26/ForeverCooldowns>
 - No dependencies, no libraries — Blizzard API only.
+- Licence: MIT

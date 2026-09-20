@@ -136,3 +136,8 @@ alerts between bar and entry.
 
 Banner and icons are generated, not drawn – see
 [`branding/tools/`](branding/tools/).
+
+## Licence
+
+MIT – see [LICENSE](LICENSE). Use, modify and redistribute freely, as
+long as the copyright notice stays with it.

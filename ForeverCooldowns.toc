@@ -7,6 +7,7 @@
 ## Version: @project-version@
 ## SavedVariables: ForeverCooldownsDB
 ## IconTexture: Interface\AddOns\ForeverCooldowns\Media\Textures\logo
+## X-License: MIT
 ## X-Category: Combat
 ## X-Website: https://github.com/Ego26/ForeverCooldowns
 ## X-FCD-Toc: v5

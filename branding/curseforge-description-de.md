@@ -146,3 +146,4 @@ Kodierkette verlustfrei übersteht, und eine Sicherung angelegt.
 
 - Quelltext, Fehlermeldungen und vollständige Dokumentation: <https://github.com/Ego26/ForeverCooldowns>
 - Keine Abhängigkeiten, keine Bibliotheken – ausschließlich Blizzard-API.
+- Lizenz: MIT
