@@ -56,6 +56,11 @@ geschrieben wird über ihren eigenen Weg, ihr „Änderungen speichern" sichert
 mit, und ein Neuladen überlebt es. Beides abschaltbar (`/fcd replace off`,
 `/fcd editui off`).
 
+Der Preis ist derselbe wie beim Sofortmodus: Wir schreiben dabei durch
+ihren Verwalter in ihren Viewer, und der gilt danach als *tainted* – er
+wirft bis zum nächsten `/reload` Fehler bei Ziel- und Aurenereignissen.
+Das Panel sagt es beim ersten Mal und bietet das Neuladen an.
+
 **Eigene Leisten.** Ausrichtung, Spalten, Symbolgröße, Abstand, Transparenz,
 Sichtbarkeit (einschließlich „Nie"), Tooltips und „Beim Anklicken benutzen" –
 pro Leiste, im Stil ihres Bearbeitungsmodus, dem die Leisten auch folgen.

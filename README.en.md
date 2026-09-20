@@ -53,6 +53,11 @@ through their own path, their "Save changes" saves ours along with it, and it
 survives a reload. Both can be switched off (`/fcd replace off`,
 `/fcd editui off`).
 
+The price is the same as for instant mode: writing goes through their
+manager into their viewer, which counts as *tainted* afterwards – it
+throws errors on target and aura events until the next `/reload`. The
+panel says so the first time and offers the reload.
+
 **Your own bars.** Orientation, columns, icon size, spacing, opacity,
 visibility (including "Never"), tooltips and "Use on click" – per bar, styled
 after their Edit Mode, which the bars follow.

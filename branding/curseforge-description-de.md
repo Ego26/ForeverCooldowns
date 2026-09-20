@@ -65,6 +65,10 @@ Weg – ihre Oberfläche zieht von selbst nach, ihr „Änderungen speichern"
 sichert unsere Änderungen mit, und ein Neuladen überlebt es. Wer lieber ihre
 Fenster behält: `/fcd replace off` und `/fcd editui off`.
 
+**Der Preis:** Eine ihrer Leisten über unser Fenster zu ändern taintet ihren
+Viewer, genau wie der Sofortmodus – er wirft dann bis zum nächsten `/reload`
+Fehler bei Ziel- und Aurenereignissen. Das AddOn sagt es beim ersten Mal.
+
 ### Blizzards Kategorien bearbeiten
 
 Mehrere Einträge auswählen (Strg, Umschalt), zwischen *Essenziell*,

@@ -1191,6 +1191,12 @@ FCD.AddTranslations("enUS", {
     ["Breite Ansicht"] = "Wide view",
 ["Verwerfen"] = "Delete",
     ["Abbrechen"] = "Cancel",
+["Ihre Leiste geändert. Blizzards Viewer wirft ab jetzt bei"] =
+        "Their bar changed. Blizzard's viewer will now throw an error on",
+    ["Ziel- und Aurenereignissen einen Fehler - ein /reload behebt das."] =
+        "target and aura events - a /reload fixes that.",
+    ["Dauerhaft vermeiden: /fcd editui off - dann bleibt ihr Fenster."] =
+        "To avoid it for good: /fcd editui off - then their window stays.",
 })
 
 FCD.SetLanguage("auto")

@@ -64,6 +64,10 @@ interface updates by itself, their "Save changes" saves ours along with it, and
 it survives a reload. If you would rather keep their windows:
 `/fcd replace off` and `/fcd editui off`.
 
+**The price:** changing one of their bars through our window taints their
+viewer, exactly as instant mode does — it then throws errors on target and
+aura events until the next `/reload`. The addon says so the first time.
+
 ### Edit Blizzard's categories
 
 Select several entries (Ctrl, Shift) and move them between *Essential*,
