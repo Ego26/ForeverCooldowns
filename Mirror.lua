@@ -83,7 +83,7 @@ local function resolve()
     end
 
     local layout = FCD.Layout:Read()
-    local map, hidden, order, seen = {}, {}, {}, {}
+    local map, hidden, order, seen, active = {}, {}, {}, {}, {}
 
     local function add(cooldownID)
         if seen[cooldownID] then
@@ -108,9 +108,15 @@ local function resolve()
             add(cooldownID)
         end
     end
+    -- Und was davon Blizzard tatsächlich anzeigt. Das ist eine kleine
+    -- Teilmenge: der Katalog kennt zu jeder Abklingzeit eine Kategorie, aber
+    -- ihre Leisten zeigen nur, was in GetCooldownViewerCategorySet steht.
+    -- Der Rest hat zwar eine Einordnung, ist aber nicht aktiv - im Panel
+    -- daran zu erkennen, dass die Kachel nicht hervorgehoben ist.
     for _, category in ipairs(Compat.GetCooldownViewerCategories()) do
         for _, cooldownID in ipairs(Compat.GetCategorySet(category.value) or {}) do
             add(cooldownID)
+            active[cooldownID] = true
         end
     end
 
@@ -130,6 +136,7 @@ local function resolve()
         map = map,
         hidden = hidden,
         order = order,
+        active = active,
         assigned = assigned,
         position = position,
         readable = layout ~= nil,
@@ -180,7 +187,18 @@ function Mirror:BuildEntries(category, includeUnknown)
     local records, byKey = {}, {}
 
     for _, cooldownID in ipairs(state.order) do
-        if self:EffectiveCategory(cooldownID) == category then
+        -- Die Einordnung allein reicht nicht. Der Katalog kennt zu jeder
+        -- Abklingzeit eine Kategorie, auch zu Fähigkeiten, die Blizzards
+        -- Leisten nie zeigen - "Heldenhafter Stoß" steht unter "Strategisch"
+        -- und taucht bei ihnen trotzdem nirgends auf. Genau die standen
+        -- vorher zusätzlich auf der gespiegelten Leiste.
+        --
+        -- Gezeigt wird deshalb, was Blizzard zeigen würde: was in ihrer
+        -- Kategorieliste steht, plus was der Spieler selbst zugewiesen hat.
+        -- Das Zweite muss mit, sonst wäre eine frische Verschiebung erst
+        -- nach dem Neuladen zu sehen - und das war der ganze Anlass.
+        local shows = state.active[cooldownID] or state.assigned[cooldownID] ~= nil
+        if shows and self:EffectiveCategory(cooldownID) == category then
             local info = Compat.GetCooldownInfo(cooldownID)
             local spellID = info and (info.spellID or info.overrideSpellID) or nil
             if spellID then

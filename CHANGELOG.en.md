@@ -41,6 +41,11 @@ All notable changes to Forever Cooldowns.
 
 ### Fixed
 
+- **Mirrored bars showed too much.** The catalogue knows a category for
+  every cooldown, including abilities Blizzard's bars never display - "Heroic
+  Strike" sits under "Utility" and still appears nowhere in theirs. What is
+  shown now is what Blizzard would show: whatever is in their category list,
+  plus whatever you assigned yourself.
 - **Bars could not be clicked in Blizzard's Edit Mode.** Their interface puts
   a surface over the screen that swallows clicks. Bars now move up one strata
   for as long as Edit Mode is open - the same treatment the panel already had.

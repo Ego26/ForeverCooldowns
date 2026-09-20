@@ -43,6 +43,12 @@ Alle nennenswerten Änderungen an Forever Cooldowns.
 
 ### Behoben
 
+- **Gespiegelte Leisten zeigten zu viel.** Der Katalog kennt zu jeder
+  Abklingzeit eine Kategorie, auch zu Fähigkeiten, die Blizzards Leisten nie
+  anzeigen - "Heldenhafter Stoß" steht unter "Strategisch" und taucht bei
+  ihnen trotzdem nirgends auf. Gezeigt wird jetzt, was Blizzard zeigen würde:
+  was in ihrer Kategorieliste steht, plus was der Spieler selbst zugewiesen
+  hat.
 - **Leisten waren in Blizzards Bearbeitungsmodus nicht anzuklicken.** Ihre
   Oberfläche legt eine Fläche über den Bildschirm, die Klicks abfängt. Die
   Leisten steigen jetzt für die Dauer des Bearbeitungsmodus eine Ebene höher -
