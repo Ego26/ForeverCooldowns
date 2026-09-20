@@ -148,6 +148,10 @@ alerts between bar and entry.
 Banner and icons are generated, not drawn – see
 [`branding/tools/`](branding/tools/).
 
+[`RELEASE-NOTES.md`](RELEASE-NOTES.md) is in English: it goes to CurseForge as
+the changelog and ships inside the package. The German version lives in
+[`branding/RELEASE-NOTES-de.md`](branding/RELEASE-NOTES-de.md).
+
 ## Licence
 
 MIT – see [LICENSE](LICENSE). Use, modify and redistribute freely, as

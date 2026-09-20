@@ -152,6 +152,10 @@ Fertig-Meldung zwischen Leiste und Eintrag.
 Banner und Symbole werden erzeugt, nicht gezeichnet – siehe
 [`branding/tools/`](branding/tools/).
 
+[`RELEASE-NOTES.md`](RELEASE-NOTES.md) ist englisch: Sie geht als Changelog
+an CurseForge und liegt im ausgelieferten Paket. Die deutsche Fassung steht
+unter [`branding/RELEASE-NOTES-de.md`](branding/RELEASE-NOTES-de.md).
+
 ## Lizenz
 
 MIT – siehe [LICENSE](LICENSE). Benutzen, ändern und weitergeben ist

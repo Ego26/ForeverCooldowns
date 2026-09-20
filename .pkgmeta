@@ -7,6 +7,10 @@ externals: {}
 
 # Ohne diese Angabe baut der Packager die Release-Notes aus den Commit-Texten
 # zusammen. Was bei CurseForge steht, soll hier stehen.
+#
+# Diese Datei ist englisch: sie geht als Changelog an CurseForge, und die
+# Projektseite dort ist englisch. Die deutsche Fassung liegt unter
+# branding/RELEASE-NOTES-de.md und wird nicht ausgeliefert.
 manual-changelog:
   filename: RELEASE-NOTES.md
   markup-type: markdown
