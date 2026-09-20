@@ -1072,12 +1072,20 @@ function Dock:AssignSelection(category)
                 end
             end
         end
-        wipe(state.selection)
-        self:LoadLayout()
-        self:Refresh()
-        FCD.Print(string.format(L["%d Abklingzeit(en) nach '%s' - sofort wirksam."],
-            changed, categoryName(category)))
-        return
+        if changed > 0 then
+            wipe(state.selection)
+            self:LoadLayout()
+            self:Refresh()
+            FCD.Print(string.format(L["%d Abklingzeit(en) nach '%s' - sofort wirksam."],
+                changed, categoryName(category)))
+            return
+        end
+
+        -- Nichts bewegt: der Sofortmodus wirkt in diesem Client nicht. Statt
+        -- hier auszusteigen, geht es unten über den sicheren Weg weiter -
+        -- gewollt war die Änderung, nicht die Fehlermeldung.
+        FCD.Print(L["Sofortmodus wirkt in diesem Client nicht - schreibe sicher."])
+        FCD.Print(L["Das Häkchen 'sofort wirksam' bleibt ohne Wirkung und kann weg."])
     end
 
     local moved = 0

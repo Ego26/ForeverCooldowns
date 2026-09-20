@@ -1215,6 +1215,13 @@ FCD.AddTranslations("enUS", {
     ["Mit  /fcd store  trotzdem schreiben, /fcd log zeigt Einzelheiten."] =
         "Use  /fcd store  to write anyway; /fcd log has the details.",
     ["würde Daten verlieren"] = "would lose data",
+-- Sofortmodus, der nichts bewirkt
+    ["Der Client nimmt die Änderung an, führt sie aber nicht aus"] =
+        "The client accepts the change but does not carry it out",
+    ["Sofortmodus wirkt in diesem Client nicht - schreibe sicher."] =
+        "Instant mode has no effect in this client - writing the safe way.",
+    ["Das Häkchen 'sofort wirksam' bleibt ohne Wirkung und kann weg."] =
+        "The 'apply immediately' checkbox does nothing here and can be turned off.",
 })
 
 FCD.SetLanguage("auto")

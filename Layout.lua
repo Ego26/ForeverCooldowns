@@ -80,7 +80,17 @@ end
 -- Im Kampf niemals über Blizzards Objekte schreiben. Der Taint blockiert
 -- sonst ihre eigenen geschützten Aktionen - unter anderem lässt sich ihr
 -- Fenster dann nicht mehr schließen ("Interface-Aktion fehlgeschlagen").
+-- Hat sich der Sofortmodus in dieser Sitzung als wirkungslos erwiesen,
+-- wird er nicht mehr angeboten - sonst scheitert jeder weitere Versuch auf
+-- dieselbe Weise, nur lauter.
 function Layout:CanWriteNativeNow()
+    if self.nativeIneffective then
+        return false
+    end
+    return self:CanWriteNativeNowInner()
+end
+
+function Layout:CanWriteNativeNowInner()
     return self:NativeWritesAllowed() and not InCombatLockdown() and self:NativeAPIExists()
 end
 
@@ -114,6 +124,16 @@ function Layout:GetDefaultCategory(cooldownID)
 end
 
 -- Rückgabe: erfolg, fehlertext
+-- Der Zustand, auf den es ankommt: was der Client tatsaechlich fuehrt,
+-- nicht was im Blob steht. Wird vor und nach dem Schreiben verglichen.
+local function effectiveState(cooldownID)
+    local info = Compat.GetCooldownInfo(cooldownID)
+    if type(info) ~= "table" then
+        return nil
+    end
+    return tostring(info.category) .. "/" .. tostring(info.isInvisible)
+end
+
 function Layout:SetCategoryNative(cooldownID, category)
     local provider = dataProvider()
     if not provider then
@@ -136,19 +156,11 @@ function Layout:SetCategoryNative(cooldownID, category)
         end
     end
 
+    local before = effectiveState(cooldownID)
+
     local ok, err = pcall(provider.SetCooldownToCategory, provider, cooldownID, category)
     if not ok then
         return false, Compat.SafeToString(err)
-    end
-
-    -- Ab dem ersten Aufruf gilt Blizzards Viewer als tainted und wirft bei
-    -- jedem Aurenereignis einen Fehler. Das merken wir uns, damit die
-    -- Oberfläche ein Neuladen anbieten kann.
-    if not self.taintedThisSession then
-        self.taintedThisSession = true
-        FCD.Print(L["Sofortmodus: Änderung wirkt. Blizzards Viewer wirft ab jetzt bei"])
-        FCD.Print(L["jedem Aurenereignis einen Fehler - ein /reload behebt das."])
-        FCD.Print(L["Dauerhaft vermeiden: Häkchen 'sofort wirksam' abschalten."])
     end
 
     -- Dieselbe Kette, die Blizzards Fenster nach einer Änderung durchläuft:
@@ -167,6 +179,29 @@ function Layout:SetCategoryNative(cooldownID, category)
             local stepOk, stepErr = pcall(object[step.name], object)
             applied[#applied + 1] = step.name .. (stepOk and "" or (" (Fehler: " .. Compat.SafeToString(stepErr) .. ")"))
         end
+    end
+
+    -- Und jetzt nachsehen, ob sich etwas bewegt hat.
+    --
+    -- Vorher galt der Aufruf als erfolgreich, sobald er nicht geworfen hat.
+    -- In einem Client, der SetCooldownToCategory annimmt und ignoriert, hieß
+    -- das: "4 Abklingzeiten verschoben - sofort wirksam", und nichts bewegte
+    -- sich. Der Benutzer sucht den Fehler dann bei sich.
+    local after = effectiveState(cooldownID)
+    if before and after and before == after then
+        -- Einmal reicht: klappt es bei einer Abklingzeit nicht, klappt es in
+        -- diesem Client bei keiner. Der Rest der Sitzung nimmt den sicheren
+        -- Weg, ohne es jedes Mal erneut zu versuchen.
+        self.nativeIneffective = true
+        return false, L["Der Client nimmt die Änderung an, führt sie aber nicht aus"]
+    end
+
+    -- Erst wenn nachgewiesen ist, dass es wirkt: der Hinweis auf den Taint.
+    if not self.taintedThisSession then
+        self.taintedThisSession = true
+        FCD.Print(L["Sofortmodus: Änderung wirkt. Blizzards Viewer wirft ab jetzt bei"])
+        FCD.Print(L["jedem Aurenereignis einen Fehler - ein /reload behebt das."])
+        FCD.Print(L["Dauerhaft vermeiden: Häkchen 'sofort wirksam' abschalten."])
     end
 
     return true, nil, table.concat(applied, ", ")
