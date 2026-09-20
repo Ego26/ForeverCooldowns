@@ -21,6 +21,11 @@ All notable changes to Forever Cooldowns.
 
 ### Changed
 
+- **The default bars mirror Blizzard's categories.** There used to be two
+  empty bars there, and a change became visible only once somebody found the
+  "mirror" button. Nobody can know that in advance, so it is now the starting
+  state: install and done. Existing profiles catch up once - but only where
+  the default bar was left untouched and empty.
 - The reload button and the status line in the panel now distinguish between a
   change that is still pending and one where only Blizzard's own bars have yet
   to catch up.

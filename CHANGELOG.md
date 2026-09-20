@@ -22,6 +22,12 @@ Alle nennenswerten Änderungen an Forever Cooldowns.
 
 ### Geändert
 
+- **Die Vorgabeleisten spiegeln Blizzards Kategorien.** Vorher standen dort
+  zwei leere Leisten, und sichtbar wurde eine Änderung erst, wenn jemand den
+  Knopf "spiegeln" entdeckte. Das kann niemand vorher wissen, also ist es
+  jetzt der Anfangszustand: installieren, fertig. Bestehende Profile ziehen
+  einmalig nach - aber nur dort, wo die Vorgabeleiste unberührt und leer
+  geblieben ist.
 - Der Neuladen-Knopf und die Zustandszeile im Panel unterscheiden jetzt, ob
   eine Änderung überhaupt noch aussteht oder nur noch Blizzards eigene
   Leisten nachziehen müssen.

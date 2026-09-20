@@ -11,11 +11,11 @@ The C function that would do both, `SetCooldownViewerCategorySet`, does not
 exist in this client. So this version takes a third route: **we draw the
 category ourselves.**
 
-- **Mirrored bars.** The *mirror* button on any section heading in the panel
-  creates a bar of your own showing exactly that category. Because the bar is
-  ours, a move shows up there in the same second - no reload, no call on
-  Blizzard's objects, and therefore no error. `/fcd mirror` does the same
-  from chat.
+- **Mirrored bars, on from the start.** Your bars show exactly what sits in
+  Blizzard's categories. Because the bars are ours, a move shows up there in
+  the same second - no reload, no call on Blizzard's objects, and therefore no
+  error. Nothing to switch on; the *mirror* button on a section heading adds
+  further categories, and `/fcd mirror` does the same from chat.
 - Everything else about the bar stays yours to set: orientation, size,
   visibility, ready alerts, and ready alerts per single entry.
 - **Detach mirror** in the bar window freezes the current contents, after
@@ -26,6 +26,11 @@ category ourselves.**
 
 ### Changed
 
+- **The default bars mirror Blizzard's categories.** There used to be two
+  empty bars there, and a change became visible only once somebody found the
+  "mirror" button. Nobody can know that in advance, so it is now the starting
+  state: install and done. Existing profiles catch up once - but only where
+  the default bar was left untouched and empty.
 - The reload button and the status line now distinguish between a change that
   is still pending and one where only Blizzard's own bars have yet to catch
   up.

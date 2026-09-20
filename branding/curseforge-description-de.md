@@ -45,13 +45,14 @@ Gegenstände gehen zusätzlich per Ziehen aus der Tasche.
 
 ### Blizzards Kategorien, sofort sichtbar
 
-Der Knopf **spiegeln** an einer Abschnittsüberschrift legt eine eigene Leiste
-an, die genau diese Kategorie zeigt. Ihr Inhalt kommt aus derselben
-Zuordnung, die im Panel bearbeitet wird – gezeichnet aber von uns. Eine
+Deine Leisten zeigen von Anfang an, was in Blizzards Kategorien liegt –
+derselbe Bestand, den das Panel bearbeitet, gezeichnet aber von uns. Eine
 Verschiebung steht dort deshalb in derselben Sekunde: ohne Neuladen, ohne
 einen Aufruf auf Blizzards Objekten, also auch ohne Fehlermeldung.
 
-Aus dem Chat geht dasselbe mit `/fcd mirror`.
+Dafür ist nichts einzustellen. Der Knopf **spiegeln** an einer
+Abschnittsüberschrift nimmt weitere Kategorien dazu oder wieder heraus, und
+`/fcd mirror` tut dasselbe aus dem Chat.
 
 ### Melden, wenn bereit
 

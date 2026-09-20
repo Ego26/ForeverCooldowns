@@ -1428,6 +1428,20 @@ local function onEvent(_, event, ...)
         else
             logMessage(L["Kein Profil aktiv - eigene Leisten bleiben leer."])
         end
+        -- Einmal je Datenbank: dass die Leisten Blizzards Kategorien zeigen,
+        -- und was das für ihre eigenen bedeutet. Danach nie wieder - eine
+        -- Ansage, die bei jedem Anmelden kommt, liest bald niemand mehr.
+        if FCD.Mirror:HasAny() and not FCD.db.settings.mirrorNoticeShown then
+            FCD.db.settings.mirrorNoticeShown = true
+            printMessage(L["Deine Leisten zeigen Blizzards Kategorien. Was du im Panel"])
+            printMessage(L["verschiebst, steht dort sofort - ohne Neuladen und ohne Fehler."])
+            printMessage(L["Blizzards eigene Leisten bleiben daneben stehen, bis du sie"])
+            printMessage(L["ausblendest - in ihrem Fenster, damit nichts getaintet wird:"])
+            for _, line in ipairs(FCD.Mirror:GetHideSteps()) do
+                printMessage(line)
+            end
+        end
+
         local declared = FCD.Compat.GetDeclaredInterface()
         if declared and FCD.tocVersion > 0 and declared ~= FCD.tocVersion then
             logMessage(string.format(L["Hinweis: .toc meldet Interface %d,"]

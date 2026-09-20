@@ -12,11 +12,12 @@ Die C-Funktion, die beides könnte, `SetCooldownViewerCategorySet`, gibt es in
 diesem Client nicht. Diese Fassung geht deshalb einen dritten Weg: **wir
 zeichnen die Kategorie selbst.**
 
-- **Gespiegelte Leisten.** Der Knopf *spiegeln* an jeder Abschnittsüberschrift
-  im Panel legt eine eigene Leiste an, die genau diese Kategorie zeigt. Weil
-  die Leiste unsere ist, steht eine Verschiebung dort in derselben Sekunde -
-  kein Neuladen, kein Aufruf auf Blizzards Objekten, also auch kein Fehler.
-  `/fcd mirror` tut dasselbe aus dem Chat.
+- **Gespiegelte Leisten, von Anfang an.** Deine Leisten zeigen genau das, was
+  in Blizzards Kategorien liegt. Weil die Leisten unsere sind, steht eine
+  Verschiebung dort in derselben Sekunde - kein Neuladen, kein Aufruf auf
+  Blizzards Objekten, also auch kein Fehler. Einzuschalten ist nichts; der
+  Knopf *spiegeln* an einer Abschnittsüberschrift nimmt weitere Kategorien
+  dazu, und `/fcd mirror` tut dasselbe aus dem Chat.
 - Alles andere an der Leiste bleibt einstellbar: Ausrichtung, Größe,
   Sichtbarkeit, Fertig-Meldung, auch je einzelnem Eintrag.
 - **Spiegelung lösen** im Leistenfenster schreibt den jetzigen Bestand fest;
@@ -28,6 +29,12 @@ zeichnen die Kategorie selbst.**
 
 ### Geändert
 
+- **Die Vorgabeleisten spiegeln Blizzards Kategorien.** Vorher standen dort
+  zwei leere Leisten, und sichtbar wurde eine Änderung erst, wenn jemand den
+  Knopf "spiegeln" entdeckte. Das kann niemand vorher wissen, also ist es
+  jetzt der Anfangszustand: installieren, fertig. Bestehende Profile ziehen
+  einmalig nach - aber nur dort, wo die Vorgabeleiste unberührt und leer
+  geblieben ist.
 - Der Neuladen-Knopf und die Zustandszeile unterscheiden jetzt, ob eine
   Änderung überhaupt noch aussteht oder nur noch Blizzards eigene Leisten
   nachziehen müssen.

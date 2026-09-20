@@ -116,10 +116,15 @@ Both routes above have a catch – one applies late, the other taints. The C
 function that would do both (`SetCooldownViewerCategorySet`) does not exist in
 this client; `/fcd check` lists it as missing.
 
-The way out is a third route: **we draw the category ourselves.** The *mirror*
-button on a section heading in the panel creates an own bar showing exactly
-that category – and because the bar is ours, a move shows up there in the same
-second. No reload, no call on Blizzard's objects, and therefore no error.
+The way out is a third route: **we draw the category ourselves.** A bar shows
+exactly what sits in one of Blizzard's categories – and because the bar is
+ours, a move shows up there in the same second. No reload, no call on
+Blizzard's objects, and therefore no error.
+
+**This is the starting state, not a setting.** The two default bars mirror
+"Essential" and "Utility Cooldowns"; installing FCD is all it takes. The
+*mirror* button on a section heading adds further categories or switches them
+off again.
 
 ```
 /fcd mirror        state, and every category with its number
@@ -138,7 +143,8 @@ the bar window.
 Blizzard's own bars still catch up only on reload. While both are on screen you
 see two versions; `/fcd mirror hide` explains how to get rid of theirs. You
 have to hide them in **their** window – if we did it, that would be exactly the
-taint this route avoids.
+taint this route avoids. It is the one step the addon cannot take for you; it
+says so once on your first login and never again.
 
 ## Where settings live
 

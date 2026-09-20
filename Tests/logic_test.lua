@@ -21,6 +21,16 @@ end
 
 dofile(ADDON .. "Locale.lua")
 dofile(ADDON .. "Compat.lua")
+-- Mirror.lua laeuft hier nicht mit: es baut Frames und liest Blizzards
+-- Layout. Profiles holt sich von dort nur die Kategorienamen fuer seine
+-- Vorgabeleisten, also reicht genau die Tabelle. Im Spiel steht Mirror.lua
+-- in der .toc vor Profiles-Aufrufen zur Verfuegung.
+ForeverCooldowns.Mirror = {
+    CATEGORY_NAMES = {
+        [0] = "Essenzielle Abklingzeiten",
+        [1] = "Strategische Abklingzeiten",
+    },
+}
 dofile(ADDON .. "Profiles.lua")
 dofile(ADDON .. "Ranks.lua")
 

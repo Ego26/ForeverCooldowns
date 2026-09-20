@@ -433,14 +433,25 @@ end
 -- nicht an: jeder Aufruf auf ihren Objekten ist genau der Taint, den dieser
 -- Weg vermeiden soll. Ausblenden muss deshalb der Spieler, in ihrem eigenen
 -- Fenster - dort kostet es nichts.
-function Mirror:GetHideInstructions()
+-- Nur die Handgriffe, ohne Vorrede: wer sie schon kennt, braucht die
+-- Begründung nicht noch einmal.
+function Mirror:GetHideSteps()
     return {
-        L["Blizzards eigene Leisten zeigen bis zum nächsten Neuladen noch den"],
-        L["alten Stand. Dauerhaft ausblenden - in ihrem Fenster, damit nichts"],
-        L["getaintet wird:"],
         L["  1. /fcd editui off"],
         L["  2. Bearbeitungsmodus öffnen und ihre Leiste anklicken"],
         L["  3. Haken bei 'Sichtbar' entfernen, Änderungen speichern"],
         L["  4. /fcd editui on, falls unser Fenster zurück soll"],
     }
+end
+
+function Mirror:GetHideInstructions()
+    local lines = {
+        L["Blizzards eigene Leisten zeigen bis zum nächsten Neuladen noch den"],
+        L["alten Stand. Dauerhaft ausblenden - in ihrem Fenster, damit nichts"],
+        L["getaintet wird:"],
+    }
+    for _, step in ipairs(self:GetHideSteps()) do
+        lines[#lines + 1] = step
+    end
+    return lines
 end

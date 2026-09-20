@@ -45,12 +45,14 @@ straight from your bags.
 
 ### Blizzard's categories, visible at once
 
-The **mirror** button on a section heading creates a bar of your own showing
-exactly that category. Its contents come from the same assignment the panel
-edits — but we draw it. A move therefore shows up there in the same second:
-no reload, no call on Blizzard's objects, and so no error message either.
+Your bars show what sits in Blizzard's categories from the start — the same
+assignment the panel edits, but drawn by us. A move therefore shows up there
+in the same second: no reload, no call on Blizzard's objects, and so no error
+message either.
 
-The same from chat: `/fcd mirror`.
+Nothing to set up. The **mirror** button on a section heading adds further
+categories or takes them out again, and `/fcd mirror` does the same from
+chat.
 
 ### Ready alerts
 

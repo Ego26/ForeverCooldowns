@@ -120,11 +120,15 @@ Beide Wege oben haben einen Haken – der eine wirkt spät, der andere taintet.
 Die C-Funktion, die beides könnte (`SetCooldownViewerCategorySet`), gibt es in
 diesem Client nicht; `/fcd check` führt sie als *fehlt*.
 
-Der Ausweg ist ein dritter Weg: **wir zeichnen die Kategorie selbst.** Der
-Knopf *spiegeln* an einer Abschnittsüberschrift im Panel legt eine eigene
-Leiste an, die genau diese Kategorie zeigt – und weil sie unsere ist, steht
-eine Verschiebung dort in derselben Sekunde. Kein Neuladen, kein Aufruf auf
-Blizzards Objekten, also auch kein Fehler.
+Der Ausweg ist ein dritter Weg: **wir zeichnen die Kategorie selbst.** Eine
+Leiste zeigt genau das, was in einer von Blizzards Kategorien liegt – und
+weil sie unsere ist, steht eine Verschiebung dort in derselben Sekunde. Kein
+Neuladen, kein Aufruf auf Blizzards Objekten, also auch kein Fehler.
+
+**Das ist der Anfangszustand, nicht eine Einstellung.** Die beiden
+Vorgabeleisten spiegeln „Essenzielle" und „Strategische Abklingzeiten"; wer
+FCD installiert, muss dafür nichts tun. Der Knopf *spiegeln* an einer
+Abschnittsüberschrift schaltet weitere Kategorien dazu oder wieder ab.
 
 ```
 /fcd mirror        Zustand und alle Kategorien mit Nummer
@@ -143,7 +147,9 @@ will, nimmt im Leistenfenster *Spiegelung lösen*.
 Blizzards eigene Leisten ziehen weiterhin erst beim Neuladen nach. Solange
 beide stehen, sieht man zweierlei; `/fcd mirror hide` sagt, wie man ihre
 loswird. Ausblenden muss man sie in **ihrem** Fenster – täten wir es, wäre es
-genau der Taint, den dieser Weg vermeidet.
+genau der Taint, den dieser Weg vermeidet. Das ist der eine Handgriff, den
+das AddOn niemandem abnehmen kann; es sagt ihn beim ersten Anmelden einmal an
+und danach nie wieder.
 
 ## Wo die Einstellungen liegen
 

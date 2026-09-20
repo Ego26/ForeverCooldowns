@@ -242,6 +242,18 @@ local function copyDefaults(target, defaults)
     end
 end
 
+-- Die Vorgabeleisten zeigen Blizzards Kategorien, statt leer zu sein.
+--
+-- Vorher lagen hier zwei leere Leisten. Ein frisch installiertes AddOn zeigte
+-- also nichts, und eine Kategorie zu ändern blieb bis zum Neuladen
+-- unsichtbar. Sichtbar wurde es erst, wenn jemand den Knopf "spiegeln"
+-- entdeckte - und das kann niemand vorher wissen. Deshalb ist es jetzt der
+-- Anfangszustand.
+local DEFAULT_MIRRORS = { 0, 1 }
+
+-- So hießen dieselben zwei Leisten, bevor sie Blizzards Kategorien zeigten.
+local LEGACY_DEFAULT_NAMES = { [0] = "Essenziell", [1] = "Strategisch" }
+
 local function nextBarID(profile)
     local highest = 0
     for _, bar in ipairs(profile.bars) do
@@ -276,6 +288,44 @@ function Profiles:GetBar(profile, barID)
         end
     end
     return nil
+end
+
+-- Legt die beiden Vorgabeleisten an. Ihr Name ist der Kategoriename und
+-- damit dieselbe Kennung wie überall: deutsch gespeichert, beim Anzeigen
+-- übersetzt.
+function Profiles:AddDefaultBars(profile)
+    for _, category in ipairs(DEFAULT_MIRRORS) do
+        local bar = self:NewBar(profile, FCD.Mirror.CATEGORY_NAMES[category])
+        bar.mirrorCategory = category
+        bar.mirrorEntryOptions = {}
+    end
+end
+
+-- Bestehende Profile nachrüsten. Angefasst wird nur, was unberührt
+-- geblieben ist: eine Vorgabeleiste unter ihrem alten Namen, ohne einen
+-- einzigen Eintrag. Wer etwas hineingelegt hat, behält seine Leiste, und wer
+-- schon spiegelt, hat ohnehin selbst entschieden.
+local function adoptDefaultMirrors(profile)
+    if type(profile) ~= "table" or type(profile.bars) ~= "table" then
+        return
+    end
+    for _, bar in ipairs(profile.bars) do
+        if bar.mirrorCategory ~= nil then
+            return
+        end
+    end
+
+    for _, category in ipairs(DEFAULT_MIRRORS) do
+        for _, bar in ipairs(profile.bars) do
+            if bar.name == LEGACY_DEFAULT_NAMES[category]
+                and #(bar.entries or {}) == 0 then
+                bar.name = FCD.Mirror.CATEGORY_NAMES[category]
+                bar.mirrorCategory = category
+                bar.mirrorEntryOptions = {}
+                break
+            end
+        end
+    end
 end
 
 local function newProfile(name, class)
@@ -411,6 +461,15 @@ function Profiles:Initialize()
         db.settings.allowNativeWrites = false
         db.schema = 3
     end
+    -- Schema 4: die beiden leeren Vorgabeleisten werden zu Spiegeln von
+    -- Blizzards Kategorien. Läuft einmal; wer sie danach entfernt, bekommt
+    -- sie nicht wieder.
+    if db.schema < 4 then
+        for _, profile in pairs(db.profiles or {}) do
+            adoptDefaultMirrors(profile)
+        end
+        db.schema = 4
+    end
     db.profiles = db.profiles or {}
     db.settings = db.settings or {}
     db.customItems = db.customItems or {}
@@ -430,8 +489,7 @@ function Profiles:Initialize()
         local defaultName = (UnitClass("player")) or "Standard"
         if not db.profiles[defaultName] then
             local profile = newProfile(defaultName, class)
-            self:NewBar(profile, "Essenziell")
-            self:NewBar(profile, "Strategisch")
+            self:AddDefaultBars(profile)
             db.profiles[defaultName] = profile
         end
         charDB.active = defaultName
@@ -538,7 +596,7 @@ function Profiles:Create(name, copyFromName)
         profile.name = name
     else
         profile = newProfile(name, self.class)
-        self:NewBar(profile, "Essenziell")
+        self:AddDefaultBars(profile)
     end
     FCD.db.profiles[name] = profile
     return profile
