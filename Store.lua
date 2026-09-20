@@ -53,6 +53,27 @@ local function pack()
     return table.concat(out)
 end
 
+-- Wie viel steckt in einem Bestand? Leisteneinträge plus Layout-Profile.
+-- Dieselbe Rechnung wie beim Anmelden, wo sie entscheidet, welche Quelle
+-- gilt - hier entscheidet sie, ob geschrieben werden darf.
+local function weigh(value)
+    if type(value) ~= "table" then
+        return 0
+    end
+    local count = 0
+    for _, profile in pairs(value.profiles or {}) do
+        if type(profile) == "table" then
+            for _, bar in ipairs(profile.bars or {}) do
+                count = count + #(bar.entries or {})
+            end
+        end
+    end
+    for _ in pairs(value.layoutProfiles or {}) do
+        count = count + 1
+    end
+    return count
+end
+
 local function unpack(text)
     if type(text) ~= "string" or text == "" then
         return nil
@@ -116,10 +137,40 @@ function Store:Save(force)
         return false, verifyErr
     end
 
+    -- Niemals ärmer überschreiben.
+    --
+    -- Genau das ist passiert: Nach einem Layoutwechsel stand im
+    -- Arbeitsspeicher der frisch angelegte, leere Stand, und der Takt hat ihn
+    -- über vorhandene Daten geschrieben. Zwei Sekunden, und ein Profil mit
+    -- allen Leisten war weg.
+    --
+    -- Liegt im Ziel mehr, als wir schreiben wollen, wird nicht geschrieben.
+    -- /fcd store schreibt trotzdem - dort ist es eine bewusste Ansage.
+    if not force then
+        local existing = state.data[STORE_KEY]
+        if type(existing) == "string" and existing ~= "" then
+            local mine = weigh(unpack(text))
+            local theirs = weigh(unpack(existing))
+            if theirs > mine then
+                self.status = string.format(
+                    L["Nicht geschrieben: im Layout liegen %d Einträge, hier nur %d."],
+                    theirs, mine)
+                if not self.warnedAboutLoss then
+                    self.warnedAboutLoss = true
+                    FCD.LogOnly(self.status)
+                    FCD.Print(L["Im Layout liegt mehr als hier - es wird nichts überschrieben."])
+                    FCD.Print(L["Mit  /fcd store  trotzdem schreiben, /fcd log zeigt Einzelheiten."])
+                end
+                return false, L["würde Daten verlieren"]
+            end
+        end
+    end
+    self.warnedAboutLoss = nil
+
     state.data[STORE_KEY] = text
-    local written, commitErr = FCD.Layout:Commit(state, "Bestand")
+    local written, commitErr = FCD.Layout:Commit(state, L["Bestand"])
     if not written then
-        self.status = "Schreiben fehlgeschlagen: " .. tostring(commitErr)
+        self.status = L["Schreiben fehlgeschlagen: "] .. tostring(commitErr)
         return false, commitErr
     end
 

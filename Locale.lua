@@ -1206,6 +1206,15 @@ FCD.AddTranslations("enUS", {
     ["Kein Layout-Verwalter erreichbar - Blizzards Fenster einmal öffnen."] =
         "No layout manager reachable - open Blizzard's window once.",
     ["Der Verwalter führt keine Layouts."] = "The manager lists no layouts.",
+["Bestand"] = "Data",
+-- Sperre gegen ärmeres Überschreiben
+    ["Nicht geschrieben: im Layout liegen %d Einträge, hier nur %d."] =
+        "Not written: the layout holds %d entries, this session only %d.",
+    ["Im Layout liegt mehr als hier - es wird nichts überschrieben."] =
+        "The layout holds more than this session - nothing was overwritten.",
+    ["Mit  /fcd store  trotzdem schreiben, /fcd log zeigt Einzelheiten."] =
+        "Use  /fcd store  to write anyway; /fcd log has the details.",
+    ["würde Daten verlieren"] = "would lose data",
 })
 
 FCD.SetLanguage("auto")
