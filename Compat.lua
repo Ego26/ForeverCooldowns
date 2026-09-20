@@ -239,17 +239,53 @@ function Compat.CooldownIsSecret(start, duration)
     return noteSecret("secretCooldown", start, duration)
 end
 
+-- Einen geschützten Wert an eine Blizzard-Uhr geben.
+--
+-- Lesen dürfen wir ihn nicht, weiterreichen theoretisch schon: dann zeichnet
+-- der Client den Wischer selbst, und das ist die einzige Art, wie ein AddOn
+-- eine geschützte Abklingzeit überhaupt darstellen kann. Manche Clients
+-- lassen das zu.
+--
+-- Dieser nicht: "Secret values are only allowed during untainted execution",
+-- und AddOn-Code ist nie untainted. Also einmal versuchen und beim ersten
+-- Nein nie wieder - ungebremst stünden zwanzig abgelehnte Aufrufe je Sekunde
+-- im Fehlerprotokoll.
+function Compat.DrawSecretCooldown(cooldown, start, duration)
+    if caps.secretCooldownDraw == false then
+        return false
+    end
+    local ok = pcall(cooldown.SetCooldown, cooldown, start, duration)
+    caps.secretCooldownDraw = ok
+    return ok
+end
+
 -- Erste Schätzung beim Start. Sie darf danebenliegen; die Aufrufer oben
 -- ziehen nach, sobald der erste geschützte Wert auftaucht.
-function Compat.DetectSecrets(spellID)
-    if caps.secretsChecked or not spellID then
+-- Übergeben wird eine ID oder eine Liste davon. Eine einzelne reichte nicht:
+-- war genau dieser Zauber gerade bereit, kam seine Abklingzeit als
+-- gewöhnliche Null, und die Prüfung meldete "nicht geschützt". Mit mehreren
+-- ist die Wahrscheinlichkeit klein, dass alle gleichzeitig bereit sind.
+function Compat.DetectSecrets(spellIDs)
+    if caps.secretsChecked or not spellIDs then
+        return
+    end
+    if type(spellIDs) == "number" then
+        spellIDs = { spellIDs }
+    end
+    local spellID = spellIDs[1]
+    if not spellID then
         return
     end
     caps.secretsChecked = true
 
-    local start, duration = Compat.GetSpellCooldown(spellID)
-    caps.secretCooldown = Compat.IsSecretValue(duration)
-        or Compat.IsSecretValue(start)
+    caps.secretCooldown = false
+    for _, probe in ipairs(spellIDs) do
+        local start, duration = Compat.GetSpellCooldown(probe)
+        if Compat.IsSecretValue(duration) or Compat.IsSecretValue(start) then
+            caps.secretCooldown = true
+            break
+        end
+    end
 
     caps.secretCharges = false
     if spellChargesNew then

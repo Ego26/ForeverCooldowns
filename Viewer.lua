@@ -588,8 +588,16 @@ local function applyCooldown(button, bar, settings, start, duration, enabled)
     -- Lua-Fehler. CooldownIsSecret fragt bei jedem Wert neu.
     if Compat.CooldownIsSecret(start, duration) then
         Viewer:StopReadyGlow(button)
-        setCountdownNumbers(button, true)
-        button.cooldown:SetCooldown(start, duration)
+        -- Weiterreichen ist alles, was mit einem geschützten Wert geht - und
+        -- auch das nimmt nicht jeder Client an. Wo er ablehnt, bleibt das
+        -- Symbol ruhig: kein Wischer, keine Zahl. Mehr ist an einem
+        -- geschützten Wert nicht möglich, und ihr eigener Viewer kann aus
+        -- demselben Grund nicht mehr.
+        local drawn = Compat.DrawSecretCooldown(button.cooldown, start, duration)
+        setCountdownNumbers(button, drawn)
+        if not drawn then
+            clearCooldown(button.cooldown)
+        end
         button.timer:SetText("")
         button.icon:SetDesaturated(false)
         return true

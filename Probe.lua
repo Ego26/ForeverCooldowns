@@ -14,7 +14,8 @@ local FEATURES = {
     { name = "Rang-Stapelung (immer bester Rang)", needs = { "spellbook", "spellSubtext" } },
     { name = "Downranking (fester Rang)", needs = { "spellbook", "spellSubtext" } },
     { name = "Rangzahl auf dem Icon", needs = { "spellSubtext" } },
-    { name = "Abklingzeit-Anzeige", needs = { "spellCooldown" } },
+    { name = "Abklingzeit-Anzeige", needs = { "spellCooldown" },
+        forbids = { "secretCooldown" } },
     { name = "Aufladungen / Stapel", needs = { "spellCharges" }, optional = true },
     { name = "Ressourcen-Abdunklung (zu wenig Wut)", needs = { "spellUsable" } },
     { name = "Filter 'nur mit Abklingzeit'", needs = { "spellBaseCooldown" }, optional = true },
@@ -79,9 +80,18 @@ function Probe:PrintFeatureMatrix()
         FCD.Print(line)
     end
     if Compat.caps.secretCooldown then
-        FCD.Print(L["|cffffcc00Hinweis:|r Dieser Client schützt Abklingzeit-Werte. Wischer und Restzeit"]
-            .. L[" zeichnet die Blizzard-Uhr; eigene Restzeit, GCD-Unterdrückung und das Abdunkeln"]
-            .. L[" laufender Abklingzeiten entfallen."])
+        FCD.Print(L["|cffffcc00Hinweis:|r Dieser Client schützt die Abklingzeit-Werte."])
+        if Compat.caps.secretCooldownDraw == false then
+            -- Der schlimmere der beiden Fälle: nicht einmal das Weiterreichen
+            -- an die Blizzard-Uhr ist erlaubt. Dann bleibt vom Symbol nur das
+            -- Symbol - und das gilt für jedes AddOn, nicht nur für dieses.
+            FCD.Print(L["Auch das Weiterreichen an die Blizzard-Uhr lehnt er ab. Die Symbole"])
+            FCD.Print(L["zeigen deshalb keinen Wischer und keine Restzeit; melden kann davon"])
+            FCD.Print(L["nichts. Kein AddOn kann das hier anders."])
+        else
+            FCD.Print(L["Wischer und Restzeit zeichnet die Blizzard-Uhr; eigene Restzeit,"])
+            FCD.Print(L["GCD-Unterdrückung und das Abdunkeln laufender Abklingzeiten entfallen."])
+        end
     end
 end
 

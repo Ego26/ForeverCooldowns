@@ -38,6 +38,15 @@ Alle nennenswerten Änderungen an Forever Cooldowns.
   für lesbar und warf beim ersten Vergleich einen Fehler. Jetzt wird bei
   jedem Wert neu gefragt; betrifft Abklingzeiten, Auren, Aufladungen und
   "benutzbar".
+- **Geschützte Abklingzeit-Werte bringen kein Symbol mehr zum Fehler.** Sie
+  auch nur an die Blizzard-Uhr weiterzureichen lehnt dieser Client ab
+  ("Secret values are only allowed during untainted execution"). Der Versuch
+  wird jetzt einmal unternommen und beim ersten Nein nicht wiederholt; das
+  Symbol bleibt dann ohne Wischer und ohne Restzeit stehen. `/fcd check`
+  sagt, welcher der beiden Fälle vorliegt.
+- Die Prüfung auf geschützte Werte läuft über mehrere Zauber statt über
+  einen. Ein einzelner, der gerade bereit war, hat sie zuverlässig
+  danebengehen lassen.
 - Eine Leiste, die Blizzards Kategorie "Gegenstände" spiegelt, wurde nicht
   mehr mit der eigenen Gegenstandsleiste verwechselt und umbenannt.
 

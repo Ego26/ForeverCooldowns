@@ -1288,6 +1288,18 @@ FCD.AddTranslations("enUS", {
         "Nothing you have learned sits in this category right now - the bar",
     ["bleibt leer und unsichtbar, bis etwas hineinkommt."] =
         "stays empty and invisible until something lands in it.",
+    ["|cffffcc00Hinweis:|r Dieser Client schützt die Abklingzeit-Werte."] =
+        "|cffffcc00Note:|r This client protects the cooldown values.",
+    ["Auch das Weiterreichen an die Blizzard-Uhr lehnt er ab. Die Symbole"] =
+        "It even refuses to pass them on to the Blizzard cooldown widget. The icons",
+    ["zeigen deshalb keinen Wischer und keine Restzeit; melden kann davon"] =
+        "therefore show no swipe and no remaining time, and nothing among them can",
+    ["nichts. Kein AddOn kann das hier anders."] =
+        "alert. No addon can do better here.",
+    ["Wischer und Restzeit zeichnet die Blizzard-Uhr; eigene Restzeit,"] =
+        "The Blizzard cooldown widget draws swipe and remaining time; our own timer,",
+    ["GCD-Unterdrückung und das Abdunkeln laufender Abklingzeiten entfallen."] =
+        "GCD suppression and dimming of running cooldowns fall away.",
 })
 
 FCD.SetLanguage("auto")

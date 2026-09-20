@@ -36,6 +36,14 @@ All notable changes to Forever Cooldowns.
   the probe spell happened to be ready, the addon assumed every value was
   readable and threw an error on the first comparison. It now asks per value;
   this covers cooldowns, auras, charges and "usable".
+- **Protected cooldown values no longer break an icon.** This client refuses
+  even to have them passed on to the Blizzard cooldown widget ("Secret values
+  are only allowed during untainted execution"). The attempt is now made once
+  and not repeated after the first refusal; the icon then stands without
+  swipe and without remaining time. `/fcd check` says which of the two cases
+  applies.
+- The probe for protected values runs against several spells instead of one.
+  A single spell that happened to be ready made it fail reliably.
 - A bar mirroring Blizzard's "Items" category is no longer mistaken for your
   own item bar and renamed.
 

@@ -41,5 +41,14 @@ zeichnen die Kategorie selbst.**
   geschützt ist aber der einzelne Wert, nicht der Client. War der Zauber
   gerade bereit, hielt das AddOn alle Werte für lesbar und warf bei der
   ersten laufenden Abklingzeit einen Fehler. Jetzt wird je Wert gefragt.
+- **Geschützte Abklingzeit-Werte bringen kein Symbol mehr zum Fehler.** Sie
+  auch nur an die Blizzard-Uhr weiterzureichen lehnt dieser Client ab
+  ("Secret values are only allowed during untainted execution"). Der Versuch
+  wird jetzt einmal unternommen und beim ersten Nein nicht wiederholt; das
+  Symbol bleibt dann ohne Wischer und ohne Restzeit stehen. `/fcd check`
+  sagt, welcher der beiden Fälle vorliegt.
+- Die Prüfung auf geschützte Werte läuft über mehrere Zauber statt über
+  einen. Ein einzelner, der gerade bereit war, hat sie zuverlässig
+  danebengehen lassen.
 - Eine Leiste, die Blizzards Kategorie "Gegenstände" spiegelt, wird nicht mehr
   mit der eigenen Gegenstandsleiste verwechselt und umbenannt.

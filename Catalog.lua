@@ -84,13 +84,21 @@ function Catalog:Rebuild()
     FCD.Items:Rebuild()
 
     -- Einmalig prüfen, ob dieser Client Abklingzeit-Werte schützt. Dafür
-    -- wird irgendein bekannter Zauber gebraucht, also erst nach dem Scan.
+    -- werden bekannte Zauber gebraucht, also erst nach dem Scan.
+    --
+    -- Mehrere, nicht einer: ein Zauber ohne laufende Abklingzeit liefert eine
+    -- gewöhnliche Null und sähe aus wie ein ungeschützter Client. Die
+    -- Einzelprüfung hat genau deshalb danebengelegen.
+    local probes = {}
     for _, family in pairs(FCD.Ranks.families) do
         if family.bestSpellID then
-            Compat.DetectSecrets(family.bestSpellID)
-            break
+            probes[#probes + 1] = family.bestSpellID
+            if #probes >= 12 then
+                break
+            end
         end
     end
+    Compat.DetectSecrets(probes)
 
     local viewer = self:ReadViewer()
 
