@@ -638,11 +638,13 @@ local function buildItemSections()
     -- Fehlersuche bisher aufgehalten.
     local emptyReason
     if not bar then
-        local profile = FCD.Profiles:GetActive()
-        emptyReason = string.format(
-            L["Leiste nicht gefunden. Aktives Profil: %s, Leisten: %d."],
-            profile and (profile.name or "ohne Namen") or "keines",
-            profile and #profile.bars or 0)
+        -- Die Gegenstandsleiste entsteht erst, wenn etwas darauf landet.
+        -- Dass es sie noch nicht gibt, ist der Regelfall und kein Befund -
+        -- hier stand eine Diagnose, die beim Fehlersuchen half und jedem
+        -- neuen Benutzer einen Fehler vorgaukelte.
+        emptyReason = FCD.Profiles:GetActive()
+            and L["Noch nichts gesetzt - unten etwas anklicken."]
+            or L["Kein Profil aktiv - ohne Profil gibt es keine Leiste."]
     elseif #bar.entries == 0 then
         emptyReason = L["Die Leiste ist leer - unten etwas anklicken."]
     else
