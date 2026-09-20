@@ -1348,6 +1348,14 @@ FCD.AddTranslations("enUS", {
         "In this client, switching off their display takes the data behind it with it - switched back on.",
     ["Blizzards Anzeige war abgeschaltet, und damit waren auch die Daten dahinter weg. Wieder eingeschaltet - nach einem /reload ist alles wie vorher."] =
         "Blizzard's display was switched off, and the data behind it was gone with it. Switched back on - after a /reload everything is as before.",
+    ["Blizzards Abklingzeit-Funktion war abgeschaltet - ohne sie gibt der Client keine Daten heraus. Wieder eingeschaltet; nach einem /reload ist alles da."] =
+        "Blizzard's cooldown feature was switched off - without it the client hands out no data. Switched back on; after a /reload everything is there.",
+    ["Mit Blizzards Anzeige war auch der Bestand weg (%d statt %d). Wieder eingeschaltet; nach einem /reload ist alles da."] =
+        "Switching off Blizzard's display took the data with it (%d instead of %d). Switched back on; after a /reload everything is there.",
+    ["|cffff4040Blizzards Abklingzeit-Funktion ist abgeschaltet|r ("] =
+        "|cffff4040Blizzard's cooldown feature is switched off|r (",
+    ["). Ohne sie gibt der Client keine Daten heraus - das Panel bleibt fast leer."] =
+        "). Without it the client hands out no data - the panel stays almost empty.",
 })
 
 FCD.SetLanguage("auto")

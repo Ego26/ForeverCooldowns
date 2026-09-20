@@ -79,6 +79,11 @@ function Probe:PrintFeatureMatrix()
         end
         FCD.Print(line)
     end
+    local off = FCD.Mirror:ViewerFeatureOff()
+    if off then
+        FCD.Print(L["|cffff4040Blizzards Abklingzeit-Funktion ist abgeschaltet|r ("] .. off
+            .. L["). Ohne sie gibt der Client keine Daten heraus - das Panel bleibt fast leer."])
+    end
     if Compat.caps.secretCooldown then
         FCD.Print(L["|cffffcc00Hinweis:|r Dieser Client schützt die Abklingzeit-Werte."])
         if Compat.caps.secretCooldownDraw == false then

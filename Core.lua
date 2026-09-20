@@ -1512,17 +1512,24 @@ local function onEvent(_, event, ...)
         -- erst nach dem Neuladen, wenn der Bestand gar nicht erst ankommt.
         -- Ohne diese Prüfung säße man vor einem leeren Panel und wüsste
         -- nicht, woher es kommt.
-        if FCD.Mirror:CountCatalog() == 0 then
-            local repaired = FCD.Mirror:RepairViewerCVar()
-            if FCD.db.settings.soloOn then
-                FCD.db.settings.soloOn = false
-                if FCD.Mirror:SetViewer(true) then
-                    repaired = true
-                end
-            end
-            if repaired then
-                printMessage(L["Blizzards Anzeige war abgeschaltet, und damit waren auch die Daten dahinter weg. Wieder eingeschaltet - nach einem /reload ist alles wie vorher."])
-            end
+        if FCD.Mirror:RepairViewerCVar() then
+            printMessage(L["Blizzards Abklingzeit-Funktion war abgeschaltet - ohne sie gibt der Client keine Daten heraus. Wieder eingeschaltet; nach einem /reload ist alles da."])
+        end
+
+        -- Der Weg über ihr AddOn zeigt seine Wirkung ebenfalls erst nach
+        -- einem Neuladen. Hier hilft kein fester Schwellwert, sondern nur
+        -- der Vergleich mit dem letzten gesunden Stand: bricht der Bestand
+        -- ein, war es der falsche Weg und wird zurückgenommen.
+        local catalog = FCD.Mirror:CountCatalog()
+        local healthy = FCD.db.settings.catalogCount or 0
+        if FCD.db.settings.soloOn and healthy > 0 and catalog * 2 < healthy then
+            FCD.db.settings.soloOn = false
+            FCD.Mirror:SetViewer(true)
+            printMessage(string.format(
+                L["Mit Blizzards Anzeige war auch der Bestand weg (%d statt %d). Wieder eingeschaltet; nach einem /reload ist alles da."],
+                catalog, healthy))
+        elseif not FCD.db.settings.soloOn and catalog > 0 then
+            FCD.db.settings.catalogCount = catalog
         end
 
         -- Eigener Schlüssel, nicht der alte mirrorNoticeShown: wer die

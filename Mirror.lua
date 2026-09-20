@@ -565,25 +565,42 @@ end
 -- Der Notausgang.
 --
 -- Eine frühere Fassung hat cooldownViewerEnabled abgeschaltet, in der
--- Annahme, das betreffe nur die Anzeige. Wer sie benutzt hat, sitzt beim
--- nächsten Anmelden vor einem leeren Panel - und käme allein nicht mehr
--- heraus, weil dieses AddOn das CVar nicht mehr schreibt. Es räumt deshalb
--- auf, was es angerichtet hat: steht kein Bestand zur Verfügung und ist das
--- CVar aus, wird es wieder eingeschaltet.
-function Mirror:RepairViewerCVar()
+-- Annahme, das betreffe nur die Anzeige. Wer sie benutzt hat, findet beim
+-- nächsten Anmelden fast keinen Bestand mehr - und käme allein nicht mehr
+-- heraus, weil dieses AddOn das CVar nicht mehr schreibt.
+--
+-- Der erste Anlauf prüfte dafür, ob GAR nichts mehr ankommt. Zu eng: es
+-- blieben fünf Einträge übrig, und damit griff das Netz nicht. Gefragt wird
+-- deshalb nicht nach der Folge, sondern nach der Ursache - das CVar selbst.
+-- Aus darf es ohnehin nie sein: ohne diese Funktion liefert der Client
+-- keine Abklingzeit-Daten, und dann hat das ganze AddOn nichts zu zeigen.
+local REPAIR_CVARS = { "cooldownViewerEnabled", "cooldownManagerEnabled" }
+
+-- Rückgabe: der Name des abgeschalteten CVars, sonst nil.
+function Mirror:ViewerFeatureOff()
     local getter = _G.GetCVar or (_G.C_CVar and _G.C_CVar.GetCVar)
-    local setter = _G.SetCVar or (_G.C_CVar and _G.C_CVar.SetCVar)
-    if type(getter) ~= "function" or type(setter) ~= "function" then
-        return false
+    if type(getter) ~= "function" then
+        return nil
     end
-    local repaired = false
-    for _, name in ipairs({ "cooldownViewerEnabled", "cooldownManagerEnabled" }) do
+    for _, name in ipairs(REPAIR_CVARS) do
         local ok, value = pcall(getter, name)
-        if ok and value == "0" and pcall(setter, name, "1") then
-            repaired = true
+        if ok and value == "0" then
+            return name
         end
     end
-    return repaired
+    return nil
+end
+
+function Mirror:RepairViewerCVar()
+    local name = self:ViewerFeatureOff()
+    if not name then
+        return false
+    end
+    local setter = _G.SetCVar or (_G.C_CVar and _G.C_CVar.SetCVar)
+    if type(setter) ~= "function" then
+        return false
+    end
+    return pcall(setter, name, "1") and true or false
 end
 
 -- Rückgabe: erfolg, brauchtNeuladen, fehlertext
