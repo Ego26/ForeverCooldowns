@@ -280,6 +280,8 @@ local function dispatch(command, argument)
             printMessage(result and (L["Geschrieben: "] .. result)
                 or (L["Nicht geschrieben: "] .. tostring(setErr)))
         end
+    elseif command == "findstore" then
+        outputWindow(L["Suche nach dem Bestand"], FCD.Probe:BuildStoreSearchReport())
     elseif command == "layouts" then
         outputWindow(L["Blizzards Layout-Liste"], FCD.Probe:BuildBlizzardLayoutReport())
     elseif command == "store" then

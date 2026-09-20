@@ -1358,6 +1358,88 @@ end
 -- Funktion, sondern irgendwo an ihrem Einstellungsfenster - deshalb wird
 -- gesucht statt geraten: eine Tabelle, deren Einträge einen Namen und eine
 -- Kennung tragen, ist eine Layout-Liste.
+-- Sucht unseren Bestand in allen Layouts, ohne umzuschalten.
+--
+-- Nötig geworden, als ein Layout aus Blizzards Liste verschwand und mit ihm
+-- scheinbar alle Daten. Umzuschalten, um nachzusehen, wäre der naheliegende
+-- Weg und der gefährlichste: der Speichertakt schreibt den Arbeitsspeicher
+-- ins aktive Layout und überschriebe dabei womöglich genau das, was man
+-- sucht. Hier wird deshalb ausschließlich gelesen.
+function Probe:BuildStoreSearchReport()
+    local lines = { L["== Suche nach dem Bestand in allen Layouts =="], "" }
+
+    -- Das aktive Layout zuerst: es ist das einzige, das über die C-Funktion
+    -- erreichbar ist, und damit die verlässlichste Auskunft.
+    local raw = Compat.GetLayoutData()
+    if type(raw) == "string" then
+        local data = Compat.DecodeLayoutString(raw)
+        local store = type(data) == "table" and data["fcdStore"]
+        lines[#lines + 1] = string.format(
+            L["Aktives Layout: Blob %d Zeichen, Bestand %s"],
+            #raw, type(store) == "string"
+                and string.format(L["vorhanden (%d Zeichen)"], #store)
+                or L["nicht vorhanden"])
+    else
+        lines[#lines + 1] = L["Aktives Layout: kein Blob lesbar."]
+    end
+    lines[#lines + 1] = ""
+
+    -- Und nun alle Layouts, wie sie im Lua-Verwalter stehen. Ob dort neben
+    -- Name und Kennung auch die Daten hängen, ist nicht dokumentiert -
+    -- deshalb werden alle Felder aufgelistet statt eines geratenen.
+    local settings = _G.CooldownViewerSettings
+    local manager
+    pcall(function()
+        manager = settings and settings.dataSerialization
+            and settings.dataSerialization.layoutManager
+    end)
+
+    if type(manager) ~= "table" or type(rawget(manager, "layouts")) ~= "table" then
+        lines[#lines + 1] = L["Kein Layout-Verwalter erreichbar - Blizzards Fenster einmal öffnen."]
+        return table.concat(lines, "\n")
+    end
+
+    local count = 0
+    for key, entry in pairs(manager.layouts) do
+        if type(entry) == "table" then
+            count = count + 1
+            local name = rawget(entry, "name") or rawget(entry, "layoutName")
+            lines[#lines + 1] = string.format("[%s] %s", tostring(key), tostring(name))
+
+            local fields = {}
+            for field, value in pairs(entry) do
+                if type(field) == "string" then
+                    fields[#fields + 1] = { field = field, value = value }
+                end
+            end
+            table.sort(fields, function(a, b) return a.field < b.field end)
+
+            for _, item in ipairs(fields) do
+                local value, field = item.value, item.field
+                if type(value) == "string" and #value > 40 then
+                    -- Sieht nach einem Blob aus: entschlüsseln und nachsehen.
+                    local data = Compat.DecodeLayoutString(value)
+                    local store = type(data) == "table" and data["fcdStore"]
+                    lines[#lines + 1] = string.format(
+                        "    .%s  (%d Zeichen)  %s", field, #value,
+                        type(store) == "string"
+                            and string.format(L["<< BESTAND HIER (%d Zeichen) >>"], #store)
+                            or (type(data) == "table" and L["entschlüsselbar, kein Bestand"]
+                                or L["nicht entschlüsselbar"]))
+                else
+                    lines[#lines + 1] = string.format("    .%s  (%s)", field, type(value))
+                end
+            end
+            lines[#lines + 1] = ""
+        end
+    end
+
+    if count == 0 then
+        lines[#lines + 1] = L["Der Verwalter führt keine Layouts."]
+    end
+    return table.concat(lines, "\n")
+end
+
 function Probe:BuildBlizzardLayoutReport()
     local lines = { "== Blizzards Layout-Liste ==", "" }
 

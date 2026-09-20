@@ -1191,6 +1191,21 @@ FCD.AddTranslations("enUS", {
     ["Breite Ansicht"] = "Wide view",
 ["Verwerfen"] = "Delete",
     ["Abbrechen"] = "Cancel",
+-- Suche nach dem Bestand in allen Layouts
+    ["Suche nach dem Bestand"] = "Looking for your data",
+    ["== Suche nach dem Bestand in allen Layouts =="] =
+        "== Looking for your data across all layouts ==",
+    ["Aktives Layout: Blob %d Zeichen, Bestand %s"] =
+        "Active layout: blob %d characters, data %s",
+    ["Aktives Layout: kein Blob lesbar."] = "Active layout: no readable blob.",
+    ["vorhanden (%d Zeichen)"] = "present (%d characters)",
+    ["nicht vorhanden"] = "not present",
+    ["<< BESTAND HIER (%d Zeichen) >>"] = "<< DATA IS HERE (%d characters) >>",
+    ["entschlüsselbar, kein Bestand"] = "decodable, no data",
+    ["nicht entschlüsselbar"] = "not decodable",
+    ["Kein Layout-Verwalter erreichbar - Blizzards Fenster einmal öffnen."] =
+        "No layout manager reachable - open Blizzard's window once.",
+    ["Der Verwalter führt keine Layouts."] = "The manager lists no layouts.",
 })
 
 FCD.SetLanguage("auto")
