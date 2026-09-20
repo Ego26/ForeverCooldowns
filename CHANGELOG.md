@@ -30,6 +30,14 @@ Alle nennenswerten Änderungen an Forever Cooldowns.
 
 ### Behoben
 
+- **Lua-Fehler an geschützten Abklingzeit-Werten.** Ob dieser Client einen
+  Wert schützt, wurde einmal beim Anmelden an irgendeinem Zauber geprüft. Das
+  ist die falsche Frage: geschützt ist der einzelne Wert, nicht der Client -
+  eine Abklingzeit von null kommt als gewöhnliche Zahl, eine laufende
+  geschützt. War der Probezauber gerade bereit, hielt das AddOn alle Werte
+  für lesbar und warf beim ersten Vergleich einen Fehler. Jetzt wird bei
+  jedem Wert neu gefragt; betrifft Abklingzeiten, Auren, Aufladungen und
+  "benutzbar".
 - Eine Leiste, die Blizzards Kategorie "Gegenstände" spiegelt, wurde nicht
   mehr mit der eigenen Gegenstandsleiste verwechselt und umbenannt.
 

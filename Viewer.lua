@@ -581,7 +581,12 @@ function Viewer:StopReadyGlow(button)
 end
 
 local function applyCooldown(button, bar, settings, start, duration, enabled)
-    if Compat.caps.secretCooldown then
+    -- Nicht caps.secretCooldown abfragen, sondern diese beiden Werte prüfen:
+    -- die Prüfung beim Anmelden lief an einem einzigen Zauber, und war der
+    -- gerade bereit, meldete sie "nicht geschützt". Der Vergleich ein paar
+    -- Zeilen weiter warf dann bei der ersten laufenden Abklingzeit einen
+    -- Lua-Fehler. CooldownIsSecret fragt bei jedem Wert neu.
+    if Compat.CooldownIsSecret(start, duration) then
         Viewer:StopReadyGlow(button)
         setCountdownNumbers(button, true)
         button.cooldown:SetCooldown(start, duration)

@@ -36,5 +36,10 @@ zeichnen die Kategorie selbst.**
 
 ### Behoben
 
+- **Lua-Fehler an geschützten Abklingzeit-Werten.** Ob dieser Client einen
+  Wert schützt, wurde einmal beim Anmelden an irgendeinem Zauber geprüft -
+  geschützt ist aber der einzelne Wert, nicht der Client. War der Zauber
+  gerade bereit, hielt das AddOn alle Werte für lesbar und warf bei der
+  ersten laufenden Abklingzeit einen Fehler. Jetzt wird je Wert gefragt.
 - Eine Leiste, die Blizzards Kategorie "Gegenstände" spiegelt, wird nicht mehr
   mit der eigenen Gegenstandsleiste verwechselt und umbenannt.

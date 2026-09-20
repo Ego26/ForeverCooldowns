@@ -67,8 +67,13 @@ end
 local function baseCooldownOf(spellID)
     local seconds = Compat.GetSpellBaseCooldown(spellID)
     if seconds == nil then
-        -- API fehlt: laufende Abklingzeit als schwaches Indiz verwenden
-        local _, duration = Compat.GetSpellCooldown(spellID)
+        -- API fehlt: laufende Abklingzeit als schwaches Indiz verwenden.
+        -- Genau die kann geschützt sein - dann ist sie als Indiz unbrauchbar
+        -- und jeder Vergleich damit ein Lua-Fehler. Also null.
+        local start, duration = Compat.GetSpellCooldown(spellID)
+        if Compat.CooldownIsSecret(start, duration) then
+            return 0
+        end
         return duration or 0
     end
     return seconds
@@ -134,7 +139,7 @@ function Catalog:Rebuild()
             known = family.knownCount > 0,
             isPassive = family.isPassive and true or false,
             baseCooldown = baseCooldown,
-            hasCooldown = baseCooldown and baseCooldown > 0,
+            hasCooldown = Compat.IsPositive(baseCooldown),
             inViewer = viewerHits ~= nil,
             viewerCount = viewerHits and #viewerHits or 0,
             viewerCategory = viewerHits and viewerHits[1].categoryName or nil,

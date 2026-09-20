@@ -29,6 +29,13 @@ All notable changes to Forever Cooldowns.
 
 ### Fixed
 
+- **Lua errors on protected cooldown values.** Whether this client protects a
+  value was probed once at login against an arbitrary spell. That is the wrong
+  question: it is the individual value that is protected, not the client - a
+  cooldown of zero arrives as an ordinary number, a running one protected. If
+  the probe spell happened to be ready, the addon assumed every value was
+  readable and threw an error on the first comparison. It now asks per value;
+  this covers cooldowns, auras, charges and "usable".
 - A bar mirroring Blizzard's "Items" category is no longer mistaken for your
   own item bar and renamed.
 

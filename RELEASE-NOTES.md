@@ -34,5 +34,10 @@ category ourselves.**
 
 ### Fixed
 
+- **Lua errors on protected cooldown values.** Whether this client protects a
+  value was probed once at login against an arbitrary spell - but it is the
+  individual value that is protected, not the client. If that spell happened
+  to be ready, the addon assumed every value was readable and threw an error
+  on the first running cooldown. It now asks per value.
 - A bar mirroring Blizzard's "Items" category is no longer mistaken for your
   own item bar and renamed.

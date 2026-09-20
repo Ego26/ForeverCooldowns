@@ -800,7 +800,11 @@ local function buildSections()
                 and (state.showPassive or not isPassive)
             -- Ist die Grundabklingzeit nicht abfragbar, wird nicht gefiltert:
             -- lieber zu viel zeigen als etwas verschwinden lassen.
-            if keep and state.onlyWithCooldown and baseCooldown ~= nil and baseCooldown <= 0 then
+            -- Ist der Wert geschützt, lässt sich nichts darüber sagen; dann
+            -- wird nicht gefiltert. Lieber zu viel zeigen als vergleichen und
+            -- einen Lua-Fehler werfen.
+            if keep and state.onlyWithCooldown and baseCooldown ~= nil
+                and not Compat.IsSecretValue(baseCooldown) and baseCooldown <= 0 then
                 keep = false
             end
 
