@@ -118,6 +118,17 @@ back to verify.
 
 ## Development
 
+Packaging and mirroring into the game folder is [`tools/build.js`](tools/build.js):
+
+```
+node tools/build.js          # package into .release/
+node tools/build.js --sync   # and into the game folder
+```
+
+It replaces `@project-version@` with the version from `Compat.lua`. The
+placeholder belongs in the repository so the packager can fill it - in any
+shipped copy it has to be gone, the working copy included.
+
 The checking tools live in [`Tests/`](Tests/) and run without the client:
 
 ```

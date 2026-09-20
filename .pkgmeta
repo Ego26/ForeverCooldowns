@@ -18,6 +18,7 @@ manual-changelog:
 ignore:
   - branding
   - Tests
+  - tools
   - .github
   - .editorconfig
   - .gitattributes

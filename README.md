@@ -122,6 +122,17 @@ Quellen genommen, `/fcd store` schreibt sofort und liest gegen.
 
 ## Entwicklung
 
+Bauen und in den Spielordner spiegeln erledigt [`tools/build.js`](tools/build.js):
+
+```
+node tools/build.js          # Paket nach .release/
+node tools/build.js --sync   # zusätzlich in den Spielordner
+```
+
+Es ersetzt dabei `@project-version@` durch die Version aus `Compat.lua`. Der
+Platzhalter gehört ins Repository, damit der Packager ihn füllt - in jeder
+ausgelieferten Fassung muss er weg sein, auch in der Arbeitskopie.
+
 Die Prüfwerkzeuge liegen in [`Tests/`](Tests/) und laufen ohne den Client:
 
 ```
