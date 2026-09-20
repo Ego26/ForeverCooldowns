@@ -56,11 +56,6 @@ geschrieben wird über ihren eigenen Weg, ihr „Änderungen speichern" sichert
 mit, und ein Neuladen überlebt es. Beides abschaltbar (`/fcd replace off`,
 `/fcd editui off`).
 
-Der Preis ist derselbe wie beim Sofortmodus: Wir schreiben dabei durch
-ihren Verwalter in ihren Viewer, und der gilt danach als *tainted* – er
-wirft bis zum nächsten `/reload` Fehler bei Ziel- und Aurenereignissen.
-Das Panel sagt es beim ersten Mal und bietet das Neuladen an.
-
 **Eigene Leisten.** Ausrichtung, Spalten, Symbolgröße, Abstand, Transparenz,
 Sichtbarkeit (einschließlich „Nie"), Tooltips und „Beim Anklicken benutzen" –
 pro Leiste, im Stil ihres Bearbeitungsmodus, dem die Leisten auch folgen.
@@ -75,8 +70,6 @@ automatischer Wechsel bei Haltung, Form oder Spezialisierung.
 | `/fcd` | Panel öffnen |
 | `/fcd wide` | zwischen schmaler und breiter Ansicht wechseln |
 | `/fcd spell <ID>` | beliebigen Zauber aufnehmen |
-| `/fcd mirror` | Blizzards Kategorien auf eigene Leisten spiegeln |
-| `/fcd solo on\|off` | Blizzards eigene Leisten ab- oder anschalten |
 | `/fcd replace on\|off` | ob FCD an die Stelle ihres Fensters tritt |
 | `/fcd editui on\|off` | eigenes Fenster im Bearbeitungsmodus |
 | `/fcd blizz` | Blizzards Fenster holen (dort wird das Layout gewechselt) |
@@ -104,64 +97,16 @@ dort als *fehlt*.
 
 Es gibt zwei Wege, und das AddOn kann beide:
 
-- **Sicherer Modus** (Standard) über `SetLayoutData`. Taintet nichts, wirkt
-  aber erst beim Neuladen. Das Panel bietet den Knopf dafür an.
-- **Sofortmodus** (`/fcd instant on`) über Blizzards eigenes Datenmodell. Wirkt ohne
+- **Sofortmodus** (Standard) über Blizzards eigenes Datenmodell. Wirkt ohne
   Neuladen. Der Preis: ihre Objekte gelten danach als *tainted*, ihr
   Aurenzugriff scheitert bis zum nächsten `/reload`. Betrifft ihre Anzeige,
   nicht unsere.
+- **Sicherer Modus** (`/fcd instant off`) über `SetLayoutData`. Taintet
+  nichts, wirkt aber erst beim Neuladen.
 
 Vor jedem Schreibvorgang wird geprüft, ob der Layout-Blob unsere Kodierkette
 verlustfrei übersteht, und eine Sicherung angelegt. `/fcd restore` nimmt den
 letzten Schreibvorgang zurück.
-
-## Sofort sichtbar, ohne Taint: gespiegelte Leisten
-
-Beide Wege oben haben einen Haken – der eine wirkt spät, der andere taintet.
-Die C-Funktion, die beides könnte (`SetCooldownViewerCategorySet`), gibt es in
-diesem Client nicht; `/fcd check` führt sie als *fehlt*.
-
-Der Ausweg ist ein dritter Weg: **wir zeichnen die Kategorie selbst.** Eine
-Leiste zeigt genau das, was in einer von Blizzards Kategorien liegt – und
-weil sie unsere ist, steht eine Verschiebung dort in derselben Sekunde. Kein
-Neuladen, kein Aufruf auf Blizzards Objekten, also auch kein Fehler.
-
-**Das ist der Anfangszustand, nicht eine Einstellung.** Die beiden
-Vorgabeleisten spiegeln „Essenzielle" und „Strategische Abklingzeiten"; wer
-FCD installiert, muss dafür nichts tun. Der Knopf *spiegeln* an einer
-Abschnittsüberschrift schaltet weitere Kategorien dazu oder wieder ab.
-
-```
-/fcd mirror        Zustand und alle Kategorien mit Nummer
-/fcd mirror on     essenziell und strategisch spiegeln
-/fcd mirror off    alle gespiegelten Leisten entfernen
-/fcd mirror 2      eine einzelne Kategorie an- oder abschalten
-/fcd mirror hide   wie man Blizzards eigene Leisten ausblendet
-```
-
-Eine gespiegelte Leiste hat keine eigene Eintragsliste – sie wird bei jeder
-Änderung neu bestimmt und deshalb auch nicht gespeichert. Was daran einstellbar
-ist, bleibt es: Ausrichtung, Größe, Sichtbarkeit, Fertig-Meldung, auch je
-Eintrag. Wer den Bestand festhalten und danach einzelne Symbole herausnehmen
-will, nimmt im Leistenfenster *Spiegelung lösen*.
-
-### Und ihre eigenen Leisten?
-
-Die würden daneben stehen und bis zum nächsten Neuladen sogar etwas anderes
-zeigen. Deshalb fragt FCD beim ersten Anmelden einmal, ob es sie abschalten
-soll – ein Klick, jederzeit umkehrbar mit `/fcd solo off`.
-
-Abgeschaltet wird ihr nachladbares AddOn – das bringt die Rahmen mit, nicht
-die Daten – und es wirkt beim nächsten Neuladen. **Ihre Rahmen fasst FCD dabei
-nicht an.** Genau das wäre der Taint, den dieser ganze Weg vermeidet: ein
-`:Hide()` auf ihrem Viewer wäre die naheliegende Zeile und die falsche.
-
-Das CVar `cooldownViewerEnabled` wäre der bequemere Schalter und ist der
-falsche: es schaltet nicht die Anzeige ab, sondern die ganze Funktion – samt
-`GetCooldownViewerCacheInfo`, aus dem Panel und Leisten ihre Daten holen. In
-derselben Sitzung fällt das nicht auf, erst nach dem Neuladen steht alles
-leer. FCD fasst es nicht mehr an und schaltet es wieder ein, wenn es es
-ausgeschaltet vorfindet.
 
 ## Wo die Einstellungen liegen
 
@@ -206,10 +151,6 @@ Fertig-Meldung zwischen Leiste und Eintrag.
 
 Banner und Symbole werden erzeugt, nicht gezeichnet – siehe
 [`branding/tools/`](branding/tools/).
-
-[`RELEASE-NOTES.md`](RELEASE-NOTES.md) ist englisch: Sie geht als Changelog
-an CurseForge und liegt im ausgelieferten Paket. Die deutsche Fassung steht
-unter [`branding/RELEASE-NOTES-de.md`](branding/RELEASE-NOTES-de.md).
 
 ## Lizenz
 

@@ -43,17 +43,6 @@ kuratierte Liste auslässt. Über `+` neben der Suche lässt sich jede Zauber-
 oder Gegenstands-ID aufnehmen – auch das, was im Zauberbuch gar nicht steht.
 Gegenstände gehen zusätzlich per Ziehen aus der Tasche.
 
-### Blizzards Kategorien, sofort sichtbar
-
-Deine Leisten zeigen von Anfang an, was in Blizzards Kategorien liegt –
-derselbe Bestand, den das Panel bearbeitet, gezeichnet aber von uns. Eine
-Verschiebung steht dort deshalb in derselben Sekunde: ohne Neuladen, ohne
-einen Aufruf auf Blizzards Objekten, also auch ohne Fehlermeldung.
-
-Dafür ist nichts einzustellen. Der Knopf **spiegeln** an einer
-Abschnittsüberschrift nimmt weitere Kategorien dazu oder wieder heraus, und
-`/fcd mirror` tut dasselbe aus dem Chat.
-
 ### Melden, wenn bereit
 
 Sobald etwas bereit wird, leuchtet es auf – mit Blizzards eigenem
@@ -75,10 +64,6 @@ Die Werte bleiben dabei ihre. Gelesen und geschrieben wird über ihren eigenen
 Weg – ihre Oberfläche zieht von selbst nach, ihr „Änderungen speichern"
 sichert unsere Änderungen mit, und ein Neuladen überlebt es. Wer lieber ihre
 Fenster behält: `/fcd replace off` und `/fcd editui off`.
-
-**Der Preis:** Eine ihrer Leisten über unser Fenster zu ändern taintet ihren
-Viewer, genau wie der Sofortmodus – er wirft dann bis zum nächsten `/reload`
-Fehler bei Ziel- und Aurenereignissen. Das AddOn sagt es beim ersten Mal.
 
 ### Blizzards Kategorien bearbeiten
 
@@ -134,22 +119,12 @@ das AddOn. `/fcd check` zeigt diese Prüfung als Liste. Schützt ein Client zum
 Beispiel die Abklingzeit-Werte, ist das Ende einer Abklingzeit für niemanden
 erkennbar, und die Fertig-Meldung steht dort als *fehlt*.
 
-**Sofort sichtbar geht - über eine eigene Leiste.** Blizzards Kategorien
-lassen sich auf zwei Wegen schreiben, und beide haben einen Haken: über ihr
-Datenmodell wirkt es sofort, taintet dabei aber ihren Viewer, der danach bis
-zum nächsten `/reload` bei Ziel- und Aurenereignissen Fehler wirft; über
-`SetLayoutData` taintet nichts, wirkt aber erst beim Neuladen. Letzteres ist
-die Voreinstellung.
-
-Der Ausweg ist der Knopf *spiegeln* an einer Abschnittsüberschrift: er legt
-eine eigene Leiste an, die genau diese Kategorie zeigt. Die zeichnen wir
-selbst, also steht eine Verschiebung dort in derselben Sekunde – ohne
-Neuladen, ohne einen Aufruf auf Blizzards Objekten und damit ohne jede
-Fehlermeldung. Blizzards eigene Leisten ziehen weiterhin erst beim Neuladen
-nach - deshalb fragt FCD beim ersten Anmelden einmal, ob es sie abschalten
-soll. Ein Klick, jederzeit umkehrbar mit `/fcd solo off`. Umgelegt wird dabei
-der Schalter, den auch du in den Spieloptionen findest; ihre Rahmen fasst das
-AddOn nicht an, denn genau das wäre der Taint, den dieser Weg vermeidet.
+**Der Sofortmodus hat einen Preis.** Änderungen an Blizzards Kategorien wirken
+ohne Neuladen, weil sie über ihr eigenes Datenmodell laufen. Sobald
+AddOn-Code das anfasst, gilt es für die restliche Sitzung als *tainted*, und
+ihr Viewer kann keine Auren mehr lesen – bis zum nächsten `/reload`. Betrifft
+ihre Anzeige, nicht unsere. Wem das nicht passt: `/fcd instant off` schreibt
+sicher, wirkt dann aber erst beim Neuladen.
 
 **Das Layout wechseln geht nur bei ihnen.** Ihr Layoutverwalter ist geschützt;
 ein Aufruf von außen würde die Sitzung taintieren. `/fcd blizz` holt ihr

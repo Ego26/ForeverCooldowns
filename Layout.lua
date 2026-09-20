@@ -490,9 +490,6 @@ function Layout:ApplyAssignments(assignments, label)
                 self:SetCategoryNative(change.id, change.category)
             end
         end
-        -- Auch hier: die gespiegelten Leisten lesen den Blob, nicht ihr
-        -- Datenmodell, und müssen deshalb eigens nachziehen.
-        FCD.Mirror:Refresh()
         return true, nil, #changes
     end
 
@@ -504,11 +501,6 @@ function Layout:ApplyAssignments(assignments, label)
         end
     end
     local ok, commitErr = self:Commit(state, label or "Zuweisungen")
-    -- Gespiegelte Leisten lesen denselben Stand und zeichnen ihn selbst;
-    -- für sie ist ein ganzes Profil damit sofort angewendet.
-    if ok then
-        FCD.Mirror:Refresh()
-    end
     return ok, commitErr, #changes
 end
 
@@ -598,7 +590,6 @@ function Layout:Restore(index)
         return false, err
     end
     table.remove(backups, index or #backups)
-    FCD.Mirror:Refresh()
     return true, backup.taken
 end
 

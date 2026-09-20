@@ -11,22 +11,6 @@ local barFrames = {}
 Viewer.barFrames = barFrames
 Viewer.unlocked = false
 
--- Eine leere Liste zum Zurückgeben, damit kein Aufrufer auf nil prüfen muss.
-local NO_ENTRIES = {}
-
--- Was auf dieser Leiste liegt. Eine gespiegelte Leiste hat keine eigene
--- Liste: ihre Einträge ergeben sich aus Blizzards Kategorie und werden
--- deshalb bei Bedarf gebaut statt gespeichert.
-function Viewer:EntriesOf(bar)
-    if type(bar) ~= "table" then
-        return NO_ENTRIES
-    end
-    if bar.mirrorCategory ~= nil and FCD.Mirror then
-        return FCD.Mirror:EntriesFor(bar)
-    end
-    return bar.entries or NO_ENTRIES
-end
-
 local UNKNOWN_ALPHA = 0.25
 local READY_GLOW = { 0.2, 1.0, 0.2 }
 local NO_POWER_TINT = { 0.5, 0.5, 1.0 }
@@ -370,11 +354,7 @@ local function layoutBar(barFrame, bar)
     local columns = math.max(1, bar.columns or 12)
     local growth = bar.growth or "RIGHT"
 
-    local count = #Viewer:EntriesOf(bar)
-    -- Woran sich später erkennen lässt, ob die Plätze noch stimmen: eine
-    -- gespiegelte Leiste kann zwischen zwei Bildern länger oder kürzer
-    -- werden, ohne dass jemand sie angefasst hätte.
-    barFrame.entryCount = count
+    local count = #bar.entries
     local visible = 0
     for index = 1, count do
         local button = acquireIcon(barFrame, index)
@@ -581,23 +561,10 @@ function Viewer:StopReadyGlow(button)
 end
 
 local function applyCooldown(button, bar, settings, start, duration, enabled)
-    -- Nicht caps.secretCooldown abfragen, sondern diese beiden Werte prüfen:
-    -- die Prüfung beim Anmelden lief an einem einzigen Zauber, und war der
-    -- gerade bereit, meldete sie "nicht geschützt". Der Vergleich ein paar
-    -- Zeilen weiter warf dann bei der ersten laufenden Abklingzeit einen
-    -- Lua-Fehler. CooldownIsSecret fragt bei jedem Wert neu.
-    if Compat.CooldownIsSecret(start, duration) then
+    if Compat.caps.secretCooldown then
         Viewer:StopReadyGlow(button)
-        -- Weiterreichen ist alles, was mit einem geschützten Wert geht - und
-        -- auch das nimmt nicht jeder Client an. Wo er ablehnt, bleibt das
-        -- Symbol ruhig: kein Wischer, keine Zahl. Mehr ist an einem
-        -- geschützten Wert nicht möglich, und ihr eigener Viewer kann aus
-        -- demselben Grund nicht mehr.
-        local drawn = Compat.DrawSecretCooldown(button.cooldown, start, duration)
-        setCountdownNumbers(button, drawn)
-        if not drawn then
-            clearCooldown(button.cooldown)
-        end
+        setCountdownNumbers(button, true)
+        button.cooldown:SetCooldown(start, duration)
         button.timer:SetText("")
         button.icon:SetDesaturated(false)
         return true
@@ -823,20 +790,10 @@ end
 
 function Viewer:UpdateBar(barFrame, bar)
     local settings = FCD.Profiles:GetSettings()
-    local entries = self:EntriesOf(bar)
-
-    -- Eine gespiegelte Leiste wird länger oder kürzer, sobald im Panel etwas
-    -- verschoben wird - ohne dass jemand die Leiste selbst angefasst hätte.
-    -- Dann müssen die Plätze neu vergeben werden, sonst steht das letzte
-    -- Symbol im Leeren oder eines fehlt.
-    if barFrame.entryCount ~= #entries then
-        layoutBar(barFrame, bar)
-    end
-
     -- Eine leere Leiste hat nichts zu zeigen und nichts zu verschieben. Im
     -- Bearbeitungsmodus standen die beiden angelegten Vorgabeleisten sonst
     -- als leere Kästen herum.
-    if #entries == 0 then
+    if #bar.entries == 0 then
         barFrame:Hide()
         return
     end
@@ -846,7 +803,7 @@ function Viewer:UpdateBar(barFrame, bar)
     end
     barFrame:Show()
 
-    for index, entry in ipairs(entries) do
+    for index, entry in ipairs(bar.entries) do
         local button = acquireIcon(barFrame, index)
         if entry.kind == "spell" then
             updateSpellIcon(button, entry, bar, settings)
@@ -921,11 +878,6 @@ function Viewer:ApplyLockState()
             -- nebeneinander verschieden aus. Alle bekommen jetzt dieselbe
             -- selbstgezeichnete Markierung.
             barFrame.overlay:SetShown(unlocked)
-            -- Blizzards Bearbeitungsmodus legt seine eigene Fläche über den
-            -- Bildschirm, und die fängt Klicks ab. Eine Leiste in der
-            -- Standardebene ist dann nicht mehr anzufassen - dasselbe
-            -- Problem, das das Panel schon mit applyStrata löst.
-            barFrame:SetFrameStrata(unlocked and "HIGH" or "MEDIUM")
             if unlocked then
                 -- Die Ebene erst hier setzen, nicht beim Erzeugen: die
                 -- Symbolknöpfe entstehen später und bekommen dann ihre eigene

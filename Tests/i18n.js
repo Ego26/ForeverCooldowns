@@ -28,10 +28,7 @@ const LABEL_TABLES = {
     'BlizzOptions.lua': ['SETTINGS'],
     'Viewer.lua': ['SOUND_CANDIDATES'],
     'Probe.lua': ['FEATURES'],
-    'Dock.lua': ['TABS'],
-    // Die Kategorienamen sind von Dock.lua hierher gewandert; beide Stellen
-    // benutzen dieselbe Tabelle.
-    'Mirror.lua': ['CATEGORY_NAMES'],
+    'Dock.lua': ['CATEGORY_NAMES', 'TABS'],
 };
 
 // Bewusste Ausnahmen: hier ist Deutsch kein Oberflächentext, sondern eine

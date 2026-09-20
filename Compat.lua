@@ -8,7 +8,7 @@ FCD.name = ADDON_NAME
 -- Steht die Version nicht in der .toc - ungepackte Arbeitskopie, in der noch
 -- der Platzhalter steht -, gilt diese hier. Sie ist der einzige Ort, an dem
 -- die Zahl im Quelltext gepflegt wird.
-FCD.FALLBACK_VERSION = "0.2.0-beta"
+FCD.FALLBACK_VERSION = "0.1.0-beta"
 FCD.version = FCD.FALLBACK_VERSION
 
 -- GetBuildInfo liefert Version, Buildnummer, Datum und Interface-Nummer.
@@ -200,92 +200,16 @@ function Compat.IsPositive(value)
     return result and true or false
 end
 
--- Die einmalige Prüfung reicht NICHT.
---
--- Angenommen wurde: Geheimhaltung sei eine Eigenschaft des Clients, ein Test
--- an irgendeinem Zauber beantworte sie also für alle. Am lebenden Client ist
--- sie eine Eigenschaft des einzelnen Wertes: eine Abklingzeit von null kommt
--- als gewöhnliche Zahl, eine laufende als geschützter Wert. War der
--- Probezauber beim Anmelden gerade bereit, fiel die Prüfung auf "nicht
--- geschützt" - und der erste Vergleich an einer laufenden Abklingzeit warf
--- einen Lua-Fehler.
---
--- Deshalb wird bei jedem Wert neu gefragt. Ein einziger geschützter Wert
--- setzt die Fähigkeit dauerhaft: abnehmen kann Geheimhaltung in einer
--- Sitzung nicht, und die Anzeige soll nicht zwischen zwei Darstellungen
--- springen.
---
--- Übergeben werden dürfen nur Werte, die sicher Zahlen sind (oder geschützte
--- Zahlen). Bei nil scheitert der Vergleich ebenfalls, und das hieße hier
--- fälschlich "geschützt".
-local function noteSecret(capability, ...)
-    if caps[capability] then
-        return true
-    end
-    for index = 1, select("#", ...) do
-        if Compat.IsSecretValue((select(index, ...))) then
-            caps[capability] = true
-            caps.secretsChecked = true
-            return true
-        end
-    end
-    return false
-end
-Compat.NoteSecret = noteSecret
-
--- Sind diese Abklingzeit-Werte auswertbar? Fragt bei jedem Aufruf neu und
--- merkt sich ein Ja.
-function Compat.CooldownIsSecret(start, duration)
-    return noteSecret("secretCooldown", start, duration)
-end
-
--- Einen geschützten Wert an eine Blizzard-Uhr geben.
---
--- Lesen dürfen wir ihn nicht, weiterreichen theoretisch schon: dann zeichnet
--- der Client den Wischer selbst, und das ist die einzige Art, wie ein AddOn
--- eine geschützte Abklingzeit überhaupt darstellen kann. Manche Clients
--- lassen das zu.
---
--- Dieser nicht: "Secret values are only allowed during untainted execution",
--- und AddOn-Code ist nie untainted. Also einmal versuchen und beim ersten
--- Nein nie wieder - ungebremst stünden zwanzig abgelehnte Aufrufe je Sekunde
--- im Fehlerprotokoll.
-function Compat.DrawSecretCooldown(cooldown, start, duration)
-    if caps.secretCooldownDraw == false then
-        return false
-    end
-    local ok = pcall(cooldown.SetCooldown, cooldown, start, duration)
-    caps.secretCooldownDraw = ok
-    return ok
-end
-
--- Erste Schätzung beim Start. Sie darf danebenliegen; die Aufrufer oben
--- ziehen nach, sobald der erste geschützte Wert auftaucht.
--- Übergeben wird eine ID oder eine Liste davon. Eine einzelne reichte nicht:
--- war genau dieser Zauber gerade bereit, kam seine Abklingzeit als
--- gewöhnliche Null, und die Prüfung meldete "nicht geschützt". Mit mehreren
--- ist die Wahrscheinlichkeit klein, dass alle gleichzeitig bereit sind.
-function Compat.DetectSecrets(spellIDs)
-    if caps.secretsChecked or not spellIDs then
-        return
-    end
-    if type(spellIDs) == "number" then
-        spellIDs = { spellIDs }
-    end
-    local spellID = spellIDs[1]
-    if not spellID then
+-- Einmalige Prüfung anhand eines bekannten Zaubers. Geheimhaltung ist eine
+-- Eigenschaft des Clients, nicht des einzelnen Wertes - deshalb reicht ein Test.
+function Compat.DetectSecrets(spellID)
+    if caps.secretsChecked or not spellID then
         return
     end
     caps.secretsChecked = true
 
-    caps.secretCooldown = false
-    for _, probe in ipairs(spellIDs) do
-        local start, duration = Compat.GetSpellCooldown(probe)
-        if Compat.IsSecretValue(duration) or Compat.IsSecretValue(start) then
-            caps.secretCooldown = true
-            break
-        end
-    end
+    local _, duration = Compat.GetSpellCooldown(spellID)
+    caps.secretCooldown = Compat.IsSecretValue(duration)
 
     caps.secretCharges = false
     if spellChargesNew then
@@ -377,12 +301,9 @@ function Compat.GetSpellCharges(spellID)
     if spellChargesNew then
         local info = spellChargesNew(spellID)
         if type(info) == "table" then
-            -- Auch hier je Wert statt einmal beim Start. Die Zahl steht am
-            -- Symbol, also zählt die aktuelle genauso wie die höchste.
-            if (info.maxCharges ~= nil and noteSecret("secretCharges", info.maxCharges))
-                or (info.currentCharges ~= nil
-                    and noteSecret("secretCharges", info.currentCharges)) then
-                return nil
+            -- Falls DetectSecrets noch nicht lief, hier nachziehen
+            if caps.secretCharges == nil then
+                caps.secretCharges = Compat.IsSecretValue(info.maxCharges)
             end
             if not caps.secretCharges and info.maxCharges and info.maxCharges > 1 then
                 return info.currentCharges, info.maxCharges, info.cooldownStartTime, info.cooldownDuration
@@ -405,20 +326,15 @@ function Compat.IsSpellUsable(spellID)
     if not spellID or caps.secretUsable then
         return nil, nil
     end
-    -- Dieselbe Regel wie bei den Abklingzeiten: geschützt ist der einzelne
-    -- Wert, nicht der Client. "usable and true or false" ist bereits eine
-    -- Verzweigung und würde an einem geschützten Wahrheitswert scheitern -
-    -- also vorher fragen, nicht hinterher.
-    local getter = spellUsableNew or spellUsableOld
-    if not getter then
-        return true, false
+    if spellUsableNew then
+        local usable, noPower = spellUsableNew(spellID)
+        return usable and true or false, noPower and true or false
     end
-    local usable, noPower = getter(spellID)
-    if Compat.IsSecretBoolean(usable) or Compat.IsSecretBoolean(noPower) then
-        caps.secretUsable = true
-        return nil, nil
+    if spellUsableOld then
+        local usable, noPower = spellUsableOld(spellID)
+        return usable and true or false, noPower and true or false
     end
-    return usable and true or false, noPower and true or false
+    return true, false
 end
 
 function Compat.IsSpellKnown(spellID)
@@ -604,18 +520,8 @@ function Compat.GetPlayerAura(spellID)
     if auraBySpellNew then
         local aura = auraBySpellNew(spellID)
         if type(aura) == "table" then
-            -- Dieselbe Falle wie bei den Abklingzeiten: eine Aura ohne
-            -- Laufzeit kommt als gewöhnliche Null, eine laufende geschützt.
-            -- Also bei jeder neu fragen statt einmal beim Start.
-            if aura.duration ~= nil and noteSecret("secretAura", aura.duration) then
-                return nil
-            end
-            -- Die Ablaufzeit ebenso: sie landet in formatTime, und dort wird
-            -- verglichen. Eine geschützte Laufzeit und eine geschützte
-            -- Ablaufzeit treten nicht zwingend gemeinsam auf.
-            if aura.expirationTime ~= nil
-                and noteSecret("secretAura", aura.expirationTime) then
-                return nil
+            if caps.secretAura == nil then
+                caps.secretAura = Compat.IsSecretValue(aura.duration)
             end
             if caps.secretAura then
                 return nil
@@ -633,10 +539,6 @@ function Compat.GetPlayerAura(spellID)
                     break
                 end
                 if auraSpellID == spellID then
-                    if (duration ~= nil and noteSecret("secretAura", duration))
-                        or (expiration ~= nil and noteSecret("secretAura", expiration)) then
-                        return nil
-                    end
                     return duration, expiration, stacks or 0
                 end
             end

@@ -64,9 +64,7 @@ local function printHelp()
     printMessage(L["/fcd - Blizzards Abklingzeit-Einstellungen mit unserem Panel öffnen"])
     printMessage(L["/fcd dock - Panel neben Blizzards Fenster ein-/ausblenden"])
     printMessage(L["/fcd wide - zwischen schmaler und breiter Ansicht wechseln"])
-    printMessage(L["/fcd mirror - Blizzards Kategorien auf eigene Leisten spiegeln"])
-    printMessage(L["/fcd solo on|off - Blizzards eigene Leisten ab- oder anschalten"])
-    printMessage(L["/fcd instant on|off - über Blizzards Lua schreiben (taintet ihren Viewer)"])
+    printMessage(L["/fcd instant on|off - sofort wirksam (Standard) oder erst nach /reload"])
     printMessage(L["/fcd log - alle bisherigen Ausgaben zum Kopieren"])
     printMessage(L["/fcd store - Bestand sofort in Blizzards Layout sichern"])
     printMessage(L["/fcd blizz - Blizzards Fenster holen (Layout wechseln)"])
@@ -172,10 +170,6 @@ local function dispatch(command, argument)
             printMessage(L["/fcd instant on   - sofort wirksam, taintet Blizzards Viewer"])
             printMessage(L["/fcd instant off  - sicher, wirkt nach /reload"])
         end
-    elseif command == "mirror" then
-        FCD:MirrorCommand(trim(argument))
-    elseif command == "solo" then
-        FCD:SoloCommand(trim(argument))
     elseif command == "wide" then
         FCD.Dock:Build()
         FCD.Dock:SetWide(not FCD.Dock.state.wide)
@@ -1108,28 +1102,6 @@ StaticPopupDialogs["FCD_ADD_ITEM"] = {
     end,
 }
 
--- Die einzige Frage, die das AddOn von sich aus stellt - einmal, beim
--- ersten Anmelden. Sie lohnt sich: ohne sie stehen Blizzards Leisten und
--- unsere nebeneinander und zeigen bis zum Neuladen sogar Verschiedenes, und
--- das sieht nach einem Fehler aus.
-StaticPopupDialogs["FCD_MIRROR_SOLO"] = {
-    text = "Forever Cooldowns zeigt Blizzards Abklingzeiten jetzt auf eigenen Leisten.\n\nSollen Blizzards eigene Leisten dafür abgeschaltet werden? Sonst steht alles doppelt.\n\nJederzeit umkehrbar mit  /fcd solo off",
-    fcdButton1 = "Abschalten",
-    fcdButton2 = "Behalten",
-    button1 = "Abschalten",
-    button2 = "Behalten",
-    timeout = 0,
-    whileDead = true,
-    hideOnEscape = true,
-    preferredIndex = 3,
-    OnAccept = function()
-        FCD:SoloCommand("on")
-    end,
-    OnCancel = function()
-        printMessage(L["Blizzards Leisten bleiben. /fcd solo on schaltet sie später ab."])
-    end,
-}
-
 StaticPopupDialogs["FCD_DELETE_LAYOUT_PROFILE"] = {
     text = "Layout '%s' wirklich verwerfen?",
     -- Eigene Beschriftung, deshalb uebersetzbar. Wo ACCEPT und CANCEL
@@ -1190,166 +1162,8 @@ StaticPopupDialogs["FCD_NEW_LAYOUT_PROFILE"] = {
     end,
 }
 
--- Blizzards Kategorien auf eigenen Leisten spiegeln.
---
--- Das ist der Weg, der sofort wirkt UND nichts taintet: wir zeichnen die
--- Kategorie selbst, statt Blizzards Viewer dazu zu bringen, sie neu zu
--- zeichnen. Ihre eigenen Leisten ziehen weiterhin erst beim Neuladen nach -
--- deshalb steht am Ende, wie man sie loswird.
--- Blizzards eigene Abklingzeit-Anzeige abschalten, damit nicht alles
--- doppelt steht. Angefasst wird dabei kein einziger ihrer Rahmen - nur der
--- Schalter, den auch der Spieler selbst umlegen würde.
-function FCD:SoloCommand(argument)
-    local Mirror = self.Mirror
-    local mode = string.lower(argument or "")
-    local kind, name = Mirror:GetViewerSwitch()
-
-    if mode ~= "on" and mode ~= "an" and mode ~= "off" and mode ~= "aus" then
-        if not kind then
-            printMessage(L["Dieser Client hat keinen Schalter für Blizzards Abklingzeit-Anzeige."])
-            for _, line in ipairs(Mirror:GetHideSteps()) do
-                printMessage(line)
-            end
-            return
-        end
-        local running = Mirror:IsViewerOn()
-        printMessage(L["Blizzards eigene Leisten: "]
-            .. (running == nil and "?" or (running and "AN" or "AUS"))
-            .. "  (" .. kind .. ": " .. tostring(name) .. ")")
-        printMessage(L["/fcd solo on  - nur unsere Leisten, ihre aus"])
-        printMessage(L["/fcd solo off - ihre wieder einschalten"])
-        return
-    end
-
-    -- "solo an" heißt: nur unsere Leisten. Ihre gehen also aus.
-    local wantTheirs = (mode == "off" or mode == "aus")
-    local ok, needsReload, err = Mirror:SetViewer(wantTheirs)
-    if not ok then
-        printMessage(L["Nicht umgeschaltet: "] .. tostring(err))
-        return
-    end
-
-    -- Festhalten, damit das nächste Anmelden prüfen kann, ob das Abschalten
-    -- den Bestand mitgenommen hat. Beim AddOn-Weg zeigt sich das erst dann.
-    FCD.db.settings.soloOn = not wantTheirs
-    FCD.Mirror:Invalidate()
-    FCD.Dock:LoadLayout()
-    FCD:RefreshData()
-
-    if wantTheirs then
-        printMessage(L["Blizzards eigene Leisten sind wieder an."])
-    else
-        printMessage(L["Blizzards eigene Leisten sind aus - es zeigt nur noch FCD."])
-    end
-    if needsReload then
-        printMessage(L["Wirksam nach einem /reload."])
-    end
-    FCD.Dock:Refresh()
-end
-
-function FCD:MirrorCommand(argument)
-    local Mirror = self.Mirror
-    local mode = string.lower(argument or "")
-
-    if mode == "off" or mode == "aus" then
-        local removed = 0
-        for _, bar in ipairs(Mirror:List()) do
-            if Mirror:Disable(bar.mirrorCategory) then
-                removed = removed + 1
-            end
-        end
-        printMessage(string.format(L["%d gespiegelte Leiste(n) entfernt."], removed))
-        self.Dock:Refresh()
-        return
-    end
-
-    if mode == "hide" or mode == "ausblenden" then
-        for _, line in ipairs(Mirror:GetHideInstructions()) do
-            printMessage(line)
-        end
-        return
-    end
-
-    if mode == "on" or mode == "an" then
-        -- Die beiden Leisten, die Blizzards Abklingzeit-Manager überhaupt
-        -- zeigt: essenziell und strategisch. Alles weitere über die Nummer
-        -- oder den Knopf an der Abschnittsüberschrift.
-        local added = {}
-        for _, category in ipairs({ 0, 1 }) do
-            if not Mirror:IsMirrored(category) then
-                local bar, err = Mirror:Enable(category)
-                if bar then
-                    added[#added + 1] = Mirror:CategoryName(category)
-                else
-                    printMessage(L["Nicht angelegt: "] .. tostring(err))
-                end
-            end
-        end
-        if #added == 0 then
-            printMessage(L["Es wird schon gespiegelt - /fcd mirror zeigt, was."])
-        else
-            printMessage(L["Gespiegelt: "] .. table.concat(added, ", "))
-            printMessage(L["Die Leisten stehen in der Bildschirmmitte übereinander."])
-            printMessage(L["/fcd unlock zum Verschieben, danach /fcd lock."])
-        end
-        for _, line in ipairs(Mirror:GetHideInstructions()) do
-            printMessage(line)
-        end
-        self.Dock:Refresh()
-        return
-    end
-
-    local number = tonumber(mode)
-    if number then
-        local mirrored, err = Mirror:Toggle(number)
-        if mirrored == nil then
-            printMessage(L["Nicht angelegt: "] .. tostring(err))
-        elseif mirrored then
-            printMessage(string.format(L["'%s' wird jetzt gespiegelt."],
-                Mirror:CategoryName(number)))
-        else
-            printMessage(string.format(L["Spiegelung von '%s' aufgehoben."],
-                Mirror:CategoryName(number)))
-        end
-        self.Dock:Refresh()
-        return
-    end
-
-    -- Ohne Argument: Zustand und was möglich wäre.
-    local active = Mirror:List()
-    if #active == 0 then
-        printMessage(L["Es wird nichts gespiegelt."])
-    else
-        local names = {}
-        for _, bar in ipairs(active) do
-            names[#names + 1] = string.format("%s (%d)",
-                Mirror:CategoryName(bar.mirrorCategory),
-                #self.Viewer:EntriesOf(bar))
-        end
-        printMessage(L["Gespiegelt: "] .. table.concat(names, ", "))
-    end
-    printMessage("")
-    printMessage(L["Eine gespiegelte Leiste zeigt genau das, was in Blizzards"])
-    printMessage(L["Kategorie liegt - gezeichnet von uns. Eine Verschiebung im Panel"])
-    printMessage(L["ist dort sofort zu sehen, ohne Neuladen und ohne ihren Viewer"])
-    printMessage(L["anzufassen. Es kann deshalb auch kein Fehler entstehen."])
-    printMessage("")
-    printMessage(L["/fcd mirror on   - essenziell und strategisch spiegeln"])
-    printMessage(L["/fcd mirror off  - alle gespiegelten Leisten entfernen"])
-    printMessage(L["/fcd mirror hide - wie man Blizzards eigene Leisten ausblendet"])
-    for _, category in ipairs(Mirror.MIRRORABLE) do
-        printMessage(string.format("/fcd mirror %d%s - %s",
-            category, Mirror:IsMirrored(category) and " *" or "  ",
-            Mirror:CategoryName(category)))
-    end
-end
-
 function FCD:RefreshData()
     self.Catalog:Rebuild()
-    -- Ein neu gelernter Rang ändert, was auf einer gespiegelten Leiste
-    -- steht: sie zeigt nur Gelerntes. Also erst den Zwischenstand wegwerfen,
-    -- dann zeichnen.
-    self.Mirror:Invalidate()
     self.Viewer:RebuildAll()
 end
 
@@ -1484,10 +1298,9 @@ local function onEvent(_, event, ...)
         if profile then
             local parts = {}
             for _, bar in ipairs(profile.bars) do
-                local count = #FCD.Viewer:EntriesOf(bar)
-                if count > 0 then
+                if #bar.entries > 0 then
                     parts[#parts + 1] = string.format("%s: %d",
-                        bar.name or (L["Leiste "] .. tostring(bar.id)), count)
+                        bar.name or (L["Leiste "] .. tostring(bar.id)), #bar.entries)
                 end
             end
             -- "Alle Leisten leer" las sich wie ein Verlust, auch wenn nie
@@ -1504,52 +1317,6 @@ local function onEvent(_, event, ...)
         else
             logMessage(L["Kein Profil aktiv - eigene Leisten bleiben leer."])
         end
-        -- Einmal je Datenbank: dass die Leisten Blizzards Kategorien zeigen,
-        -- und was das für ihre eigenen bedeutet. Danach nie wieder - eine
-        -- Ansage, die bei jedem Anmelden kommt, liest bald niemand mehr.
-        -- Sicherheitsnetz. Beides, was Blizzards Anzeige abschalten kann,
-        -- nimmt in diesem Client womöglich die Daten mit - und das zeigt sich
-        -- erst nach dem Neuladen, wenn der Bestand gar nicht erst ankommt.
-        -- Ohne diese Prüfung säße man vor einem leeren Panel und wüsste
-        -- nicht, woher es kommt.
-        if FCD.Mirror:RepairViewerCVar() then
-            printMessage(L["Blizzards Abklingzeit-Funktion war abgeschaltet - ohne sie gibt der Client keine Daten heraus. Wieder eingeschaltet; nach einem /reload ist alles da."])
-        end
-
-        -- Der Weg über ihr AddOn zeigt seine Wirkung ebenfalls erst nach
-        -- einem Neuladen. Hier hilft kein fester Schwellwert, sondern nur
-        -- der Vergleich mit dem letzten gesunden Stand: bricht der Bestand
-        -- ein, war es der falsche Weg und wird zurückgenommen.
-        local catalog = FCD.Mirror:CountCatalog()
-        local healthy = FCD.db.settings.catalogCount or 0
-        if FCD.db.settings.soloOn and healthy > 0 and catalog * 2 < healthy then
-            FCD.db.settings.soloOn = false
-            FCD.Mirror:SetViewer(true)
-            printMessage(string.format(
-                L["Mit Blizzards Anzeige war auch der Bestand weg (%d statt %d). Wieder eingeschaltet; nach einem /reload ist alles da."],
-                catalog, healthy))
-        elseif not FCD.db.settings.soloOn and catalog > 0 then
-            FCD.db.settings.catalogCount = catalog
-        end
-
-        -- Eigener Schlüssel, nicht der alte mirrorNoticeShown: wer die
-        -- Vorgängerfassung schon einmal gestartet hat, hätte die Frage sonst
-        -- nie zu sehen bekommen, weil dort nur eine Anleitung stand.
-        if FCD.Mirror:HasAny() and not FCD.db.settings.soloAsked then
-            FCD.db.settings.soloAsked = true
-            printMessage(L["Deine Leisten zeigen Blizzards Kategorien. Was du im Panel verschiebst, steht dort sofort - ohne Neuladen und ohne Fehler."])
-            -- Eine Frage mit einem Klick statt einer Anleitung mit vier
-            -- Schritten. Gefragt wird nur, wo sich die Frage beantworten
-            -- lässt und ihre Anzeige überhaupt noch läuft.
-            if FCD.Mirror:GetViewerSwitch() and FCD.Mirror:IsViewerOn() ~= false then
-                FCD.ShowPopup("FCD_MIRROR_SOLO")
-            else
-                for _, line in ipairs(FCD.Mirror:GetHideInstructions()) do
-                    printMessage(line)
-                end
-            end
-        end
-
         local declared = FCD.Compat.GetDeclaredInterface()
         if declared and FCD.tocVersion > 0 and declared ~= FCD.tocVersion then
             logMessage(string.format(L["Hinweis: .toc meldet Interface %d,"]

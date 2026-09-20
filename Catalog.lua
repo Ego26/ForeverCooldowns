@@ -67,13 +67,8 @@ end
 local function baseCooldownOf(spellID)
     local seconds = Compat.GetSpellBaseCooldown(spellID)
     if seconds == nil then
-        -- API fehlt: laufende Abklingzeit als schwaches Indiz verwenden.
-        -- Genau die kann geschützt sein - dann ist sie als Indiz unbrauchbar
-        -- und jeder Vergleich damit ein Lua-Fehler. Also null.
-        local start, duration = Compat.GetSpellCooldown(spellID)
-        if Compat.CooldownIsSecret(start, duration) then
-            return 0
-        end
+        -- API fehlt: laufende Abklingzeit als schwaches Indiz verwenden
+        local _, duration = Compat.GetSpellCooldown(spellID)
         return duration or 0
     end
     return seconds
@@ -84,21 +79,13 @@ function Catalog:Rebuild()
     FCD.Items:Rebuild()
 
     -- Einmalig prüfen, ob dieser Client Abklingzeit-Werte schützt. Dafür
-    -- werden bekannte Zauber gebraucht, also erst nach dem Scan.
-    --
-    -- Mehrere, nicht einer: ein Zauber ohne laufende Abklingzeit liefert eine
-    -- gewöhnliche Null und sähe aus wie ein ungeschützter Client. Die
-    -- Einzelprüfung hat genau deshalb danebengelegen.
-    local probes = {}
+    -- wird irgendein bekannter Zauber gebraucht, also erst nach dem Scan.
     for _, family in pairs(FCD.Ranks.families) do
         if family.bestSpellID then
-            probes[#probes + 1] = family.bestSpellID
-            if #probes >= 12 then
-                break
-            end
+            Compat.DetectSecrets(family.bestSpellID)
+            break
         end
     end
-    Compat.DetectSecrets(probes)
 
     local viewer = self:ReadViewer()
 
@@ -147,7 +134,7 @@ function Catalog:Rebuild()
             known = family.knownCount > 0,
             isPassive = family.isPassive and true or false,
             baseCooldown = baseCooldown,
-            hasCooldown = Compat.IsPositive(baseCooldown),
+            hasCooldown = baseCooldown and baseCooldown > 0,
             inViewer = viewerHits ~= nil,
             viewerCount = viewerHits and #viewerHits or 0,
             viewerCategory = viewerHits and viewerHits[1].categoryName or nil,

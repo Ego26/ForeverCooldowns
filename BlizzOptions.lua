@@ -83,18 +83,6 @@ local function setValue(system, settingID, value)
         FCD.Print(L["Diese Einstellung ließ sich nicht setzen - Einzelheiten in /fcd log."])
         return false
     end
-
-    -- Wir laufen hier durch ihren Verwalter in ihren Viewer hinein; ab dem
-    -- ersten Schreiben gilt er als tainted und wirft bei Ziel- und
-    -- Aurenereignissen Fehler. Dieselbe Folge wie beim Sofortmodus, deshalb
-    -- dieselbe Markierung: das Panel bietet dann das Neuladen an.
-    if FCD.Layout and not FCD.Layout.taintedThisSession then
-        FCD.Layout.taintedThisSession = true
-        FCD.Print(L["Ihre Leiste geändert. Blizzards Viewer wirft ab jetzt bei"])
-        FCD.Print(L["Ziel- und Aurenereignissen einen Fehler - ein /reload behebt das."])
-        FCD.Print(L["Dauerhaft vermeiden: /fcd editui off - dann bleibt ihr Fenster."])
-    end
-
     return true
 end
 

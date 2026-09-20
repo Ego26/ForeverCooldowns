@@ -43,17 +43,6 @@ list leaves out. The `+` next to the search box takes any spell or item ID —
 including things the spellbook does not list at all. Items can also be dragged
 straight from your bags.
 
-### Blizzard's categories, visible at once
-
-Your bars show what sits in Blizzard's categories from the start — the same
-assignment the panel edits, but drawn by us. A move therefore shows up there
-in the same second: no reload, no call on Blizzard's objects, and so no error
-message either.
-
-Nothing to set up. The **mirror** button on a section heading adds further
-categories or takes them out again, and `/fcd mirror` does the same from
-chat.
-
 ### Ready alerts
 
 When something becomes ready it lights up — using Blizzard's own spell alert
@@ -74,10 +63,6 @@ The values stay theirs. Reading and writing goes through their own path — thei
 interface updates by itself, their "Save changes" saves ours along with it, and
 it survives a reload. If you would rather keep their windows:
 `/fcd replace off` and `/fcd editui off`.
-
-**The price:** changing one of their bars through our window taints their
-viewer, exactly as instant mode does — it then throws errors on target and
-aura events until the next `/reload`. The addon says so the first time.
 
 ### Edit Blizzard's categories
 
@@ -132,20 +117,12 @@ the addon. `/fcd check` shows that probe as a list. If a client protects
 cooldown values, for instance, nobody can detect the end of a cooldown, and
 ready alerts show up as missing.
 
-**Instant is possible — on a bar of your own.** Blizzard's categories can be
-written two ways, and both have a catch: through their data model it applies
-at once but taints their viewer, which then throws errors on target and aura
-events until the next `/reload`; through `SetLayoutData` nothing is tainted
-but it only applies on reload. The latter is the default.
-
-The way out is the *mirror* button on a section heading: it creates a bar of
-your own showing exactly that category. We draw it, so a move shows up there
-in the same second — no reload, no call on Blizzard's objects, and therefore
-no error message at all. Blizzard's own bars still catch up only on reload;
-so FCD asks once, on your first login, whether to switch them off. One
-click, reversible at any time with `/fcd solo off`. It flips the same switch
-you would find in the game options; the addon does not touch their frames,
-because that would be exactly the taint this route avoids.
+**Instant mode has a price.** Changes to Blizzard's categories apply without
+reloading because they go through their own data model. Once addon code
+touches that, it counts as *tainted* for the rest of the session and their
+viewer can no longer read auras — until the next `/reload`. It affects their
+display, not ours. If you would rather not: `/fcd instant off` writes safely,
+but only takes effect on reload.
 
 **Switching layouts only works in their window.** Their layout manager is
 protected; calling it from outside would taint the session. `/fcd blizz`

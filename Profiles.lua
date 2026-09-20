@@ -17,17 +17,11 @@ local SETTING_DEFAULTS = {
     gcdThreshold = 1.6,
     updateInterval = 0.1,
     autoSwitch = true,
-    -- Der sichere Weg ist die Voreinstellung: geschrieben wird über
-    -- SetLayoutData, das taintet nichts, wirkt aber erst beim Neuladen.
-    --
-    -- Zuerst stand hier der Sofortmodus. Der wirkt ohne Neuladen, taintet
-    -- dabei aber Blizzards Viewer - und dann wirft er bei jedem Ziel- und
-    -- Aurenereignis einen roten Lua-Fehler. Wer das AddOn neu installiert und
-    -- als Erstes einen Eintrag verschiebt, sieht also Fehler und hält sie für
-    -- einen Defekt. Diesen Preis darf nur zahlen, wer ihn kennt:
-    -- /fcd instant on schaltet den Sofortmodus ein und sagt dabei, was er
-    -- kostet.
-    allowNativeWrites = false,
+    -- Änderungen wirken sofort, so wie in Blizzards eigenem Fenster. Preis:
+    -- ihre Objekte gelten danach als "tainted", ihr Aurenzugriff scheitert bis
+    -- zum nächsten /reload. Bewusste Entscheidung; /fcd instant off wählt
+    -- den sicheren Weg, der erst beim Neuladen greift.
+    allowNativeWrites = true,
     -- Panel automatisch neben Blizzards Einstellungsfenster einblenden
     dockToBlizzard = true,
     -- Abgerundete Symbolecken über eine Maske. Abschaltbar, weil eine
@@ -242,18 +236,6 @@ local function copyDefaults(target, defaults)
     end
 end
 
--- Die Vorgabeleisten zeigen Blizzards Kategorien, statt leer zu sein.
---
--- Vorher lagen hier zwei leere Leisten. Ein frisch installiertes AddOn zeigte
--- also nichts, und eine Kategorie zu ändern blieb bis zum Neuladen
--- unsichtbar. Sichtbar wurde es erst, wenn jemand den Knopf "spiegeln"
--- entdeckte - und das kann niemand vorher wissen. Deshalb ist es jetzt der
--- Anfangszustand.
-local DEFAULT_MIRRORS = { 0, 1 }
-
--- So hießen dieselben zwei Leisten, bevor sie Blizzards Kategorien zeigten.
-local LEGACY_DEFAULT_NAMES = { [0] = "Essenziell", [1] = "Strategisch" }
-
 local function nextBarID(profile)
     local highest = 0
     for _, bar in ipairs(profile.bars) do
@@ -288,49 +270,6 @@ function Profiles:GetBar(profile, barID)
         end
     end
     return nil
-end
-
--- Legt die beiden Vorgabeleisten an. Ihr Name ist der Kategoriename und
--- damit dieselbe Kennung wie überall: deutsch gespeichert, beim Anzeigen
--- übersetzt.
-function Profiles:AddDefaultBars(profile)
-    for _, category in ipairs(DEFAULT_MIRRORS) do
-        local bar = self:NewBar(profile, FCD.Mirror.CATEGORY_NAMES[category])
-        bar.mirrorCategory = category
-        bar.mirrorEntryOptions = {}
-    end
-end
-
--- Bestehende Profile nachrüsten. Angefasst wird nur, was unberührt
--- geblieben ist: eine Vorgabeleiste unter ihrem alten Namen, ohne einen
--- einzigen Eintrag. Wer etwas hineingelegt hat, behält seine Leiste, und wer
--- schon spiegelt, hat ohnehin selbst entschieden.
-local function adoptDefaultMirrors(profile)
-    if type(profile) ~= "table" or type(profile.bars) ~= "table" then
-        return
-    end
-    for _, category in ipairs(DEFAULT_MIRRORS) do
-        -- Wer diese Kategorie schon spiegelt, hat selbst entschieden.
-        local already = false
-        for _, bar in ipairs(profile.bars) do
-            if bar.mirrorCategory == category then
-                already = true
-                break
-            end
-        end
-        if not already then
-            for _, bar in ipairs(profile.bars) do
-                if bar.name == LEGACY_DEFAULT_NAMES[category]
-                    and bar.mirrorCategory == nil
-                    and #(bar.entries or {}) == 0 then
-                    bar.name = FCD.Mirror.CATEGORY_NAMES[category]
-                    bar.mirrorCategory = category
-                    bar.mirrorEntryOptions = {}
-                    break
-                end
-            end
-        end
-    end
 end
 
 local function newProfile(name, class)
@@ -450,30 +389,12 @@ function Profiles:Initialize()
     end
 
     db.schema = db.schema or 1
-    -- Schema 2 hat den Sofortmodus nachgereicht, als er die Voreinstellung
-    -- war. Die Zeile ist weg, der Schritt bleibt: eine Datenbank von damals
-    -- soll nicht zweimal dieselbe Nummer durchlaufen.
+    -- Der Sofortmodus war zunächst aus; copyDefaults füllt nur fehlende
+    -- Werte, bestehende Datenbanken bekommen ihn deshalb hier nachgereicht.
     if db.schema < 2 then
         db.settings = db.settings or {}
+        db.settings.allowNativeWrites = true
         db.schema = 2
-    end
-    -- Und zurück: wer den Sofortmodus über Schema 2 bekommen hat, hat ihn nie
-    -- gewählt. Er wird einmalig abgeschaltet, weil er rote Lua-Fehler
-    -- verursacht, sobald man einen Eintrag verschiebt. Einschalten geht
-    -- weiterhin mit /fcd instant on - dann als bewusste Entscheidung.
-    if db.schema < 3 then
-        db.settings = db.settings or {}
-        db.settings.allowNativeWrites = false
-        db.schema = 3
-    end
-    -- Schema 4: die beiden leeren Vorgabeleisten werden zu Spiegeln von
-    -- Blizzards Kategorien. Läuft einmal; wer sie danach entfernt, bekommt
-    -- sie nicht wieder.
-    if db.schema < 4 then
-        for _, profile in pairs(db.profiles or {}) do
-            adoptDefaultMirrors(profile)
-        end
-        db.schema = 4
     end
     db.profiles = db.profiles or {}
     db.settings = db.settings or {}
@@ -494,7 +415,8 @@ function Profiles:Initialize()
         local defaultName = (UnitClass("player")) or "Standard"
         if not db.profiles[defaultName] then
             local profile = newProfile(defaultName, class)
-            self:AddDefaultBars(profile)
+            self:NewBar(profile, "Essenziell")
+            self:NewBar(profile, "Strategisch")
             db.profiles[defaultName] = profile
         end
         charDB.active = defaultName
@@ -507,10 +429,7 @@ function Profiles:Initialize()
         -- Trank aus wie ein verlorener Eintrag. Einmalig, danach entscheidet
         -- das Optionsfenster.
         for _, bar in ipairs(profile.bars) do
-            -- Blizzards Kategorie 7 heißt ebenfalls "Gegenstände". Eine
-            -- Leiste, die sie spiegelt, ist keine Gegenstandsleiste und darf
-            -- deren Vorgaben nicht bekommen.
-            if not bar.fcdItemDefaults and bar.mirrorCategory == nil
+            if not bar.fcdItemDefaults
                 and (bar.name == "Gegenstände verfolgen" or bar.name == "Gegenstände") then
                 bar.fcdItemDefaults = true
                 bar.visibility = bar.visibility or {}
@@ -601,7 +520,7 @@ function Profiles:Create(name, copyFromName)
         profile.name = name
     else
         profile = newProfile(name, self.class)
-        self:AddDefaultBars(profile)
+        self:NewBar(profile, "Essenziell")
     end
     FCD.db.profiles[name] = profile
     return profile

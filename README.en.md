@@ -53,11 +53,6 @@ through their own path, their "Save changes" saves ours along with it, and it
 survives a reload. Both can be switched off (`/fcd replace off`,
 `/fcd editui off`).
 
-The price is the same as for instant mode: writing goes through their
-manager into their viewer, which counts as *tainted* afterwards – it
-throws errors on target and aura events until the next `/reload`. The
-panel says so the first time and offers the reload.
-
 **Your own bars.** Orientation, columns, icon size, spacing, opacity,
 visibility (including "Never"), tooltips and "Use on click" – per bar, styled
 after their Edit Mode, which the bars follow.
@@ -72,8 +67,6 @@ automatic switching on stance, form or specialisation.
 | `/fcd` | open the panel |
 | `/fcd wide` | switch between narrow and wide view |
 | `/fcd spell <ID>` | add any spell |
-| `/fcd mirror` | mirror Blizzard's categories onto your own bars |
-| `/fcd solo on\|off` | switch Blizzard's own bars off or on |
 | `/fcd replace on\|off` | whether FCD takes the place of their window |
 | `/fcd editui on\|off` | our own window in Edit Mode |
 | `/fcd blizz` | fetch Blizzard's window (that is where layouts are switched) |
@@ -100,64 +93,16 @@ end of a cooldown, and ready alerts show up as missing.
 
 There are two ways, and the addon can do both:
 
-- **Safe mode** (default) through `SetLayoutData`. Taints nothing, but only
-  takes effect on reload. The panel offers the reload button for it.
-- **Instant mode** (`/fcd instant on`) through Blizzard's own data model. Takes effect
+- **Instant mode** (default) through Blizzard's own data model. Takes effect
   without reloading. The price: their objects count as *tainted* afterwards,
   and their aura access fails until the next `/reload`. This affects their
   display, not ours.
+- **Safe mode** (`/fcd instant off`) through `SetLayoutData`. Taints nothing,
+  but only takes effect on reload.
 
 Before every write, the addon checks that the layout blob survives our
 encoding chain losslessly, and takes a backup. `/fcd restore` undoes the last
 write.
-
-## Instant and taint-free: mirrored bars
-
-Both routes above have a catch – one applies late, the other taints. The C
-function that would do both (`SetCooldownViewerCategorySet`) does not exist in
-this client; `/fcd check` lists it as missing.
-
-The way out is a third route: **we draw the category ourselves.** A bar shows
-exactly what sits in one of Blizzard's categories – and because the bar is
-ours, a move shows up there in the same second. No reload, no call on
-Blizzard's objects, and therefore no error.
-
-**This is the starting state, not a setting.** The two default bars mirror
-"Essential" and "Utility Cooldowns"; installing FCD is all it takes. The
-*mirror* button on a section heading adds further categories or switches them
-off again.
-
-```
-/fcd mirror        state, and every category with its number
-/fcd mirror on     mirror essential and utility
-/fcd mirror off    remove every mirrored bar
-/fcd mirror 2      switch a single category on or off
-/fcd mirror hide   how to hide Blizzard's own bars
-```
-
-A mirrored bar has no entry list of its own – it is worked out afresh on every
-change and therefore never stored. Everything else stays adjustable:
-orientation, size, visibility, ready alerts, per entry as well. If you want to
-freeze the contents and then take out individual icons, use *Detach mirror* in
-the bar window.
-
-### What about their own bars?
-
-They would stand alongside and, until the next reload, even show something
-different. So FCD asks once on your first login whether it should switch them
-off – one click, reversible at any time with `/fcd solo off`.
-
-It disables their loadable addon – which brings the frames, not the data –
-and that takes effect on the next reload. **FCD does not touch their frames.**
-That would be exactly the taint this whole route avoids: a `:Hide()` on their
-viewer is the obvious line and the wrong one.
-
-The CVar `cooldownViewerEnabled` would be the more convenient switch and is
-the wrong one: it does not switch off the display but the whole feature –
-including `GetCooldownViewerCacheInfo`, which is where the panel and the bars
-get their data. Within the same session this goes unnoticed; only after a
-reload does everything stand empty. FCD no longer touches it, and switches it
-back on if it finds it off.
 
 ## Where settings live
 
@@ -202,10 +147,6 @@ alerts between bar and entry.
 
 Banner and icons are generated, not drawn – see
 [`branding/tools/`](branding/tools/).
-
-[`RELEASE-NOTES.md`](RELEASE-NOTES.md) is in English: it goes to CurseForge as
-the changelog and ships inside the package. The German version lives in
-[`branding/RELEASE-NOTES-de.md`](branding/RELEASE-NOTES-de.md).
 
 ## Licence
 

@@ -1,85 +1,35 @@
-## Was 0.2.0-beta bringt
+## Was diese Version bringt
 
-### Sofort - und ohne einen einzigen Fehler
+Erste öffentliche Fassung.
 
-Eine Abklingzeit zwischen Blizzards Kategorien zu verschieben ließ bisher die
-Wahl zwischen zwei schlechten Hälften: über ihr Lua schreiben und es sofort
-sehen, dafür ihren Viewer tainten, der danach bei jedem Ziel- und
-Aurenereignis rote Fehler wirft - oder sicher schreiben und auf ein Neuladen
-warten.
+### Neu
 
-Die C-Funktion, die beides könnte, `SetCooldownViewerCategorySet`, gibt es in
-diesem Client nicht. Diese Fassung geht deshalb einen dritten Weg: **wir
-zeichnen die Kategorie selbst.**
+- **Beliebige Zauber und Gegenstände verfolgen.** Blizzards Manager zeigt nur
+  seine kuratierte Liste; hier kommt alles auf eine eigene Leiste - über den
+  Knopf neben der Suche, per `/fcd spell <ID>` oder durch Ablegen aus der
+  Tasche, auch Zauber, die im Zauberbuch nicht stehen. Ein eigener Abschnitt
+  zeigt, was ihre Liste auslässt.
+- **Ränge gestapelt.** Dieselbe Fähigkeit in dreißig Rängen wird zu einem
+  Eintrag mit dem besten gelernten Rang. Rangzahl steht auf dem Symbol.
+- **Eine Oberfläche für alles.** Forever Cooldowns tritt an die Stelle von
+  Blizzards Abklingzeit-Fenster und ersetzt im Bearbeitungsmodus auch die
+  Einstellungsfenster ihrer Leisten. Die Werte bleiben ihre: ihr "Änderungen
+  speichern" sichert mit, ein Neuladen überlebt es. Beides abschaltbar.
+- **Fertig-Meldung.** Was bereit wird, leuchtet auf und bleibt markiert,
+  solange es bereit ist - mit Blizzards eigenem Leuchten, wo der Client es
+  kennt. Wahlweise mit Ton, einstellbar je Leiste und abweichend je Eintrag.
+- **Blizzards Kategorien bearbeiten.** Mehrfachauswahl, Ziehen zwischen den
+  Abschnitten, Zielknöpfe. Geschrieben wird in ihr eigenes Layout.
+- **Eigene Leisten** mit Ausrichtung, Größe, Abstand, Transparenz,
+  Sichtbarkeit und "Beim Anklicken benutzen" - einstellbar in einem Fenster
+  im Stil ihres Bearbeitungsmodus, dem die Leisten auch folgen.
+- **Profile** speichern, wechseln und als Text teilen; optional automatisch
+  bei Haltung, Form oder Spezialisierung.
+- **Oberfläche auf Deutsch und Englisch**, der Sprache des Clients folgend;
+  `/fcd lang de|en|auto` überschreibt das.
 
-- **Gespiegelte Leisten, von Anfang an.** Deine Leisten zeigen genau das, was
-  in Blizzards Kategorien liegt. Weil die Leisten unsere sind, steht eine
-  Verschiebung dort in derselben Sekunde - kein Neuladen, kein Aufruf auf
-  Blizzards Objekten, also auch kein Fehler. Einzuschalten ist nichts; der
-  Knopf *spiegeln* an einer Abschnittsüberschrift nimmt weitere Kategorien
-  dazu, und `/fcd mirror` tut dasselbe aus dem Chat.
-- Alles andere an der Leiste bleibt einstellbar: Ausrichtung, Größe,
-  Sichtbarkeit, Fertig-Meldung, auch je einzelnem Eintrag.
-- **Spiegelung lösen** im Leistenfenster schreibt den jetzigen Bestand fest;
-  danach ist es eine gewöhnliche Leiste, die sich von Hand bearbeiten lässt.
-- `/fcd mirror hide` erklärt, wie man Blizzards eigene Leisten ausblendet -
-  die ziehen weiterhin erst beim Neuladen nach. Ausblenden muss man sie in
-  ihrem Fenster; täte das AddOn es, wäre es genau der Taint, den dieser Weg
-  vermeidet.
+### Gut zu wissen
 
-### Geändert
-
-- **`/fcd solo` schaltet Blizzards eigene Leisten ab.** Sonst stünde alles
-  doppelt, sobald FCD ihre Kategorien zeigt. Abgeschaltet wird ihr
-  nachladbares AddOn - das bringt die Rahmen mit, nicht die Daten - und es
-  wirkt beim nächsten Neuladen. Ihre Rahmen werden dabei nicht angefasst,
-  denn genau das wäre der Taint, den dieser Weg vermeidet. Kennt ein Client
-  dieses AddOn nicht, sagt `/fcd solo` das und nennt die Handgriffe in
-  Blizzards eigenem Fenster.
-- **Die Vorgabeleisten spiegeln Blizzards Kategorien.** Vorher standen dort
-  zwei leere Leisten, und sichtbar wurde eine Änderung erst, wenn jemand den
-  Knopf "spiegeln" entdeckte. Das kann niemand vorher wissen, also ist es
-  jetzt der Anfangszustand: installieren, fertig. Bestehende Profile ziehen
-  einmalig nach - aber nur dort, wo die Vorgabeleiste unberührt und leer
-  geblieben ist.
-- Der Neuladen-Knopf und die Zustandszeile unterscheiden jetzt, ob eine
-  Änderung überhaupt noch aussteht oder nur noch Blizzards eigene Leisten
-  nachziehen müssen.
-- Die Kategorienamen liegen nur noch an einer Stelle; Panel und Leisten können
-  sie deshalb nicht mehr verschieden benennen.
-
-### Behoben
-
-- **Ein leeres Panel repariert sich selbst.** Kommt beim Anmelden kein
-  Bestand an und ist Blizzards Abklingzeit-Funktion abgeschaltet, schaltet
-  FCD sie wieder ein und sagt es. Grund: das CVar `cooldownViewerEnabled`
-  schaltet nicht die Anzeige ab, sondern die ganze Funktion - samt
-  `GetCooldownViewerCacheInfo`, aus dem Panel und Leisten ihre Daten holen.
-  In derselben Sitzung fällt das nicht auf, erst nach dem Neuladen. FCD
-  fasst dieses CVar deshalb nicht mehr an.
-- **Gespiegelte Leisten zeigten zu viel.** Der Katalog kennt zu jeder
-  Abklingzeit eine Kategorie, auch zu Fähigkeiten, die Blizzards Leisten nie
-  anzeigen - "Heldenhafter Stoß" steht unter "Strategisch" und taucht bei
-  ihnen trotzdem nirgends auf. Gezeigt wird jetzt, was Blizzard zeigen würde:
-  was in ihrer Kategorieliste steht, plus was der Spieler selbst zugewiesen
-  hat.
-- **Leisten waren in Blizzards Bearbeitungsmodus nicht anzuklicken.** Ihre
-  Oberfläche legt eine Fläche über den Bildschirm, die Klicks abfängt. Die
-  Leisten steigen jetzt für die Dauer des Bearbeitungsmodus eine Ebene höher -
-  dieselbe Behandlung, die das Panel schon hatte.
-- **Lua-Fehler an geschützten Abklingzeit-Werten.** Ob dieser Client einen
-  Wert schützt, wurde einmal beim Anmelden an irgendeinem Zauber geprüft -
-  geschützt ist aber der einzelne Wert, nicht der Client. War der Zauber
-  gerade bereit, hielt das AddOn alle Werte für lesbar und warf bei der
-  ersten laufenden Abklingzeit einen Fehler. Jetzt wird je Wert gefragt.
-- **Geschützte Abklingzeit-Werte bringen kein Symbol mehr zum Fehler.** Sie
-  auch nur an die Blizzard-Uhr weiterzureichen lehnt dieser Client ab
-  ("Secret values are only allowed during untainted execution"). Der Versuch
-  wird jetzt einmal unternommen und beim ersten Nein nicht wiederholt; das
-  Symbol bleibt dann ohne Wischer und ohne Restzeit stehen. `/fcd check`
-  sagt, welcher der beiden Fälle vorliegt.
-- Die Prüfung auf geschützte Werte läuft über mehrere Zauber statt über
-  einen. Ein einzelner, der gerade bereit war, hat sie zuverlässig
-  danebengehen lassen.
-- Eine Leiste, die Blizzards Kategorie "Gegenstände" spiegelt, wird nicht mehr
-  mit der eigenen Gegenstandsleiste verwechselt und umbenannt.
+`/fcd check` zeigt, was dieser Client hergibt. Jede benötigte API wird
+einzeln geprüft - fehlt eine, entfällt genau das Merkmal, das auf ihr
+aufbaut, nicht das AddOn.
