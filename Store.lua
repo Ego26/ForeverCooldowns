@@ -53,27 +53,6 @@ local function pack()
     return table.concat(out)
 end
 
--- Wie viel steckt in einem Bestand? Leisteneinträge plus Layout-Profile.
--- Dieselbe Rechnung wie beim Anmelden, wo sie entscheidet, welche Quelle
--- gilt - hier entscheidet sie, ob geschrieben werden darf.
-local function weigh(value)
-    if type(value) ~= "table" then
-        return 0
-    end
-    local count = 0
-    for _, profile in pairs(value.profiles or {}) do
-        if type(profile) == "table" then
-            for _, bar in ipairs(profile.bars or {}) do
-                count = count + #(bar.entries or {})
-            end
-        end
-    end
-    for _ in pairs(value.layoutProfiles or {}) do
-        count = count + 1
-    end
-    return count
-end
-
 local function unpack(text)
     if type(text) ~= "string" or text == "" then
         return nil
@@ -96,6 +75,10 @@ function Store:Load()
     end
     local text = state.data and state.data[STORE_KEY]
     if type(text) ~= "string" or text == "" then
+        -- Leeres Layout: hier ist nichts zu verlieren, also darf der Takt
+        -- schreiben. Ohne diese Zeile hielte die Herkunftsprüfung unten den
+        -- Bestand der vorigen Sitzung fest und verweigerte jedes Schreiben.
+        self.lastWritten = nil
         self.status = L["Im Layout liegt noch kein Bestand."]
         return nil, L["kein Bestand"]
     end
@@ -137,32 +120,35 @@ function Store:Save(force)
         return false, verifyErr
     end
 
-    -- Niemals ärmer überschreiben.
+    -- Nur schreiben, wenn wir wissen, worauf wir schreiben.
     --
-    -- Genau das ist passiert: Nach einem Layoutwechsel stand im
-    -- Arbeitsspeicher der frisch angelegte, leere Stand, und der Takt hat ihn
-    -- über vorhandene Daten geschrieben. Zwei Sekunden, und ein Profil mit
-    -- allen Leisten war weg.
+    -- Der erste Versuch verglich die Größe: liegt im Layout mehr als hier,
+    -- wird nicht geschrieben. Das hat jedes absichtliche Löschen mitblockiert
+    -- - ein Gegenstand von der Leiste genommen, ein /reload, und er war
+    -- wieder da. Die Größe war das falsche Merkmal.
     --
-    -- Liegt im Ziel mehr, als wir schreiben wollen, wird nicht geschrieben.
-    -- /fcd store schreibt trotzdem - dort ist es eine bewusste Ansage.
+    -- Es geht nicht um mehr oder weniger, sondern um Herkunft: Steht im
+    -- Layout genau der Bestand, den wir in dieser Sitzung gelesen oder zuletzt
+    -- geschrieben haben, dann ist unser Stand dessen Nachfolger und darf auch
+    -- kleiner sein. Steht dort etwas Fremdes - weil das Layout gewechselt hat
+    -- oder ein anderer Charakter geschrieben hat -, wird nicht geschrieben,
+    -- bis es beim Anmelden abgeglichen wurde.
     if not force then
         local existing = state.data[STORE_KEY]
-        if type(existing) == "string" and existing ~= "" then
-            local mine = weigh(unpack(text))
-            local theirs = weigh(unpack(existing))
-            if theirs > mine then
-                self.status = string.format(
-                    L["Nicht geschrieben: im Layout liegen %d Einträge, hier nur %d."],
-                    theirs, mine)
-                if not self.warnedAboutLoss then
-                    self.warnedAboutLoss = true
-                    FCD.LogOnly(self.status)
-                    FCD.Print(L["Im Layout liegt mehr als hier - es wird nichts überschrieben."])
-                    FCD.Print(L["Mit  /fcd store  trotzdem schreiben, /fcd log zeigt Einzelheiten."])
-                end
-                return false, L["würde Daten verlieren"]
+        if existing == "" then
+            existing = nil
+        end
+        if existing ~= self.lastWritten then
+            self.status = string.format(
+                L["Nicht geschrieben: im Layout steht ein fremder Bestand (%d Zeichen)."],
+                type(existing) == "string" and #existing or 0)
+            if not self.warnedAboutLoss then
+                self.warnedAboutLoss = true
+                FCD.LogOnly(self.status)
+                FCD.Print(L["Im Layout steht ein Bestand, der nicht von dieser Sitzung stammt."])
+                FCD.Print(L["Ein /reload gleicht ab, /fcd store schreibt trotzdem."])
             end
+            return false, L["fremder Bestand im Layout"]
         end
     end
     self.warnedAboutLoss = nil
