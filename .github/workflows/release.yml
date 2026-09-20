@@ -18,6 +18,11 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    # GITHUB_TOKEN hat in neuen Repositories nur Leserechte. Ein Release
+    # anzulegen ist ein Schreibvorgang - ohne diese Zeile antwortet GitHub
+    # mit 403, obwohl der Upload zu CurseForge längst durch ist.
+    permissions:
+      contents: write
     steps:
       - name: Quelltext holen
         uses: actions/checkout@v4
