@@ -8,7 +8,7 @@ FCD.name = ADDON_NAME
 -- Steht die Version nicht in der .toc - ungepackte Arbeitskopie, in der noch
 -- der Platzhalter steht -, gilt diese hier. Sie ist der einzige Ort, an dem
 -- die Zahl im Quelltext gepflegt wird.
-FCD.FALLBACK_VERSION = "0.1.1-beta"
+FCD.FALLBACK_VERSION = "0.1.0-beta"
 FCD.version = FCD.FALLBACK_VERSION
 
 -- GetBuildInfo liefert Version, Buildnummer, Datum und Interface-Nummer.
@@ -650,6 +650,16 @@ end
 -- dass der Spieler ihr Fenster einmal öffnet.
 local loadAddOn = method(C_AddOns, "LoadAddOn") or globalFunction("LoadAddOn")
 
+-- Wie das Addon heißt, ist nicht vorhersagbar - in diesem Build stand es
+-- nirgends geschrieben. Also der Reihe nach, bis das Einstellungsfenster da
+-- ist. Der Aufruf kostet nichts, wenn es bereits geladen ist.
+local COOLDOWN_ADDONS = {
+    "Blizzard_CooldownViewer",
+    "Blizzard_CooldownViewerSettings",
+    "Blizzard_CooldownManager",
+    "Blizzard_EditMode",
+}
+
 function Compat.EnsureCooldownViewerLoaded()
     if type(_G.CooldownViewerSettings) == "table" then
         return true
@@ -657,8 +667,13 @@ function Compat.EnsureCooldownViewerLoaded()
     if not loadAddOn then
         return false
     end
-    pcall(loadAddOn, "Blizzard_CooldownViewer")
-    return type(_G.CooldownViewerSettings) == "table"
+    for _, name in ipairs(COOLDOWN_ADDONS) do
+        pcall(loadAddOn, name)
+        if type(_G.CooldownViewerSettings) == "table" then
+            return true
+        end
+    end
+    return false
 end
 
 function Compat.GetCooldownViewerCategories()

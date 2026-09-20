@@ -420,6 +420,13 @@ function Layout:Read()
         return nil, err or L["GetLayoutData lieferte keine Zeichenkette"]
     end
 
+    -- Ein frischer Charakter hat noch kein Layout gespeichert. Das ist kein
+    -- Fehler und darf nicht als "Entschlüsseln fehlgeschlagen" in der
+    -- Statuszeile stehen - das liest sich wie ein Defekt.
+    if raw == "" then
+        return nil, L["Für diesen Charakter gibt es noch kein Layout."]
+    end
+
     local data, decodeErr, _, recipe = Compat.DecodeLayoutString(raw)
     if not data then
         return nil, L["Entschlüsseln fehlgeschlagen: "] .. tostring(decodeErr)

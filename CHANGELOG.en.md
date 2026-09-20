@@ -4,51 +4,6 @@
 
 All notable changes to Forever Cooldowns.
 
-## [0.1.1-beta]
-
-A fix release. On the Forever client, 0.1.0-beta showed an incomplete and
-wrongly sorted catalogue after a layout change, and saved data could be lost.
-
-### Fixed
-
-- **The catalogue now comes from Blizzard's own display layer**
-  (`GetDisplayData`). It used to come from the layout's order list, which is
-  empty in a freshly created layout - the panel then shrank to the handful of
-  currently active cooldowns while Blizzard's window next to it still showed
-  hundreds.
-- **Placement and "known" come from that same source.** The general queries
-  return the global default rather than the state of the active layout:
-  `isInvisible` was always false there, and `IsSpellKnown` considered
-  several ranks of a rank chain known. Both windows now read the same table
-  and show the same sections.
-- **No more spells from other classes.** Blizzard's cooldown addon loads on
-  demand; without it the catalogue fell back to a scan across every class. It
-  is now loaded on demand, and the scan only runs on `/fcd catalog full`.
-- **Data loss on login.** This client does not always hand back the
-  account-wide file although it sits valid on disk; on logout the defaults
-  were then written over it. The per-character second copy meant to catch
-  this was not declared in the `.toc` and was never written. Both fixed,
-  verifiable with `/fcd mirror`.
-- **Items came back after a `/reload`.** The guard against data loss
-  compared sizes and so treated every deliberate deletion as a loss. It now
-  checks provenance instead.
-- **Changes show at once**, even when the client only adopts them on reload.
-  An ability with stacked ranks appears in one section only, not several.
-- **The game no longer freezes** when many cooldowns are moved at once.
-- **The filter checkboxes are saved** - "known only" and the others fell back
-  to their defaults after every reload.
-- **Blizzard's layouts appear in the dropdown.** Their field is called
-  `layoutName`; we read `name`, so the list stayed empty.
-- The reload button only appears when a reload actually does something.
-
-### Added
-
-- `/fcd tab` - what the tab is made of, next to Blizzard's own lists.
-- `/fcd provider` - read Blizzard's data model.
-- `/fcd scan` - count through the cooldown ID range.
-- `/fcd mirror` - write and check the second copy.
-- `/fcd catalog blizz|full` - where the cooldown list comes from.
-
 ## [0.1.0-beta]
 
 ### Added
@@ -80,8 +35,16 @@ wrongly sorted catalogue after a layout change, and saved data could be lost.
   client creates no SavedVariables for the addon. `/fcd store` writes
   immediately and reads back to verify.
 - Rounded icon corners via a mask (`/fcd round on|off`).
+- A per-character second copy: this client does not hand back the
+  account-wide file on login although it sits valid on disk. A full copy is
+  therefore written on logout and restored from on the next login.
+  `/fcd mirror` shows it.
+- The catalogue comes from Blizzard's own display layer, so both windows
+  show the same entries in the same sections, including the unlearned and
+  the hidden ones.
 - Diagnostic commands: `/fcd check`, `/fcd probe`, `/fcd log`, `/fcd layout`,
-  `/fcd shown`, `/fcd editmode`, `/fcd editsettings`.
+  `/fcd shown`, `/fcd editmode`, `/fcd editsettings`, `/fcd tab`,
+  `/fcd provider`, `/fcd scan`, `/fcd catalog`.
 
 ### Known limitations
 
@@ -89,9 +52,13 @@ wrongly sorted catalogue after a layout change, and saved data could be lost.
   their layout manager is protected.
 - Instant mode marks Blizzard's viewer as tainted; their aura access then
   fails until the next reload.
-- In this client the addon's SavedVariables are not returned. The data
-  therefore rides in Blizzard's layout; if the client rewrites that layout
-  itself, it can be lost. This is checked regularly and written back.
+- In this client the account-wide file arrives empty on login although it
+  sits valid on disk. The data is therefore carried by the per-character
+  second copy, with Blizzard's layout as a third net. `/fcd mirror` says
+  where it came from.
+- If the client lists no cooldowns for a character, the first two tabs stay
+  empty - so does Blizzard's own window. Your own spells and items can be
+  tracked independently of that.
 - If a client protects cooldown values, the end of a cooldown cannot be
   detected and ready alerts are unavailable. `/fcd check` says whether that
   applies here.

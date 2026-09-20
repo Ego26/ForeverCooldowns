@@ -116,4 +116,35 @@ if (loose.length) {
 if (!missing.length && !loose.length) {
     console.log('\nAlles zweisprachig.');
 }
-process.exit(missing.length + loose.length > 0 ? 1 : 0);
+// RELEASE-NOTES.md geht als Changelog an CurseForge, und die Projektseite
+// dort ist englisch. Die Datei hat schon einmal unbemerkt die Sprache
+// gewechselt - eine Kopie der deutschen Fassung darüber, und beim nächsten
+// Release stand der Changelog auf Deutsch. Deshalb wird sie geprüft.
+const GERMAN_MARKERS = [
+    'Abklingzeit', 'Fassung', 'Behoben', 'Hinzugefügt', 'Einträge',
+    'Layoutwechsel', 'gelernt', 'Gut zu wissen', 'Zauber', 'Leiste',
+    'Fenster', 'nicht', 'werden', 'wurde', 'ände',
+];
+const germanInNotes = [];
+try {
+    const notes = fs.readFileSync('../RELEASE-NOTES.md', 'utf8');
+    for (const marker of GERMAN_MARKERS) {
+        if (notes.includes(marker)) germanInNotes.push(marker);
+    }
+} catch (error) {
+    germanInNotes.push('nicht lesbar: ' + error.message);
+}
+
+if (germanInNotes.length) {
+    console.log('');
+    console.log('RELEASE-NOTES.md ist nicht englisch (' + germanInNotes.length + ' Treffer):');
+    console.log('  ' + germanInNotes.join(', '));
+    console.log('  Diese Datei geht als Changelog an CurseForge.');
+    console.log('  Englisch: branding/RELEASE-NOTES-en.md, Deutsch: branding/RELEASE-NOTES-de.md');
+}
+
+if (!germanInNotes.length) {
+    console.log('Release-Notes sind englisch.');
+}
+
+process.exit(missing.length + loose.length + germanInNotes.length > 0 ? 1 : 0);

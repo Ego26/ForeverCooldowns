@@ -602,6 +602,12 @@ local function buildStaticMap()
         -- Nur noch auf ausdrücklichen Wunsch: /fcd catalog voll.
         Dock.catalogSource = "scan"
         catalog = Compat.ScanCooldownIDs(seeds)
+    elseif FCD.Layout.GetDisplayData() then
+        -- Ihr Modell ist da und führt trotzdem nichts. Auf einem frischen
+        -- Charakter ist das der Normalfall - Blizzards eigenes Fenster ist
+        -- dann genauso leer. Kein Fehler, nur nichts zu zeigen.
+        Dock.catalogSource = "leer"
+        catalog = seeds
     else
         -- Lieber wenig als falsch.
         --
@@ -2942,7 +2948,18 @@ function Dock:Refresh()
         panel.reloadButton:Hide()
     end
 
-    if self.layoutError then
+    -- Ein leeres Panel ohne Begründung sieht nach einem Defekt aus.
+    --
+    -- Auf einem frischen Charakter ist Blizzards Abklingzeit-Addon noch nicht
+    -- geladen; ohne ihr Datenmodell haben wir keinen Katalog, und seit wir
+    -- nicht mehr auf den Durchlauf über alle Klassen zurückfallen, bleiben
+    -- die Abschnitte dann leer. Das gehört gesagt, samt dem einen Handgriff,
+    -- der es behebt.
+    if self.catalogSource == "keine" then
+        parts[#parts + 1] = L["Blizzards Abklingzeiten noch nicht geladen - /fcd blizz öffnet ihr Fenster einmal."]
+    elseif self.catalogSource == "leer" then
+        parts[#parts + 1] = L["Der Client führt für diesen Charakter keine Abklingzeiten - Blizzards Fenster ist ebenso leer."]
+    elseif self.layoutError then
         parts[#parts + 1] = self.layoutError
     end
     panel.status:SetText(table.concat(parts, L["   |   "]))

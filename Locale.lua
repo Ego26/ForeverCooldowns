@@ -1352,6 +1352,12 @@ FCD.AddTranslations("enUS", {
         "Filters: stack ranks=%s, known only=%s, with cooldown only=%s, passives=%s",
     ["/fcd tab - was den Reiter füllt und was herausfällt"] =
         "/fcd tab - what fills the tab and what drops out",
+    ["Für diesen Charakter gibt es noch kein Layout."] =
+        "There is no layout for this character yet.",
+    ["Der Client führt für diesen Charakter keine Abklingzeiten - Blizzards Fenster ist ebenso leer."] =
+        "The client lists no cooldowns for this character - Blizzard's window is just as empty.",
+    ["Blizzards Abklingzeiten noch nicht geladen - /fcd blizz öffnet ihr Fenster einmal."] =
+        "Blizzard's cooldowns are not loaded yet - /fcd blizz opens their window once.",
 })
 
 FCD.SetLanguage("auto")
