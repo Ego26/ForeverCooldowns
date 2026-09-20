@@ -444,7 +444,10 @@ function Profiles:Initialize()
         -- Trank aus wie ein verlorener Eintrag. Einmalig, danach entscheidet
         -- das Optionsfenster.
         for _, bar in ipairs(profile.bars) do
-            if not bar.fcdItemDefaults
+            -- Blizzards Kategorie 7 heißt ebenfalls "Gegenstände". Eine
+            -- Leiste, die sie spiegelt, ist keine Gegenstandsleiste und darf
+            -- deren Vorgaben nicht bekommen.
+            if not bar.fcdItemDefaults and bar.mirrorCategory == nil
                 and (bar.name == "Gegenstände verfolgen" or bar.name == "Gegenstände") then
                 bar.fcdItemDefaults = true
                 bar.visibility = bar.visibility or {}

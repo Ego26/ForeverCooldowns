@@ -1,35 +1,40 @@
-## Was diese Version bringt
+## Was 0.2.0-beta bringt
 
-Erste öffentliche Fassung.
+### Sofort - und ohne einen einzigen Fehler
 
-### Neu
+Eine Abklingzeit zwischen Blizzards Kategorien zu verschieben ließ bisher die
+Wahl zwischen zwei schlechten Hälften: über ihr Lua schreiben und es sofort
+sehen, dafür ihren Viewer tainten, der danach bei jedem Ziel- und
+Aurenereignis rote Fehler wirft - oder sicher schreiben und auf ein Neuladen
+warten.
 
-- **Beliebige Zauber und Gegenstände verfolgen.** Blizzards Manager zeigt nur
-  seine kuratierte Liste; hier kommt alles auf eine eigene Leiste - über den
-  Knopf neben der Suche, per `/fcd spell <ID>` oder durch Ablegen aus der
-  Tasche, auch Zauber, die im Zauberbuch nicht stehen. Ein eigener Abschnitt
-  zeigt, was ihre Liste auslässt.
-- **Ränge gestapelt.** Dieselbe Fähigkeit in dreißig Rängen wird zu einem
-  Eintrag mit dem besten gelernten Rang. Rangzahl steht auf dem Symbol.
-- **Eine Oberfläche für alles.** Forever Cooldowns tritt an die Stelle von
-  Blizzards Abklingzeit-Fenster und ersetzt im Bearbeitungsmodus auch die
-  Einstellungsfenster ihrer Leisten. Die Werte bleiben ihre: ihr "Änderungen
-  speichern" sichert mit, ein Neuladen überlebt es. Beides abschaltbar.
-- **Fertig-Meldung.** Was bereit wird, leuchtet auf und bleibt markiert,
-  solange es bereit ist - mit Blizzards eigenem Leuchten, wo der Client es
-  kennt. Wahlweise mit Ton, einstellbar je Leiste und abweichend je Eintrag.
-- **Blizzards Kategorien bearbeiten.** Mehrfachauswahl, Ziehen zwischen den
-  Abschnitten, Zielknöpfe. Geschrieben wird in ihr eigenes Layout.
-- **Eigene Leisten** mit Ausrichtung, Größe, Abstand, Transparenz,
-  Sichtbarkeit und "Beim Anklicken benutzen" - einstellbar in einem Fenster
-  im Stil ihres Bearbeitungsmodus, dem die Leisten auch folgen.
-- **Profile** speichern, wechseln und als Text teilen; optional automatisch
-  bei Haltung, Form oder Spezialisierung.
-- **Oberfläche auf Deutsch und Englisch**, der Sprache des Clients folgend;
-  `/fcd lang de|en|auto` überschreibt das.
+Die C-Funktion, die beides könnte, `SetCooldownViewerCategorySet`, gibt es in
+diesem Client nicht. Diese Fassung geht deshalb einen dritten Weg: **wir
+zeichnen die Kategorie selbst.**
 
-### Gut zu wissen
+- **Gespiegelte Leisten.** Der Knopf *spiegeln* an jeder Abschnittsüberschrift
+  im Panel legt eine eigene Leiste an, die genau diese Kategorie zeigt. Weil
+  die Leiste unsere ist, steht eine Verschiebung dort in derselben Sekunde -
+  kein Neuladen, kein Aufruf auf Blizzards Objekten, also auch kein Fehler.
+  `/fcd mirror` tut dasselbe aus dem Chat.
+- Alles andere an der Leiste bleibt einstellbar: Ausrichtung, Größe,
+  Sichtbarkeit, Fertig-Meldung, auch je einzelnem Eintrag.
+- **Spiegelung lösen** im Leistenfenster schreibt den jetzigen Bestand fest;
+  danach ist es eine gewöhnliche Leiste, die sich von Hand bearbeiten lässt.
+- `/fcd mirror hide` erklärt, wie man Blizzards eigene Leisten ausblendet -
+  die ziehen weiterhin erst beim Neuladen nach. Ausblenden muss man sie in
+  ihrem Fenster; täte das AddOn es, wäre es genau der Taint, den dieser Weg
+  vermeidet.
 
-`/fcd check` zeigt, was dieser Client hergibt. Jede benötigte API wird
-einzeln geprüft - fehlt eine, entfällt genau das Merkmal, das auf ihr
-aufbaut, nicht das AddOn.
+### Geändert
+
+- Der Neuladen-Knopf und die Zustandszeile unterscheiden jetzt, ob eine
+  Änderung überhaupt noch aussteht oder nur noch Blizzards eigene Leisten
+  nachziehen müssen.
+- Die Kategorienamen liegen nur noch an einer Stelle; Panel und Leisten können
+  sie deshalb nicht mehr verschieden benennen.
+
+### Behoben
+
+- Eine Leiste, die Blizzards Kategorie "Gegenstände" spiegelt, wird nicht mehr
+  mit der eigenen Gegenstandsleiste verwechselt und umbenannt.

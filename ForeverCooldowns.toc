@@ -20,6 +20,7 @@ Ranks.lua
 Items.lua
 Catalog.lua
 Layout.lua
+Mirror.lua
 Viewer.lua
 Widgets.lua
 Art.lua

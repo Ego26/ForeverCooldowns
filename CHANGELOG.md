@@ -4,6 +4,35 @@
 
 Alle nennenswerten Änderungen an Forever Cooldowns.
 
+## [0.2.0-beta]
+
+### Hinzugefügt
+
+- **Gespiegelte Leisten.** Eine eigene Leiste kann eine von Blizzards
+  Kategorien zeigen; ihren Inhalt bestimmt dieselbe Zuordnung, die das Panel
+  bearbeitet. Gezeichnet wird von uns, deshalb steht eine Verschiebung dort
+  sofort - ohne Neuladen und ohne einen einzigen Aufruf auf Blizzards
+  Objekten, also ohne Taint und ohne Lua-Fehler. Der Knopf *spiegeln* sitzt
+  an jeder Abschnittsüberschrift, dazu `/fcd mirror`.
+- *Spiegelung lösen* im Leistenfenster: schreibt den jetzigen Bestand fest,
+  danach ist es eine gewöhnliche Leiste.
+- `/fcd mirror hide` erklärt, wie man Blizzards eigene Leisten ausblendet -
+  in ihrem Fenster, weil jedes Anfassen von unserer Seite genau den Taint
+  erzeugen würde, den dieser Weg vermeidet.
+
+### Geändert
+
+- Der Neuladen-Knopf und die Zustandszeile im Panel unterscheiden jetzt, ob
+  eine Änderung überhaupt noch aussteht oder nur noch Blizzards eigene
+  Leisten nachziehen müssen.
+- Die Kategorienamen liegen nur noch an einer Stelle (`Mirror.lua`); Panel
+  und Leisten können sie deshalb nicht mehr verschieden benennen.
+
+### Behoben
+
+- Eine Leiste, die Blizzards Kategorie "Gegenstände" spiegelt, wurde nicht
+  mehr mit der eigenen Gegenstandsleiste verwechselt und umbenannt.
+
 ## [0.1.0-beta]
 
 ### Hinzugefügt

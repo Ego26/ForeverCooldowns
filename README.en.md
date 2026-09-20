@@ -72,6 +72,7 @@ automatic switching on stance, form or specialisation.
 | `/fcd` | open the panel |
 | `/fcd wide` | switch between narrow and wide view |
 | `/fcd spell <ID>` | add any spell |
+| `/fcd mirror` | mirror Blizzard's categories onto your own bars |
 | `/fcd replace on\|off` | whether FCD takes the place of their window |
 | `/fcd editui on\|off` | our own window in Edit Mode |
 | `/fcd blizz` | fetch Blizzard's window (that is where layouts are switched) |
@@ -108,6 +109,36 @@ There are two ways, and the addon can do both:
 Before every write, the addon checks that the layout blob survives our
 encoding chain losslessly, and takes a backup. `/fcd restore` undoes the last
 write.
+
+## Instant and taint-free: mirrored bars
+
+Both routes above have a catch – one applies late, the other taints. The C
+function that would do both (`SetCooldownViewerCategorySet`) does not exist in
+this client; `/fcd check` lists it as missing.
+
+The way out is a third route: **we draw the category ourselves.** The *mirror*
+button on a section heading in the panel creates an own bar showing exactly
+that category – and because the bar is ours, a move shows up there in the same
+second. No reload, no call on Blizzard's objects, and therefore no error.
+
+```
+/fcd mirror        state, and every category with its number
+/fcd mirror on     mirror essential and utility
+/fcd mirror off    remove every mirrored bar
+/fcd mirror 2      switch a single category on or off
+/fcd mirror hide   how to hide Blizzard's own bars
+```
+
+A mirrored bar has no entry list of its own – it is worked out afresh on every
+change and therefore never stored. Everything else stays adjustable:
+orientation, size, visibility, ready alerts, per entry as well. If you want to
+freeze the contents and then take out individual icons, use *Detach mirror* in
+the bar window.
+
+Blizzard's own bars still catch up only on reload. While both are on screen you
+see two versions; `/fcd mirror hide` explains how to get rid of theirs. You
+have to hide them in **their** window – if we did it, that would be exactly the
+taint this route avoids.
 
 ## Where settings live
 

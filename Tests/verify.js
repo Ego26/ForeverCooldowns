@@ -79,7 +79,8 @@ if (unknown.size === 0) {
 
 // ------------------------------------------------ 3. Modulübergreifende Aufrufe
 console.log('\n== Modulaufrufe ==');
-const MODULES = ['Compat', 'Profiles', 'Ranks', 'Items', 'Catalog', 'Viewer', 'Editor', 'Probe', 'FCD'];
+const MODULES = ['Compat', 'Profiles', 'Ranks', 'Items', 'Catalog', 'Viewer', 'Editor', 'Probe',
+    'Mirror', 'Layout', 'FCD'];
 const defs = new Set();
 for (const src of Object.values(sources)) {
     for (const m of src.matchAll(/^function\s+(\w+)[.:](\w+)\s*\(/gm)) defs.add(m[1] + '.' + m[2]);

@@ -1197,6 +1197,97 @@ FCD.AddTranslations("enUS", {
         "target and aura events - a /reload fixes that.",
     ["Dauerhaft vermeiden: /fcd editui off - dann bleibt ihr Fenster."] =
         "To avoid it for good: /fcd editui off - then their window stays.",
+-- Gespiegelte Kategorien: Blizzards Einordnung auf eigenen Leisten.
+    ["Diese Kategorie lässt sich nicht spiegeln."] = "This category cannot be mirrored.",
+    ["Kein Profil aktiv."] = "No profile active.",
+    ["Leiste spiegeln"] = "Mirror bar",
+    ["Spiegelung aufheben"] = "Stop mirroring",
+    ["Spiegelung lösen"] = "Detach mirror",
+    ["Blizzards eigene Leisten zeigen bis zum nächsten Neuladen noch den"] =
+        "Blizzard's own bars still show the old state until the next reload.",
+    ["alten Stand. Dauerhaft ausblenden - in ihrem Fenster, damit nichts"] =
+        "To hide them for good - in their own window, so that nothing gets",
+    ["getaintet wird:"] = "tainted:",
+    ["  1. /fcd editui off"] = "  1. /fcd editui off",
+    ["  2. Bearbeitungsmodus öffnen und ihre Leiste anklicken"] =
+        "  2. Open Edit Mode and click their bar",
+    ["  3. Haken bei 'Sichtbar' entfernen, Änderungen speichern"] =
+        "  3. Untick \"Visible\", save changes",
+    ["  4. /fcd editui on, falls unser Fenster zurück soll"] =
+        "  4. /fcd editui on if you want our window back",
+    ["spiegeln"] = "mirror",
+    ["gespiegelt"] = "mirrored",
+    ["Auf eigene Leiste spiegeln"] = "Mirror onto own bar",
+    ["Legt eine Leiste an, die genau diese Kategorie zeigt."] =
+        "Creates a bar that shows exactly this category.",
+    ["Wir zeichnen sie selbst: Verschiebungen sind dort sofort zu"] =
+        "We draw it ourselves: moves show up there right away,",
+    ["sehen, ohne Neuladen und ohne Blizzards Viewer anzufassen."] =
+        "without a reload and without touching Blizzard's viewer.",
+    ["Die eigene Leiste für diese Kategorie wird entfernt."] =
+        "The own bar for this category is removed.",
+    ["Blizzards eigene Leiste bleibt davon unberührt."] =
+        "Blizzard's own bar is left untouched.",
+    ["%d Abklingzeit(en) nach '%s' - auf den gespiegelten Leisten sofort zu sehen."] =
+        "%d cooldown(s) moved to '%s' - visible on the mirrored bars right away.",
+    ["Sofort sehen statt neu laden: der Knopf 'spiegeln' an der"] =
+        "See it now instead of reloading: the \"mirror\" button on the section",
+    ["Abschnittsüberschrift legt eine eigene Leiste an, die diese"] =
+        "heading creates an own bar showing that category. We draw it",
+    ["Kategorie zeigt. Die zeichnen wir selbst - sofort und ohne Fehler."] =
+        "ourselves - instant, and without any error.",
+    ["'%s' liegt jetzt auf einer eigenen Leiste - Änderungen daran sind dort sofort zu sehen."] =
+        "'%s' now has its own bar - changes to it show up there right away.",
+    ["Die neue Leiste steht in der Bildschirmmitte; ziehen verschiebt sie."] =
+        "The new bar sits in the middle of the screen; drag it where you want it.",
+    ["Die neue Leiste steht in der Bildschirmmitte - /fcd unlock zum Verschieben."] =
+        "The new bar sits in the middle of the screen - /fcd unlock to move it.",
+    ["Spiegelung von '%s' aufgehoben."] = "Stopped mirroring '%s'.",
+    ["Blizzards eigene Leisten nachziehen (Neuladen)"] = "Update Blizzard's own bars (reload)",
+    ["Auf den gespiegelten Leisten schon zu sehen"] = "Already visible on the mirrored bars",
+    ["Spiegelt Blizzards Kategorie '%s'. Der Inhalt wird nicht gespeichert, sondern bei jeder Änderung neu bestimmt - deshalb ist er hier sofort richtig."] =
+        "Mirrors Blizzard's category '%s'. The contents are not stored but worked out afresh on every change - which is why they are correct here immediately.",
+    ["Die Leiste behält ihren jetzigen Inhalt und folgt Blizzards"] =
+        "The bar keeps its current contents and no longer follows",
+    ["Kategorie nicht mehr."] = "Blizzard's category.",
+    ["Der jetzige Inhalt wird festgeschrieben und gehört danach dieser"] =
+        "The current contents are fixed in place and belong to this bar",
+    ["Leiste. Sie folgt Blizzards Kategorie dann nicht mehr - dafür"] =
+        "afterwards. It no longer follows Blizzard's category - in exchange",
+    ["lassen sich einzelne Symbole herausnehmen."] = "you can take out individual icons.",
+    ["/fcd mirror - Blizzards Kategorien auf eigene Leisten spiegeln"] =
+        "/fcd mirror - mirror Blizzard's categories onto your own bars",
+    ["/fcd instant on|off - über Blizzards Lua schreiben (taintet ihren Viewer)"] =
+        "/fcd instant on|off - write through Blizzard's Lua (taints their viewer)",
+    ["%d gespiegelte Leiste(n) entfernt."] = "%d mirrored bar(s) removed.",
+    ["Nicht angelegt: "] = "Not created: ",
+    ["Es wird schon gespiegelt - /fcd mirror zeigt, was."] =
+        "Mirroring is already on - /fcd mirror shows what.",
+    ["Gespiegelt: "] = "Mirrored: ",
+    ["Die Leisten stehen in der Bildschirmmitte übereinander."] =
+        "The bars sit stacked in the middle of the screen.",
+    ["/fcd unlock zum Verschieben, danach /fcd lock."] =
+        "/fcd unlock to move them, /fcd lock when done.",
+    ["'%s' wird jetzt gespiegelt."] = "'%s' is now mirrored.",
+    ["Es wird nichts gespiegelt."] = "Nothing is being mirrored.",
+    ["Eine gespiegelte Leiste zeigt genau das, was in Blizzards"] =
+        "A mirrored bar shows exactly what sits in Blizzard's category -",
+    ["Kategorie liegt - gezeichnet von uns. Eine Verschiebung im Panel"] =
+        "drawn by us. A move in the panel is visible there right away,",
+    ["ist dort sofort zu sehen, ohne Neuladen und ohne ihren Viewer"] =
+        "without a reload and without touching their viewer. So there is",
+    ["anzufassen. Es kann deshalb auch kein Fehler entstehen."] =
+        "no way for an error to appear either.",
+    ["/fcd mirror on   - essenziell und strategisch spiegeln"] =
+        "/fcd mirror on   - mirror essential and utility",
+    ["/fcd mirror off  - alle gespiegelten Leisten entfernen"] =
+        "/fcd mirror off  - remove all mirrored bars",
+    ["/fcd mirror hide - wie man Blizzards eigene Leisten ausblendet"] =
+        "/fcd mirror hide - how to hide Blizzard's own bars",
+    ["In dieser Kategorie liegt gerade nichts Gelerntes - die Leiste"] =
+        "Nothing you have learned sits in this category right now - the bar",
+    ["bleibt leer und unsichtbar, bis etwas hineinkommt."] =
+        "stays empty and invisible until something lands in it.",
 })
 
 FCD.SetLanguage("auto")

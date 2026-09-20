@@ -4,6 +4,34 @@
 
 All notable changes to Forever Cooldowns.
 
+## [0.2.0-beta]
+
+### Added
+
+- **Mirrored bars.** A bar of your own can show one of Blizzard's categories;
+  its contents come from the same assignment the panel edits. We draw it, so a
+  move shows up there immediately - no reload and not a single call on
+  Blizzard's objects, which means no taint and no Lua errors. The *mirror*
+  button sits on every section heading, and there is `/fcd mirror`.
+- *Detach mirror* in the bar window: freezes the current contents, after which
+  it is an ordinary bar.
+- `/fcd mirror hide` explains how to hide Blizzard's own bars - in their
+  window, because touching them from our side would create exactly the taint
+  this route avoids.
+
+### Changed
+
+- The reload button and the status line in the panel now distinguish between a
+  change that is still pending and one where only Blizzard's own bars have yet
+  to catch up.
+- Category names live in one place only (`Mirror.lua`), so the panel and the
+  bars can no longer name them differently.
+
+### Fixed
+
+- A bar mirroring Blizzard's "Items" category is no longer mistaken for your
+  own item bar and renamed.
+
 ## [0.1.0-beta]
 
 ### Added

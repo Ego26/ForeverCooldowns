@@ -11,6 +11,9 @@
 # es doch einmal im Ordner, soll es nicht mitgehen.
 node_modules/
 package-lock.json
+# Legt npm beim Installieren der Pruefwerkzeuge an. Welche das sind, steht in
+# Tests/README.md - eine zweite Stelle dafuer waere eine, die veraltet.
+Tests/package.json
 
 # ------------------------------------------------------------------ Ausgaben
 

@@ -43,6 +43,15 @@ list leaves out. The `+` next to the search box takes any spell or item ID —
 including things the spellbook does not list at all. Items can also be dragged
 straight from your bags.
 
+### Blizzard's categories, visible at once
+
+The **mirror** button on a section heading creates a bar of your own showing
+exactly that category. Its contents come from the same assignment the panel
+edits — but we draw it. A move therefore shows up there in the same second:
+no reload, no call on Blizzard's objects, and so no error message either.
+
+The same from chat: `/fcd mirror`.
+
 ### Ready alerts
 
 When something becomes ready it lights up — using Blizzard's own spell alert
@@ -121,14 +130,17 @@ the addon. `/fcd check` shows that probe as a list. If a client protects
 cooldown values, for instance, nobody can detect the end of a cooldown, and
 ready alerts show up as missing.
 
-**Instant mode has a price - which is why it is off.** By default, changes to
-Blizzard's categories take effect on the next reload; that is the safe route.
-Turn on `/fcd instant on` and they apply without
-reloading because they go through their own data model. Once addon code
-touches that, it counts as *tainted* for the rest of the session and their
-viewer can no longer read auras — until the next `/reload`. It affects their
-display, not ours. If you would rather not: `/fcd instant off` writes safely,
-but only takes effect on reload.
+**Instant is possible — on a bar of your own.** Blizzard's categories can be
+written two ways, and both have a catch: through their data model it applies
+at once but taints their viewer, which then throws errors on target and aura
+events until the next `/reload`; through `SetLayoutData` nothing is tainted
+but it only applies on reload. The latter is the default.
+
+The way out is the *mirror* button on a section heading: it creates a bar of
+your own showing exactly that category. We draw it, so a move shows up there
+in the same second — no reload, no call on Blizzard's objects, and therefore
+no error message at all. Blizzard's own bars still catch up only on reload;
+`/fcd mirror hide` explains how to hide them in their window.
 
 **Switching layouts only works in their window.** Their layout manager is
 protected; calling it from outside would taint the session. `/fcd blizz`

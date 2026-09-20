@@ -64,7 +64,8 @@ local function printHelp()
     printMessage(L["/fcd - Blizzards Abklingzeit-Einstellungen mit unserem Panel öffnen"])
     printMessage(L["/fcd dock - Panel neben Blizzards Fenster ein-/ausblenden"])
     printMessage(L["/fcd wide - zwischen schmaler und breiter Ansicht wechseln"])
-    printMessage(L["/fcd instant on|off - sofort wirksam (Standard) oder erst nach /reload"])
+    printMessage(L["/fcd mirror - Blizzards Kategorien auf eigene Leisten spiegeln"])
+    printMessage(L["/fcd instant on|off - über Blizzards Lua schreiben (taintet ihren Viewer)"])
     printMessage(L["/fcd log - alle bisherigen Ausgaben zum Kopieren"])
     printMessage(L["/fcd store - Bestand sofort in Blizzards Layout sichern"])
     printMessage(L["/fcd blizz - Blizzards Fenster holen (Layout wechseln)"])
@@ -170,6 +171,8 @@ local function dispatch(command, argument)
             printMessage(L["/fcd instant on   - sofort wirksam, taintet Blizzards Viewer"])
             printMessage(L["/fcd instant off  - sicher, wirkt nach /reload"])
         end
+    elseif command == "mirror" then
+        FCD:MirrorCommand(trim(argument))
     elseif command == "wide" then
         FCD.Dock:Build()
         FCD.Dock:SetWide(not FCD.Dock.state.wide)
@@ -1162,8 +1165,115 @@ StaticPopupDialogs["FCD_NEW_LAYOUT_PROFILE"] = {
     end,
 }
 
+-- Blizzards Kategorien auf eigenen Leisten spiegeln.
+--
+-- Das ist der Weg, der sofort wirkt UND nichts taintet: wir zeichnen die
+-- Kategorie selbst, statt Blizzards Viewer dazu zu bringen, sie neu zu
+-- zeichnen. Ihre eigenen Leisten ziehen weiterhin erst beim Neuladen nach -
+-- deshalb steht am Ende, wie man sie loswird.
+function FCD:MirrorCommand(argument)
+    local Mirror = self.Mirror
+    local mode = string.lower(argument or "")
+
+    if mode == "off" or mode == "aus" then
+        local removed = 0
+        for _, bar in ipairs(Mirror:List()) do
+            if Mirror:Disable(bar.mirrorCategory) then
+                removed = removed + 1
+            end
+        end
+        printMessage(string.format(L["%d gespiegelte Leiste(n) entfernt."], removed))
+        self.Dock:Refresh()
+        return
+    end
+
+    if mode == "hide" or mode == "ausblenden" then
+        for _, line in ipairs(Mirror:GetHideInstructions()) do
+            printMessage(line)
+        end
+        return
+    end
+
+    if mode == "on" or mode == "an" then
+        -- Die beiden Leisten, die Blizzards Abklingzeit-Manager überhaupt
+        -- zeigt: essenziell und strategisch. Alles weitere über die Nummer
+        -- oder den Knopf an der Abschnittsüberschrift.
+        local added = {}
+        for _, category in ipairs({ 0, 1 }) do
+            if not Mirror:IsMirrored(category) then
+                local bar, err = Mirror:Enable(category)
+                if bar then
+                    added[#added + 1] = Mirror:CategoryName(category)
+                else
+                    printMessage(L["Nicht angelegt: "] .. tostring(err))
+                end
+            end
+        end
+        if #added == 0 then
+            printMessage(L["Es wird schon gespiegelt - /fcd mirror zeigt, was."])
+        else
+            printMessage(L["Gespiegelt: "] .. table.concat(added, ", "))
+            printMessage(L["Die Leisten stehen in der Bildschirmmitte übereinander."])
+            printMessage(L["/fcd unlock zum Verschieben, danach /fcd lock."])
+        end
+        for _, line in ipairs(Mirror:GetHideInstructions()) do
+            printMessage(line)
+        end
+        self.Dock:Refresh()
+        return
+    end
+
+    local number = tonumber(mode)
+    if number then
+        local mirrored, err = Mirror:Toggle(number)
+        if mirrored == nil then
+            printMessage(L["Nicht angelegt: "] .. tostring(err))
+        elseif mirrored then
+            printMessage(string.format(L["'%s' wird jetzt gespiegelt."],
+                Mirror:CategoryName(number)))
+        else
+            printMessage(string.format(L["Spiegelung von '%s' aufgehoben."],
+                Mirror:CategoryName(number)))
+        end
+        self.Dock:Refresh()
+        return
+    end
+
+    -- Ohne Argument: Zustand und was möglich wäre.
+    local active = Mirror:List()
+    if #active == 0 then
+        printMessage(L["Es wird nichts gespiegelt."])
+    else
+        local names = {}
+        for _, bar in ipairs(active) do
+            names[#names + 1] = string.format("%s (%d)",
+                Mirror:CategoryName(bar.mirrorCategory),
+                #self.Viewer:EntriesOf(bar))
+        end
+        printMessage(L["Gespiegelt: "] .. table.concat(names, ", "))
+    end
+    printMessage("")
+    printMessage(L["Eine gespiegelte Leiste zeigt genau das, was in Blizzards"])
+    printMessage(L["Kategorie liegt - gezeichnet von uns. Eine Verschiebung im Panel"])
+    printMessage(L["ist dort sofort zu sehen, ohne Neuladen und ohne ihren Viewer"])
+    printMessage(L["anzufassen. Es kann deshalb auch kein Fehler entstehen."])
+    printMessage("")
+    printMessage(L["/fcd mirror on   - essenziell und strategisch spiegeln"])
+    printMessage(L["/fcd mirror off  - alle gespiegelten Leisten entfernen"])
+    printMessage(L["/fcd mirror hide - wie man Blizzards eigene Leisten ausblendet"])
+    for _, category in ipairs(Mirror.MIRRORABLE) do
+        printMessage(string.format("/fcd mirror %d%s - %s",
+            category, Mirror:IsMirrored(category) and " *" or "  ",
+            Mirror:CategoryName(category)))
+    end
+end
+
 function FCD:RefreshData()
     self.Catalog:Rebuild()
+    -- Ein neu gelernter Rang ändert, was auf einer gespiegelten Leiste
+    -- steht: sie zeigt nur Gelerntes. Also erst den Zwischenstand wegwerfen,
+    -- dann zeichnen.
+    self.Mirror:Invalidate()
     self.Viewer:RebuildAll()
 end
 
@@ -1298,9 +1408,10 @@ local function onEvent(_, event, ...)
         if profile then
             local parts = {}
             for _, bar in ipairs(profile.bars) do
-                if #bar.entries > 0 then
+                local count = #FCD.Viewer:EntriesOf(bar)
+                if count > 0 then
                     parts[#parts + 1] = string.format("%s: %d",
-                        bar.name or (L["Leiste "] .. tostring(bar.id)), #bar.entries)
+                        bar.name or (L["Leiste "] .. tostring(bar.id)), count)
                 end
             end
             -- "Alle Leisten leer" las sich wie ein Verlust, auch wenn nie

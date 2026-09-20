@@ -151,7 +151,7 @@ local function isItemBar(bar)
     if bar.fcdItemDefaults then
         return true
     end
-    local entries = bar.entries or {}
+    local entries = FCD.Viewer:EntriesOf(bar)
     if #entries == 0 then
         return false
     end
@@ -660,6 +660,43 @@ local function build()
     end)
 
     dialog:SetHeight(-offsetY + PAD)
+    dialog.baseHeight = -offsetY + PAD
+
+    -- Nur bei einer gespiegelten Leiste sichtbar: woher ihr Inhalt kommt und
+    -- wie man ihn übernimmt. Die beiden Elemente hängen unter dem letzten
+    -- Knopf; die Fensterhöhe zieht in Refresh nach, damit das Fenster bei
+    -- einer gewöhnlichen Leiste nicht mit leerem Raum endet.
+    dialog.mirrorNote = dialog:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    dialog.mirrorNote:SetPoint("TOPLEFT", PAD, offsetY - 4)
+    dialog.mirrorNote:SetPoint("TOPRIGHT", -PAD, offsetY - 4)
+    dialog.mirrorNote:SetHeight(46)
+    dialog.mirrorNote:SetJustifyH("LEFT")
+    dialog.mirrorNote:SetJustifyV("TOP")
+    dialog.mirrorNote:SetSpacing(2)
+
+    dialog.mirrorRelease = CreateFrame("Button", nil, dialog, "UIPanelButtonTemplate")
+    dialog.mirrorRelease:SetSize(WIDTH - 2 * PAD, 22)
+    dialog.mirrorRelease:SetPoint("TOPLEFT", PAD, offsetY - 52)
+    dialog.mirrorRelease:SetText(L["Spiegelung lösen"])
+    dialog.mirrorRelease:SetScript("OnClick", function()
+        if current and FCD.Mirror:Release(current) then
+            FCD.Print(L["Die Leiste behält ihren jetzigen Inhalt und folgt Blizzards"])
+            FCD.Print(L["Kategorie nicht mehr."])
+            BarOptions:Refresh()
+            FCD.Dock:Refresh()
+        end
+    end)
+    dialog.mirrorRelease:SetScript("OnEnter", function(self)
+        FCD.Widgets.ShowTooltip(self, "ANCHOR_RIGHT", L["Spiegelung lösen"],
+            L["Der jetzige Inhalt wird festgeschrieben und gehört danach dieser"],
+            L["Leiste. Sie folgt Blizzards Kategorie dann nicht mehr - dafür"],
+            L["lassen sich einzelne Symbole herausnehmen."])
+    end)
+    dialog.mirrorRelease:SetScript("OnLeave", FCD.Widgets.HideTooltip)
+
+    -- Was die beiden zusätzlich brauchen: Text, Abstand, Knopf, Rand.
+    dialog.mirrorHeight = 52 + 22 + PAD
+
     return dialog
 end
 
@@ -685,6 +722,21 @@ function BarOptions:Refresh()
     end
     -- Gegenstände werden nicht gelernt; der Schalter hätte keine Wirkung.
     dialog.unknownCheck:SetShown(not items)
+
+    -- Bei einer gespiegelten Leiste gehört dazu, dass ihr Inhalt nicht ihr
+    -- eigener ist. Ohne diesen Satz sucht man das Hinzufügen von Symbolen
+    -- und findet es nirgends.
+    local mirrored = FCD.Mirror:IsMirror(current)
+    dialog.mirrorNote:SetShown(mirrored)
+    dialog.mirrorRelease:SetShown(mirrored)
+    if mirrored then
+        dialog.mirrorNote:SetText(string.format(
+            L["Spiegelt Blizzards Kategorie '%s'. Der Inhalt wird nicht gespeichert, sondern bei jeder Änderung neu bestimmt - deshalb ist er hier sofort richtig."],
+            FCD.Mirror:CategoryName(current.mirrorCategory)))
+        dialog:SetHeight(dialog.baseHeight + dialog.mirrorHeight)
+    else
+        dialog:SetHeight(dialog.baseHeight)
+    end
 
     -- Der gespeicherte Name ist die Kennung der Leiste und bleibt deutsch;
     -- fuer die Anzeige wird er uebersetzt, sofern es eine Uebersetzung gibt.
@@ -886,6 +938,10 @@ local function acquireEntryRow(index)
     end, function(value)
         if row.entry then
             setEntryAlert(row.entry, value)
+            -- Auf einer gespiegelten Leiste wird die Eintragsliste bei jeder
+            -- Änderung neu gebaut. Ohne dieses Festhalten wäre die Einstellung
+            -- beim nächsten gelernten Rang wieder weg.
+            FCD.Mirror:RememberEntry(entryBar, row.entry)
             BarOptions:RefreshEntries()
             applied()
             -- applied() baut die Leisten neu auf; die Vorschau muss danach
@@ -904,6 +960,7 @@ local function acquireEntryRow(index)
     end, function(value)
         if row.entry then
             row.entry.alertSoundID = (value ~= INHERIT) and value or nil
+            FCD.Mirror:RememberEntry(entryBar, row.entry)
             BarOptions:RefreshEntries()
             -- Wie im Leistenfenster: sofort vorspielen, sonst wählt man einen
             -- Namen und weiß nicht, was er hergibt.
@@ -979,7 +1036,7 @@ function BarOptions:RefreshEntries()
         return
     end
 
-    local entries = entryBar.entries or {}
+    local entries = FCD.Viewer:EntriesOf(entryBar)
     entryDialog.title:SetText(L["Fertig-Meldung: "]
         .. (entryBar.name and L[entryBar.name]
             or (L["Leiste "] .. tostring(entryBar.id))))

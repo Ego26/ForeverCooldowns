@@ -75,6 +75,7 @@ automatischer Wechsel bei Haltung, Form oder Spezialisierung.
 | `/fcd` | Panel öffnen |
 | `/fcd wide` | zwischen schmaler und breiter Ansicht wechseln |
 | `/fcd spell <ID>` | beliebigen Zauber aufnehmen |
+| `/fcd mirror` | Blizzards Kategorien auf eigene Leisten spiegeln |
 | `/fcd replace on\|off` | ob FCD an die Stelle ihres Fensters tritt |
 | `/fcd editui on\|off` | eigenes Fenster im Bearbeitungsmodus |
 | `/fcd blizz` | Blizzards Fenster holen (dort wird das Layout gewechselt) |
@@ -112,6 +113,37 @@ Es gibt zwei Wege, und das AddOn kann beide:
 Vor jedem Schreibvorgang wird geprüft, ob der Layout-Blob unsere Kodierkette
 verlustfrei übersteht, und eine Sicherung angelegt. `/fcd restore` nimmt den
 letzten Schreibvorgang zurück.
+
+## Sofort sichtbar, ohne Taint: gespiegelte Leisten
+
+Beide Wege oben haben einen Haken – der eine wirkt spät, der andere taintet.
+Die C-Funktion, die beides könnte (`SetCooldownViewerCategorySet`), gibt es in
+diesem Client nicht; `/fcd check` führt sie als *fehlt*.
+
+Der Ausweg ist ein dritter Weg: **wir zeichnen die Kategorie selbst.** Der
+Knopf *spiegeln* an einer Abschnittsüberschrift im Panel legt eine eigene
+Leiste an, die genau diese Kategorie zeigt – und weil sie unsere ist, steht
+eine Verschiebung dort in derselben Sekunde. Kein Neuladen, kein Aufruf auf
+Blizzards Objekten, also auch kein Fehler.
+
+```
+/fcd mirror        Zustand und alle Kategorien mit Nummer
+/fcd mirror on     essenziell und strategisch spiegeln
+/fcd mirror off    alle gespiegelten Leisten entfernen
+/fcd mirror 2      eine einzelne Kategorie an- oder abschalten
+/fcd mirror hide   wie man Blizzards eigene Leisten ausblendet
+```
+
+Eine gespiegelte Leiste hat keine eigene Eintragsliste – sie wird bei jeder
+Änderung neu bestimmt und deshalb auch nicht gespeichert. Was daran einstellbar
+ist, bleibt es: Ausrichtung, Größe, Sichtbarkeit, Fertig-Meldung, auch je
+Eintrag. Wer den Bestand festhalten und danach einzelne Symbole herausnehmen
+will, nimmt im Leistenfenster *Spiegelung lösen*.
+
+Blizzards eigene Leisten ziehen weiterhin erst beim Neuladen nach. Solange
+beide stehen, sieht man zweierlei; `/fcd mirror hide` sagt, wie man ihre
+loswird. Ausblenden muss man sie in **ihrem** Fenster – täten wir es, wäre es
+genau der Taint, den dieser Weg vermeidet.
 
 ## Wo die Einstellungen liegen
 

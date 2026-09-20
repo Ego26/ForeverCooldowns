@@ -297,19 +297,10 @@ end
 
 -- --------------------------------------------------------- Zustand lesen
 
--- Wortlaut wie in Blizzards Fenster, damit die Abschnitte wiedererkennbar
--- sind. "Verfolgte Buffs" hieß bei ihnen nie so.
-local CATEGORY_NAMES = {
-    [-2] = "Nicht angezeigt (passiv)",
-    [-1] = "Nicht angezeigt",
-    [0] = "Essenzielle Abklingzeiten",
-    [1] = "Strategische Abklingzeiten",
-    [2] = "Verfolgte Stärkungseffekte",
-    [3] = "Verfolgte Leisten",
-    [4] = "Gruppenstärkungseffekte",
-    [7] = "Gegenstände",
-    [8] = "Gegenstände (verfolgt)",
-}
+-- Die Kategorienamen stehen in Mirror.lua. Zwei Tabellen hätten sich
+-- irgendwann unterschieden, und dann hieße dieselbe Kategorie im Panel
+-- anders als auf der Leiste, die sie spiegelt.
+local CATEGORY_NAMES = FCD.Mirror.CATEGORY_NAMES
 
 -- Blizzard teilt die Kategorien auf zwei Reiter auf, jeder mit eigenem
 -- "Nicht angezeigt". Welcher Reiter für einen Eintrag zuständig ist, sagt
@@ -373,7 +364,11 @@ local function ownBar(name, create)
         return nil
     end
     for _, bar in ipairs(profile.bars) do
-        if bar.name == name then
+        -- Eine gespiegelte Leiste trägt den Namen ihrer Kategorie und kann
+        -- deshalb genauso heißen wie eine eigene. Sie gehört uns aber nicht:
+        -- ihr Inhalt kommt aus Blizzards Zuordnung und ließe sich hier nicht
+        -- verändern.
+        if bar.name == name and bar.mirrorCategory == nil then
             return bar
         end
     end
@@ -403,12 +398,15 @@ local function itemBar(create)
     end
 
     for _, bar in ipairs(profile.bars) do
-        if bar.name == ITEM_BAR_NAME then
+        if bar.name == ITEM_BAR_NAME and bar.mirrorCategory == nil then
             return prepare(bar)
         end
     end
     for _, bar in ipairs(profile.bars) do
-        if bar.name == ITEM_BAR_LEGACY then
+        -- Blizzards Kategorie 7 heißt ebenfalls "Gegenstände". Eine
+        -- gespiegelte Leiste darf deshalb nicht umbenannt und vereinnahmt
+        -- werden, sonst verschwände ihre Spiegelung.
+        if bar.name == ITEM_BAR_LEGACY and bar.mirrorCategory == nil then
             bar.name = ITEM_BAR_NAME
             return prepare(bar)
         end
@@ -441,9 +439,8 @@ end
 
 local function categoryName(value)
     -- Der Name in der Tabelle ist der deutsche Schlüssel; übersetzt wird
-    -- hier, damit ein späterer Sprachwechsel greift.
-    return (CATEGORY_NAMES[value] and L[CATEGORY_NAMES[value]])
-        or (L["Kategorie "] .. tostring(value))
+    -- erst beim Anzeigen, damit ein späterer Sprachwechsel greift.
+    return FCD.Mirror:CategoryName(value)
 end
 
 -- Standard-Einordnung je Abklingzeit.
@@ -496,6 +493,10 @@ function Dock:LoadLayout()
     self.layout = layout
     self.layoutError = err
     self.staticMap, self.staticOrder, self.staticHidden = buildStaticMap()
+    -- Die gespiegelten Leisten lesen dasselbe Layout. Wird es hier neu
+    -- geholt, kann ihr Zwischenstand veraltet sein - auch dann, wenn die
+    -- Änderung aus Blizzards eigenem Fenster kam.
+    FCD.Mirror:Invalidate()
     return layout
 end
 
@@ -1074,6 +1075,7 @@ function Dock:AssignSelection(category)
         end
         wipe(state.selection)
         self:LoadLayout()
+        FCD.Mirror:Refresh()
         self:Refresh()
         FCD.Print(string.format(L["%d Abklingzeit(en) nach '%s' - sofort wirksam."],
             changed, categoryName(category)))
@@ -1107,11 +1109,67 @@ function Dock:AssignSelection(category)
         return
     end
 
+    -- Blizzards eigene Leisten lesen das Layout erst beim Neuladen wieder;
+    -- für sie steht die Änderung also noch aus.
     self.needsReload = true
     wipe(state.selection)
+
+    -- Unsere gespiegelten Leisten zeichnen wir selbst. Für sie ist dieselbe
+    -- Änderung in derselben Sekunde da - ohne dass eine Zeile Blizzard-Lua
+    -- gelaufen wäre und damit ohne jeden Taint.
+    local mirrored = FCD.Mirror:Refresh()
     self:Refresh()
+
+    if mirrored then
+        FCD.Print(string.format(
+            L["%d Abklingzeit(en) nach '%s' - auf den gespiegelten Leisten sofort zu sehen."],
+            moved, categoryName(category)))
+        return
+    end
+
     FCD.Print(string.format(L["%d Abklingzeit(en) nach '%s' - wirksam nach dem Neuladen."],
         moved, categoryName(category)))
+    -- Einmal je Sitzung: dass es auch ohne Neuladen geht, sieht man dem
+    -- Panel sonst nicht an.
+    if not self.mirrorHintShown then
+        self.mirrorHintShown = true
+        FCD.Print(L["Sofort sehen statt neu laden: der Knopf 'spiegeln' an der"])
+        FCD.Print(L["Abschnittsüberschrift legt eine eigene Leiste an, die diese"])
+        FCD.Print(L["Kategorie zeigt. Die zeichnen wir selbst - sofort und ohne Fehler."])
+    end
+end
+
+-- Eine Kategorie auf eine eigene Leiste spiegeln oder die Spiegelung wieder
+-- aufheben. Der Knopf dafür sitzt an der Überschrift des Abschnitts.
+function Dock:ToggleMirror(category)
+    local mirrored, err = FCD.Mirror:Toggle(category)
+    if mirrored == nil then
+        FCD.Print(L["Nicht angelegt: "] .. tostring(err))
+        return
+    end
+    if mirrored then
+        FCD.Print(string.format(
+            L["'%s' liegt jetzt auf einer eigenen Leiste - Änderungen daran sind dort sofort zu sehen."],
+            categoryName(category)))
+        -- Eine leere Leiste wird nicht gezeichnet. Ohne diesen Satz sucht man
+        -- sie auf dem Bildschirm und hält das Spiegeln für kaputt.
+        local bar = FCD.Mirror:FindBar(category)
+        local count = bar and #FCD.Viewer:EntriesOf(bar) or 0
+        if count == 0 then
+            FCD.Print(L["In dieser Kategorie liegt gerade nichts Gelerntes - die Leiste"])
+            FCD.Print(L["bleibt leer und unsichtbar, bis etwas hineinkommt."])
+        elseif FCD.Viewer.unlocked then
+            FCD.Print(L["Die neue Leiste steht in der Bildschirmmitte; ziehen verschiebt sie."])
+        else
+            FCD.Print(L["Die neue Leiste steht in der Bildschirmmitte - /fcd unlock zum Verschieben."])
+        end
+        for _, line in ipairs(FCD.Mirror:GetHideInstructions()) do
+            FCD.Print(line)
+        end
+    else
+        FCD.Print(string.format(L["Spiegelung von '%s' aufgehoben."], categoryName(category)))
+    end
+    self:Refresh()
 end
 
 -- ------------------------------------------------------------ Ziehen
@@ -1540,8 +1598,46 @@ local function createHeader(parent)
     header.background:SetColorTexture(1, 1, 1, 0.08)
     header.text = header:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     header.text:SetPoint("LEFT", 8, 0)
+    header.text:SetJustifyH("LEFT")
+    -- Die Zeile ist 22 Pixel hoch; ein Umbruch würde aus der Überschrift
+    -- herauslaufen. Lieber abschneiden, sobald rechts der Knopf steht.
+    header.text:SetWordWrap(false)
     header.toggle = header:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     header.toggle:SetPoint("RIGHT", -8, 0)
+
+    -- Rechts in der Überschrift: diese Kategorie auf eine eigene Leiste
+    -- legen. Der Knopf steht genau dort, wo man die Kategorie ohnehin
+    -- ansieht - als Slash-Befehl hätte ihn niemand gefunden.
+    header.mirror = CreateFrame("Button", nil, header)
+    header.mirror:SetSize(86, 16)
+    header.mirror:SetPoint("RIGHT", -24, 0)
+    header.mirror.background = header.mirror:CreateTexture(nil, "ARTWORK")
+    header.mirror.background:SetAllPoints()
+    header.mirror.text = header.mirror:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    header.mirror.text:SetPoint("CENTER")
+    header.mirror:SetScript("OnClick", function(self)
+        if self.category ~= nil then
+            Dock:ToggleMirror(self.category)
+        end
+    end)
+    header.mirror:SetScript("OnEnter", function(self)
+        if self.category == nil then
+            return
+        end
+        if FCD.Mirror:IsMirrored(self.category) then
+            FCD.Widgets.ShowTooltip(self, "ANCHOR_LEFT", L["Spiegelung aufheben"],
+                L["Die eigene Leiste für diese Kategorie wird entfernt."],
+                L["Blizzards eigene Leiste bleibt davon unberührt."])
+        else
+            FCD.Widgets.ShowTooltip(self, "ANCHOR_LEFT", L["Auf eigene Leiste spiegeln"],
+                L["Legt eine Leiste an, die genau diese Kategorie zeigt."],
+                L["Wir zeichnen sie selbst: Verschiebungen sind dort sofort zu"],
+                L["sehen, ohne Neuladen und ohne Blizzards Viewer anzufassen."])
+        end
+    end)
+    header.mirror:SetScript("OnLeave", FCD.Widgets.HideTooltip)
+    header.mirror:Hide()
+
     header:SetScript("OnClick", function(self)
         state.collapsed[self.sectionID] = not state.collapsed[self.sectionID]
         Dock:Refresh()
@@ -2453,6 +2549,31 @@ function Dock:Refresh()
             or string.format(L["%s  (%d, davon %d gelernt)"],
                 section.title, #section.items, section.knownCount or 0))
         header.toggle:SetText(state.collapsed[section.id] and "+" or "-")
+
+        -- Spiegeln lohnt nur bei einer echten Kategorie: "Nicht angezeigt"
+        -- als Leiste wäre ein Widerspruch, und die eigenen Reiter haben
+        -- ohnehin schon ihre Leiste.
+        local mirrorable = type(section.category) == "number"
+            and section.category >= 0
+            and FCD.Mirror.CATEGORY_NAMES[section.category] ~= nil
+        -- Der Titel endet vor dem, was rechts steht - sonst schöbe sich ein
+        -- langer Kategoriename unter den Knopf.
+        header.text:ClearAllPoints()
+        header.text:SetPoint("LEFT", 8, 0)
+        header.text:SetPoint("RIGHT",
+            mirrorable and header.mirror or header.toggle, "LEFT", -6, 0)
+
+        if mirrorable then
+            local on = FCD.Mirror:IsMirrored(section.category)
+            header.mirror.category = section.category
+            header.mirror.text:SetText(on and L["gespiegelt"] or L["spiegeln"])
+            header.mirror.background:SetColorTexture(
+                on and 0.20 or 0.10, on and 0.34 or 0.10, on and 0.20 or 0.12, 0.9)
+            header.mirror:Show()
+        else
+            header.mirror.category = nil
+            header.mirror:Hide()
+        end
         header:Show()
 
         panel.layout[#panel.layout + 1] = { header = header, section = section }
@@ -2664,9 +2785,17 @@ function Dock:Refresh()
         end
     else
         if self.needsReload then
-            panel.reloadButton:SetText(L["Änderungen anwenden (Neuladen)"])
+            -- Mit gespiegelten Leisten ist die Änderung längst zu sehen;
+            -- offen ist dann nur noch Blizzards eigene Anzeige. Das ist ein
+            -- anderer Satz als "Änderungen stehen aus".
+            if FCD.Mirror:HasAny() then
+                panel.reloadButton:SetText(L["Blizzards eigene Leisten nachziehen (Neuladen)"])
+                parts[#parts + 1] = L["Auf den gespiegelten Leisten schon zu sehen"]
+            else
+                panel.reloadButton:SetText(L["Änderungen anwenden (Neuladen)"])
+                parts[#parts + 1] = L["Änderungen stehen aus"]
+            end
             panel.reloadButton:Show()
-            parts[#parts + 1] = L["Änderungen stehen aus"]
         else
             panel.reloadButton:Hide()
         end

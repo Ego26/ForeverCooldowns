@@ -8,7 +8,7 @@ FCD.name = ADDON_NAME
 -- Steht die Version nicht in der .toc - ungepackte Arbeitskopie, in der noch
 -- der Platzhalter steht -, gilt diese hier. Sie ist der einzige Ort, an dem
 -- die Zahl im Quelltext gepflegt wird.
-FCD.FALLBACK_VERSION = "0.1.0-beta"
+FCD.FALLBACK_VERSION = "0.2.0-beta"
 FCD.version = FCD.FALLBACK_VERSION
 
 -- GetBuildInfo liefert Version, Buildnummer, Datum und Interface-Nummer.
