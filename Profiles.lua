@@ -309,20 +309,25 @@ local function adoptDefaultMirrors(profile)
     if type(profile) ~= "table" or type(profile.bars) ~= "table" then
         return
     end
-    for _, bar in ipairs(profile.bars) do
-        if bar.mirrorCategory ~= nil then
-            return
-        end
-    end
-
     for _, category in ipairs(DEFAULT_MIRRORS) do
+        -- Wer diese Kategorie schon spiegelt, hat selbst entschieden.
+        local already = false
         for _, bar in ipairs(profile.bars) do
-            if bar.name == LEGACY_DEFAULT_NAMES[category]
-                and #(bar.entries or {}) == 0 then
-                bar.name = FCD.Mirror.CATEGORY_NAMES[category]
-                bar.mirrorCategory = category
-                bar.mirrorEntryOptions = {}
+            if bar.mirrorCategory == category then
+                already = true
                 break
+            end
+        end
+        if not already then
+            for _, bar in ipairs(profile.bars) do
+                if bar.name == LEGACY_DEFAULT_NAMES[category]
+                    and bar.mirrorCategory == nil
+                    and #(bar.entries or {}) == 0 then
+                    bar.name = FCD.Mirror.CATEGORY_NAMES[category]
+                    bar.mirrorCategory = category
+                    bar.mirrorEntryOptions = {}
+                    break
+                end
             end
         end
     end

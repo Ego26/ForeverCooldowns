@@ -433,6 +433,152 @@ end
 -- nicht an: jeder Aufruf auf ihren Objekten ist genau der Taint, den dieser
 -- Weg vermeiden soll. Ausblenden muss deshalb der Spieler, in ihrem eigenen
 -- Fenster - dort kostet es nichts.
+-- ------------------------------------------- Blizzards Leisten abschalten
+
+-- Wenn wir ihre Kategorien zeigen, sollen ihre Leisten weg - sonst steht
+-- alles doppelt, und bis zum nächsten Neuladen sogar mit verschiedenem
+-- Inhalt. Nur: ihre Rahmen anzufassen ist genau der Taint, den dieser ganze
+-- Weg vermeidet. Ein :Hide() auf ihrem Viewer wäre die naheliegende Zeile
+-- und die falsche.
+--
+-- Es gibt zwei Wege, die ihren Code gar nicht erst berühren:
+--
+--   * Die Einstellung, die der Spieler selbst in den Spieloptionen umlegen
+--     würde. Ist sie als CVar vorhanden, setzen wir sie - Blizzards eigener
+--     Code räumt dann auf, und zwar sofort.
+--   * Sonst das nachladbare AddOn abschalten, das ihre Anzeige mitbringt.
+--     Wirkt erst beim Neuladen, dafür endgültig.
+--
+-- Welcher greift, entscheidet der Client. Beide sind umkehrbar.
+local VIEWER_CVARS = { "cooldownViewerEnabled", "cooldownManagerEnabled" }
+local VIEWER_ADDON_HINTS = { "cooldownviewer", "cooldownmanager" }
+
+local function readCVar(name)
+    local getter = _G.GetCVar or (_G.C_CVar and _G.C_CVar.GetCVar)
+    if type(getter) ~= "function" then
+        return nil
+    end
+    local ok, value = pcall(getter, name)
+    if ok and type(value) == "string" and value ~= "" then
+        return value
+    end
+    return nil
+end
+
+local function writeCVar(name, value)
+    local setter = _G.SetCVar or (_G.C_CVar and _G.C_CVar.SetCVar)
+    if type(setter) ~= "function" then
+        return false
+    end
+    return pcall(setter, name, value) and true or false
+end
+
+function Mirror:FindViewerCVar()
+    for _, name in ipairs(VIEWER_CVARS) do
+        if readCVar(name) ~= nil then
+            return name
+        end
+    end
+    return nil
+end
+
+-- Der Name des AddOns ist zwischen den Builds nicht stabil, also wird die
+-- Liste durchsucht statt geraten.
+function Mirror:FindViewerAddOn()
+    local addons = _G.C_AddOns
+    if type(addons) ~= "table" or type(addons.GetNumAddOns) ~= "function"
+        or type(addons.GetAddOnInfo) ~= "function" then
+        return nil
+    end
+    local ok, count = pcall(addons.GetNumAddOns)
+    if not ok or type(count) ~= "number" then
+        return nil
+    end
+    for index = 1, count do
+        local infoOk, name = pcall(addons.GetAddOnInfo, index)
+        if infoOk and type(name) == "string" then
+            local lower = string.lower(name)
+            for _, hint in ipairs(VIEWER_ADDON_HINTS) do
+                if string.find(lower, hint, 1, true) then
+                    return name
+                end
+            end
+        end
+    end
+    return nil
+end
+
+-- Rückgabe: "cvar", "addon" oder nil - und der zugehörige Name.
+function Mirror:GetViewerSwitch()
+    local cvar = self:FindViewerCVar()
+    if cvar then
+        return "cvar", cvar
+    end
+    local addon = self:FindViewerAddOn()
+    if addon then
+        return "addon", addon
+    end
+    return nil
+end
+
+-- Läuft Blizzards eigene Anzeige gerade? nil heißt: nicht feststellbar.
+function Mirror:IsViewerOn()
+    local kind, name = self:GetViewerSwitch()
+    if kind == "cvar" then
+        return readCVar(name) ~= "0"
+    end
+    if kind == "addon" then
+        local addons = _G.C_AddOns
+        if type(addons.GetAddOnEnableState) ~= "function" then
+            return nil
+        end
+        -- Die Reihenfolge der Argumente hat zwischen den Builds gewechselt;
+        -- beide probieren und die Zahl nehmen, die dabei herauskommt.
+        local character = UnitName("player")
+        local attempts = { { name, character }, { character, name } }
+        for _, args in ipairs(attempts) do
+            local ok, state = pcall(addons.GetAddOnEnableState, args[1], args[2])
+            if ok and type(state) == "number" then
+                return state > 0
+            end
+        end
+        return nil
+    end
+    return nil
+end
+
+-- Rückgabe: erfolg, brauchtNeuladen, fehlertext
+function Mirror:SetViewer(on)
+    local kind, name = self:GetViewerSwitch()
+    if not kind then
+        return false, false,
+            L["Dieser Client hat keinen Schalter für Blizzards Abklingzeit-Anzeige."]
+    end
+
+    if kind == "cvar" then
+        if InCombatLockdown() then
+            return false, false, L["Im Kampf nicht - danach noch einmal."]
+        end
+        if not writeCVar(name, on and "1" or "0") then
+            return false, false, L["Die Einstellung ließ sich nicht setzen."]
+        end
+        -- Ihr eigener Code zieht auf die Einstellung hin nach; ein Neuladen
+        -- braucht es dafür nicht.
+        return true, false
+    end
+
+    local addons = _G.C_AddOns
+    local action = on and addons.EnableAddOn or addons.DisableAddOn
+    if type(action) ~= "function" then
+        return false, false, L["Dieser Client kann AddOns nicht umschalten."]
+    end
+    if not pcall(action, name) then
+        return false, false, L["Das AddOn ließ sich nicht umschalten."]
+    end
+    -- Geladen ist geladen: weg ist es erst nach dem Neuladen.
+    return true, true
+end
+
 -- Nur die Handgriffe, ohne Vorrede: wer sie schon kennt, braucht die
 -- Begründung nicht noch einmal.
 function Mirror:GetHideSteps()
@@ -445,6 +591,13 @@ function Mirror:GetHideSteps()
 end
 
 function Mirror:GetHideInstructions()
+    -- Gibt es einen Schalter, ist die Anleitung von Hand überflüssig.
+    if self:GetViewerSwitch() then
+        return {
+            L["Blizzards eigene Leisten stehen daneben und zeigen bis zum"],
+            L["Neuladen den alten Stand. /fcd solo schaltet sie ab."],
+        }
+    end
     local lines = {
         L["Blizzards eigene Leisten zeigen bis zum nächsten Neuladen noch den"],
         L["alten Stand. Dauerhaft ausblenden - in ihrem Fenster, damit nichts"],

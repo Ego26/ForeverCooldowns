@@ -26,6 +26,13 @@ category ourselves.**
 
 ### Changed
 
+- **`/fcd solo` switches Blizzard's own bars off.** Otherwise everything
+  would be shown twice once FCD displays their categories. It flips the same
+  switch you would find in the game options (a CVar); if the client has none,
+  their loadable addon is disabled instead and it takes effect on the next
+  reload. Their frames are not touched - that would be exactly the taint this
+  route avoids. FCD asks once on your first login; answering is one click and
+  reversible at any time.
 - **The default bars mirror Blizzard's categories.** There used to be two
   empty bars there, and a change became visible only once somebody found the
   "mirror" button. Nobody can know that in advance, so it is now the starting
@@ -39,6 +46,9 @@ category ourselves.**
 
 ### Fixed
 
+- **Bars could not be clicked in Blizzard's Edit Mode.** Their interface puts
+  a surface over the screen that swallows clicks. Bars now move up one strata
+  for as long as Edit Mode is open - the same treatment the panel already had.
 - **Lua errors on protected cooldown values.** Whether this client protects a
   value was probed once at login against an arbitrary spell - but it is the
   individual value that is protected, not the client. If that spell happened

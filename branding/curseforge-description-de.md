@@ -146,7 +146,10 @@ eine eigene Leiste an, die genau diese Kategorie zeigt. Die zeichnen wir
 selbst, also steht eine Verschiebung dort in derselben Sekunde – ohne
 Neuladen, ohne einen Aufruf auf Blizzards Objekten und damit ohne jede
 Fehlermeldung. Blizzards eigene Leisten ziehen weiterhin erst beim Neuladen
-nach; `/fcd mirror hide` sagt, wie man sie in ihrem Fenster ausblendet.
+nach - deshalb fragt FCD beim ersten Anmelden einmal, ob es sie abschalten
+soll. Ein Klick, jederzeit umkehrbar mit `/fcd solo off`. Umgelegt wird dabei
+der Schalter, den auch du in den Spieloptionen findest; ihre Rahmen fasst das
+AddOn nicht an, denn genau das wäre der Taint, den dieser Weg vermeidet.
 
 **Das Layout wechseln geht nur bei ihnen.** Ihr Layoutverwalter ist geschützt;
 ein Aufruf von außen würde die Sitzung taintieren. `/fcd blizz` holt ihr

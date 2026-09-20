@@ -29,6 +29,13 @@ zeichnen die Kategorie selbst.**
 
 ### Geändert
 
+- **`/fcd solo` schaltet Blizzards eigene Leisten ab.** Sonst stünde alles
+  doppelt, sobald FCD ihre Kategorien zeigt. Umgelegt wird der Schalter, den
+  auch der Spieler in den Spieloptionen findet (CVar); kennt der Client
+  keinen, wird ihr nachladbares AddOn deaktiviert und es wirkt beim nächsten
+  Neuladen. Ihre Rahmen werden dabei nicht angefasst - genau das wäre der
+  Taint, den dieser Weg vermeidet. Beim ersten Anmelden fragt FCD einmal
+  danach; die Antwort ist ein Klick und jederzeit umkehrbar.
 - **Die Vorgabeleisten spiegeln Blizzards Kategorien.** Vorher standen dort
   zwei leere Leisten, und sichtbar wurde eine Änderung erst, wenn jemand den
   Knopf "spiegeln" entdeckte. Das kann niemand vorher wissen, also ist es
@@ -43,6 +50,10 @@ zeichnen die Kategorie selbst.**
 
 ### Behoben
 
+- **Leisten waren in Blizzards Bearbeitungsmodus nicht anzuklicken.** Ihre
+  Oberfläche legt eine Fläche über den Bildschirm, die Klicks abfängt. Die
+  Leisten steigen jetzt für die Dauer des Bearbeitungsmodus eine Ebene höher -
+  dieselbe Behandlung, die das Panel schon hatte.
 - **Lua-Fehler an geschützten Abklingzeit-Werten.** Ob dieser Client einen
   Wert schützt, wurde einmal beim Anmelden an irgendeinem Zauber geprüft -
   geschützt ist aber der einzelne Wert, nicht der Client. War der Zauber

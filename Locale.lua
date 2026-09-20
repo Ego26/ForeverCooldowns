@@ -1308,6 +1308,44 @@ FCD.AddTranslations("enUS", {
         "Blizzard's own bars stay alongside until you hide them - in their",
     ["ausblendest - in ihrem Fenster, damit nichts getaintet wird:"] =
         "own window, so that nothing gets tainted:",
+    ["Dieser Client hat keinen Schalter für Blizzards Abklingzeit-Anzeige."] =
+        "This client has no switch for Blizzard's cooldown display.",
+    ["Im Kampf nicht - danach noch einmal."] =
+        "Not in combat - try again afterwards.",
+    ["Die Einstellung ließ sich nicht setzen."] =
+        "The setting could not be applied.",
+    ["Dieser Client kann AddOns nicht umschalten."] =
+        "This client cannot toggle addons.",
+    ["Das AddOn ließ sich nicht umschalten."] =
+        "The addon could not be toggled.",
+    ["Blizzards eigene Leisten stehen daneben und zeigen bis zum"] =
+        "Blizzard's own bars stand alongside and show the old state until the",
+    ["Neuladen den alten Stand. /fcd solo schaltet sie ab."] =
+        "next reload. /fcd solo switches them off.",
+    ["/fcd solo on|off - Blizzards eigene Leisten ab- oder anschalten"] =
+        "/fcd solo on|off - switch Blizzard's own bars off or on",
+    ["Blizzards eigene Leisten: "] =
+        "Blizzard's own bars: ",
+    ["/fcd solo on  - nur unsere Leisten, ihre aus"] =
+        "/fcd solo on  - our bars only, theirs off",
+    ["/fcd solo off - ihre wieder einschalten"] =
+        "/fcd solo off - switch theirs back on",
+    ["Nicht umgeschaltet: "] =
+        "Not switched: ",
+    ["Blizzards eigene Leisten sind wieder an."] =
+        "Blizzard's own bars are back on.",
+    ["Blizzards eigene Leisten sind aus - es zeigt nur noch FCD."] =
+        "Blizzard's own bars are off - only FCD is showing now.",
+    ["Wirksam nach einem /reload."] =
+        "Takes effect after a /reload.",
+    ["Abschalten"] =
+        "Switch off",
+    ["Behalten"] =
+        "Keep them",
+    ["Blizzards Leisten bleiben. /fcd solo on schaltet sie später ab."] =
+        "Blizzard's bars stay. /fcd solo on switches them off later.",
+    ["Forever Cooldowns zeigt Blizzards Abklingzeiten jetzt auf eigenen Leisten.\n\nSollen Blizzards eigene Leisten dafür abgeschaltet werden? Sonst steht alles doppelt.\n\nJederzeit umkehrbar mit  /fcd solo off"] =
+        "Forever Cooldowns now shows Blizzard's cooldowns on bars of your own.\n\nSwitch Blizzard's own bars off for that? Otherwise everything is shown twice.\n\nReversible at any time with  /fcd solo off",
 })
 
 FCD.SetLanguage("auto")

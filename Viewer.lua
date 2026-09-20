@@ -921,6 +921,11 @@ function Viewer:ApplyLockState()
             -- nebeneinander verschieden aus. Alle bekommen jetzt dieselbe
             -- selbstgezeichnete Markierung.
             barFrame.overlay:SetShown(unlocked)
+            -- Blizzards Bearbeitungsmodus legt seine eigene Fläche über den
+            -- Bildschirm, und die fängt Klicks ab. Eine Leiste in der
+            -- Standardebene ist dann nicht mehr anzufassen - dasselbe
+            -- Problem, das das Panel schon mit applyStrata löst.
+            barFrame:SetFrameStrata(unlocked and "HIGH" or "MEDIUM")
             if unlocked then
                 -- Die Ebene erst hier setzen, nicht beim Erzeugen: die
                 -- Symbolknöpfe entstehen später und bekommen dann ihre eigene

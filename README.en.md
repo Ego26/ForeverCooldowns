@@ -73,6 +73,7 @@ automatic switching on stance, form or specialisation.
 | `/fcd wide` | switch between narrow and wide view |
 | `/fcd spell <ID>` | add any spell |
 | `/fcd mirror` | mirror Blizzard's categories onto your own bars |
+| `/fcd solo on\|off` | switch Blizzard's own bars off or on |
 | `/fcd replace on\|off` | whether FCD takes the place of their window |
 | `/fcd editui on\|off` | our own window in Edit Mode |
 | `/fcd blizz` | fetch Blizzard's window (that is where layouts are switched) |
@@ -140,11 +141,17 @@ orientation, size, visibility, ready alerts, per entry as well. If you want to
 freeze the contents and then take out individual icons, use *Detach mirror* in
 the bar window.
 
-Blizzard's own bars still catch up only on reload. While both are on screen you
-see two versions; `/fcd mirror hide` explains how to get rid of theirs. You
-have to hide them in **their** window – if we did it, that would be exactly the
-taint this route avoids. It is the one step the addon cannot take for you; it
-says so once on your first login and never again.
+### What about their own bars?
+
+They would stand alongside and, until the next reload, even show something
+different. So FCD asks once on your first login whether it should switch them
+off – one click, reversible at any time with `/fcd solo off`.
+
+It switches them off through the same setting you would flip in the game
+options (a CVar); if the client has none, their loadable addon is disabled
+instead, which takes effect on the next reload. **FCD does not touch their
+frames.** That would be exactly the taint this whole route avoids: a
+`:Hide()` on their viewer is the obvious line and the wrong one.
 
 ## Where settings live
 

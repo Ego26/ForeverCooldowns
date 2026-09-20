@@ -76,6 +76,7 @@ automatischer Wechsel bei Haltung, Form oder Spezialisierung.
 | `/fcd wide` | zwischen schmaler und breiter Ansicht wechseln |
 | `/fcd spell <ID>` | beliebigen Zauber aufnehmen |
 | `/fcd mirror` | Blizzards Kategorien auf eigene Leisten spiegeln |
+| `/fcd solo on\|off` | Blizzards eigene Leisten ab- oder anschalten |
 | `/fcd replace on\|off` | ob FCD an die Stelle ihres Fensters tritt |
 | `/fcd editui on\|off` | eigenes Fenster im Bearbeitungsmodus |
 | `/fcd blizz` | Blizzards Fenster holen (dort wird das Layout gewechselt) |
@@ -144,12 +145,18 @@ ist, bleibt es: Ausrichtung, Größe, Sichtbarkeit, Fertig-Meldung, auch je
 Eintrag. Wer den Bestand festhalten und danach einzelne Symbole herausnehmen
 will, nimmt im Leistenfenster *Spiegelung lösen*.
 
-Blizzards eigene Leisten ziehen weiterhin erst beim Neuladen nach. Solange
-beide stehen, sieht man zweierlei; `/fcd mirror hide` sagt, wie man ihre
-loswird. Ausblenden muss man sie in **ihrem** Fenster – täten wir es, wäre es
-genau der Taint, den dieser Weg vermeidet. Das ist der eine Handgriff, den
-das AddOn niemandem abnehmen kann; es sagt ihn beim ersten Anmelden einmal an
-und danach nie wieder.
+### Und ihre eigenen Leisten?
+
+Die würden daneben stehen und bis zum nächsten Neuladen sogar etwas anderes
+zeigen. Deshalb fragt FCD beim ersten Anmelden einmal, ob es sie abschalten
+soll – ein Klick, jederzeit umkehrbar mit `/fcd solo off`.
+
+Abgeschaltet wird über den Schalter, den auch du in den Spieloptionen umlegen
+würdest (CVar); kennt der Client keinen, wird stattdessen ihr nachladbares
+AddOn deaktiviert – das wirkt dann beim nächsten Neuladen. **Ihre Rahmen fasst
+FCD dabei nicht an.** Genau das wäre der Taint, den dieser ganze Weg
+vermeidet: ein `:Hide()` auf ihrem Viewer wäre die naheliegende Zeile und die
+falsche.
 
 ## Wo die Einstellungen liegen
 

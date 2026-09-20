@@ -142,7 +142,10 @@ The way out is the *mirror* button on a section heading: it creates a bar of
 your own showing exactly that category. We draw it, so a move shows up there
 in the same second — no reload, no call on Blizzard's objects, and therefore
 no error message at all. Blizzard's own bars still catch up only on reload;
-`/fcd mirror hide` explains how to hide them in their window.
+so FCD asks once, on your first login, whether to switch them off. One
+click, reversible at any time with `/fcd solo off`. It flips the same switch
+you would find in the game options; the addon does not touch their frames,
+because that would be exactly the taint this route avoids.
 
 **Switching layouts only works in their window.** Their layout manager is
 protected; calling it from outside would taint the session. `/fcd blizz`
