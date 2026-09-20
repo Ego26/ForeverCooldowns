@@ -1,4 +1,4 @@
-## Interface: 120000
+## Interface: 16001
 ## Title: Forever Cooldowns
 ## Title-deDE: Forever Cooldowns
 ## Notes: Rank-aware cooldown manager. Track any spell or item, not just Blizzard's list. Type /fcd.

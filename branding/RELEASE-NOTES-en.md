@@ -25,6 +25,8 @@ First public release.
   which the bars follow.
 - **Profiles** to save, switch and share as text; optionally automatic on
   stance, form or specialisation.
+- **English and German interface**, following your client's language;
+  `/fcd lang de|en|auto` overrides it.
 
 ### Good to know
 

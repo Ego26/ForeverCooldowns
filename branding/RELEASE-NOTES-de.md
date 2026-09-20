@@ -25,6 +25,8 @@ Erste öffentliche Fassung.
   im Stil ihres Bearbeitungsmodus, dem die Leisten auch folgen.
 - **Profile** speichern, wechseln und als Text teilen; optional automatisch
   bei Haltung, Form oder Spezialisierung.
+- **Oberfläche auf Deutsch und Englisch**, der Sprache des Clients folgend;
+  `/fcd lang de|en|auto` überschreibt das.
 
 ### Gut zu wissen
 
