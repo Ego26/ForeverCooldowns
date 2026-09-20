@@ -121,7 +121,9 @@ the addon. `/fcd check` shows that probe as a list. If a client protects
 cooldown values, for instance, nobody can detect the end of a cooldown, and
 ready alerts show up as missing.
 
-**Instant mode has a price.** Changes to Blizzard's categories apply without
+**Instant mode has a price - which is why it is off.** By default, changes to
+Blizzard's categories take effect on the next reload; that is the safe route.
+Turn on `/fcd instant on` and they apply without
 reloading because they go through their own data model. Once addon code
 touches that, it counts as *tainted* for the rest of the session and their
 viewer can no longer read auras — until the next `/reload`. It affects their

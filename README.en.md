@@ -98,12 +98,12 @@ end of a cooldown, and ready alerts show up as missing.
 
 There are two ways, and the addon can do both:
 
-- **Instant mode** (default) through Blizzard's own data model. Takes effect
+- **Safe mode** (default) through `SetLayoutData`. Taints nothing, but only
+  takes effect on reload. The panel offers the reload button for it.
+- **Instant mode** (`/fcd instant on`) through Blizzard's own data model. Takes effect
   without reloading. The price: their objects count as *tainted* afterwards,
   and their aura access fails until the next `/reload`. This affects their
   display, not ours.
-- **Safe mode** (`/fcd instant off`) through `SetLayoutData`. Taints nothing,
-  but only takes effect on reload.
 
 Before every write, the addon checks that the layout blob survives our
 encoding chain losslessly, and takes a backup. `/fcd restore` undoes the last

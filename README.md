@@ -102,12 +102,12 @@ dort als *fehlt*.
 
 Es gibt zwei Wege, und das AddOn kann beide:
 
-- **Sofortmodus** (Standard) über Blizzards eigenes Datenmodell. Wirkt ohne
+- **Sicherer Modus** (Standard) über `SetLayoutData`. Taintet nichts, wirkt
+  aber erst beim Neuladen. Das Panel bietet den Knopf dafür an.
+- **Sofortmodus** (`/fcd instant on`) über Blizzards eigenes Datenmodell. Wirkt ohne
   Neuladen. Der Preis: ihre Objekte gelten danach als *tainted*, ihr
   Aurenzugriff scheitert bis zum nächsten `/reload`. Betrifft ihre Anzeige,
   nicht unsere.
-- **Sicherer Modus** (`/fcd instant off`) über `SetLayoutData`. Taintet
-  nichts, wirkt aber erst beim Neuladen.
 
 Vor jedem Schreibvorgang wird geprüft, ob der Layout-Blob unsere Kodierkette
 verlustfrei übersteht, und eine Sicherung angelegt. `/fcd restore` nimmt den

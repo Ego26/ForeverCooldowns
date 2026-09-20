@@ -123,7 +123,10 @@ das AddOn. `/fcd check` zeigt diese Prüfung als Liste. Schützt ein Client zum
 Beispiel die Abklingzeit-Werte, ist das Ende einer Abklingzeit für niemanden
 erkennbar, und die Fertig-Meldung steht dort als *fehlt*.
 
-**Der Sofortmodus hat einen Preis.** Änderungen an Blizzards Kategorien wirken
+**Der Sofortmodus hat einen Preis - deshalb ist er aus.** Änderungen an
+Blizzards Kategorien wirken standardmäßig erst beim Neuladen; das ist der
+sichere Weg. Wer `/fcd instant on` einschaltet, bekommt sie sofort, und dann
+gilt: Änderungen wirken
 ohne Neuladen, weil sie über ihr eigenes Datenmodell laufen. Sobald
 AddOn-Code das anfasst, gilt es für die restliche Sitzung als *tainted*, und
 ihr Viewer kann keine Auren mehr lesen – bis zum nächsten `/reload`. Betrifft

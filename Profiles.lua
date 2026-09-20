@@ -17,11 +17,17 @@ local SETTING_DEFAULTS = {
     gcdThreshold = 1.6,
     updateInterval = 0.1,
     autoSwitch = true,
-    -- Änderungen wirken sofort, so wie in Blizzards eigenem Fenster. Preis:
-    -- ihre Objekte gelten danach als "tainted", ihr Aurenzugriff scheitert bis
-    -- zum nächsten /reload. Bewusste Entscheidung; /fcd instant off wählt
-    -- den sicheren Weg, der erst beim Neuladen greift.
-    allowNativeWrites = true,
+    -- Der sichere Weg ist die Voreinstellung: geschrieben wird über
+    -- SetLayoutData, das taintet nichts, wirkt aber erst beim Neuladen.
+    --
+    -- Zuerst stand hier der Sofortmodus. Der wirkt ohne Neuladen, taintet
+    -- dabei aber Blizzards Viewer - und dann wirft er bei jedem Ziel- und
+    -- Aurenereignis einen roten Lua-Fehler. Wer das AddOn neu installiert und
+    -- als Erstes einen Eintrag verschiebt, sieht also Fehler und hält sie für
+    -- einen Defekt. Diesen Preis darf nur zahlen, wer ihn kennt:
+    -- /fcd instant on schaltet den Sofortmodus ein und sagt dabei, was er
+    -- kostet.
+    allowNativeWrites = false,
     -- Panel automatisch neben Blizzards Einstellungsfenster einblenden
     dockToBlizzard = true,
     -- Abgerundete Symbolecken über eine Maske. Abschaltbar, weil eine
@@ -389,12 +395,21 @@ function Profiles:Initialize()
     end
 
     db.schema = db.schema or 1
-    -- Der Sofortmodus war zunächst aus; copyDefaults füllt nur fehlende
-    -- Werte, bestehende Datenbanken bekommen ihn deshalb hier nachgereicht.
+    -- Schema 2 hat den Sofortmodus nachgereicht, als er die Voreinstellung
+    -- war. Die Zeile ist weg, der Schritt bleibt: eine Datenbank von damals
+    -- soll nicht zweimal dieselbe Nummer durchlaufen.
     if db.schema < 2 then
         db.settings = db.settings or {}
-        db.settings.allowNativeWrites = true
         db.schema = 2
+    end
+    -- Und zurück: wer den Sofortmodus über Schema 2 bekommen hat, hat ihn nie
+    -- gewählt. Er wird einmalig abgeschaltet, weil er rote Lua-Fehler
+    -- verursacht, sobald man einen Eintrag verschiebt. Einschalten geht
+    -- weiterhin mit /fcd instant on - dann als bewusste Entscheidung.
+    if db.schema < 3 then
+        db.settings = db.settings or {}
+        db.settings.allowNativeWrites = false
+        db.schema = 3
     end
     db.profiles = db.profiles or {}
     db.settings = db.settings or {}
